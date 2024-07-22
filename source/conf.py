@@ -32,7 +32,7 @@ extensions = [
     "sphinx.ext.githubpages",
     "sphinx.ext.extlinks",
     "sphinx_sitemap",
-    "sphinx_scylladb_theme",
+    "sphinx_dark_scylladb_theme",
     "sphinx_multiversion",  # optional
     "recommonmark",  # optional
 ]
