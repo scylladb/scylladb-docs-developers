@@ -60,10 +60,10 @@
     </div></div></div>
 
 .. toctree::
-   :maxdepth: 3
+   :maxdepth: 5
    :hidden:
 
-    Projects <projects>
+    Projects <projects/index> 
     Tutorials <tutorials>
     Community <community>
     GitHub repository <https://github.com/scylladb/scylladb-docs-developers>
