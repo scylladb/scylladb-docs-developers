@@ -33,7 +33,7 @@ jobs:
         run: |
           tar \
             --dereference --hard-dereference \
-            --directory docs/_build/dirhtml/ \
+            --directory _build/dirhtml/ \
             -cvf ${{ runner.temp }}/artifact.tar \
             .
       - name: Upload artifact
