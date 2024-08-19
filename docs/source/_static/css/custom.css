@@ -1,0 +1,14 @@
+.hero-box--primary {
+    background: rgb(2, 0, 36) linear-gradient(to bottom, #101040, #1e2465, #2a3b8e, #3153b9, #326de6);
+    color: #fff;
+    padding: 2rem 0;
+}
+
+.hero__button {
+    color: white;
+    border: 1px solid white;
+
+    .button:hover {
+        color: white;
+    }
+}
