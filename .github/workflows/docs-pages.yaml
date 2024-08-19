@@ -12,7 +12,7 @@ on:
 
 jobs:
   build:
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-latest
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -29,19 +29,12 @@ jobs:
         run: make -C docs multiversion
       - name: Build redirects
         run: make -C docs redirects
-      - name: Tar folder
-        run: |
-          tar \
-            --dereference --hard-dereference \
-            --directory docs/_build/dirhtml/ \
-            -cvf ${{ runner.temp }}/artifact.tar \
-            .
+      - name: Setup Pages
+        uses: actions/configure-pages@v5
       - name: Upload artifact
-        uses: actions/upload-artifact@main
+        uses: actions/upload-pages-artifact@v3
         with:
-          name: github-pages
-          path: ${{ runner.temp }}/artifact.tar
-          retention-days: "1"
+          path: 'docs/_build/dirhtml/'
 
   release:
     # Add a dependency to the build job
