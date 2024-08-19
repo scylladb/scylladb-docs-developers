@@ -34,7 +34,7 @@
 .. raw:: html
 
   <div class="card cell large-6">
-    <img src="/_static/img/tutorial_1m_ops.png">
+    <img src="/scylladb-docs-developers/stable/_static/img/tutorial_1m_ops.png">
     <div class="card-section">
       <h4>Set up your own 1M OPS benchmark with ScyllaDB</h4>
       <p>You’ll learn how you can set up cloud infrastructure on top of ScyllaDB Cloud and Amazon Web Services
@@ -46,7 +46,7 @@
 .. raw:: html
 
   <div class="card cell large-6">
-    <img src="/_static/img/tutorial_video_streaming.png">
+    <img src="/scylladb-docs-developers/stable/_static/img/tutorial_video_streaming.png">
     <div class="card-section">
       <h4>Build a video streaming application with ScyllaDB</h4>
       <p>This tutorial is a step-by-step guide to build an Media Player project connected to Scylla Cloud.
@@ -63,7 +63,7 @@
 .. raw:: html
 
   <div class="card cell large-6">
-    <img src="/_static/img/tutorial_1m_ops.png">
+    <img src="/scylladb-docs-developers/stable/_static/img/tutorial_1m_ops.png">
     <div class="card-section">
       <h4>Set up your own 1M OPS benchmark with ScyllaDB</h4>
       <p>You’ll learn how you can set up cloud infrastructure on top of ScyllaDB Cloud and Amazon Web Services
@@ -75,7 +75,7 @@
 .. raw:: html
 
   <div class="card cell large-6">
-    <img src="/_static/img/tutorial_video_streaming.png">
+    <img src="/scylladb-docs-developers/stable/_static/img/tutorial_video_streaming.png">
     <div class="card-section">
       <h4>Build a video streaming application with ScyllaDB</h4>
       <p>This tutorial is a step-by-step guide to build an Media Player project connected to Scylla Cloud.
