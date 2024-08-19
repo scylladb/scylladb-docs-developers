@@ -90,5 +90,5 @@
    :maxdepth: 5
    :hidden:
 
-    Tutorials <tutorials>
     GitHub repository <https://github.com/scylladb/scylladb-docs-developers>
+    Tutorials <tutorials>
