@@ -37,9 +37,8 @@
     <img src="/scylladb-docs-developers/stable/_static/img/tutorial_1m_ops.png">
     <div class="card-section">
       <h4>Set up your own 1M OPS benchmark with ScyllaDB</h4>
-      <p>You’ll learn how you can set up cloud infrastructure on top of ScyllaDB Cloud and Amazon Web Services
-        to run a 1 million operations/second workload. We created a Terraform tool to help you set up the minimum
-        infrastructure required to test a heavy workload using ScyllaDB – all in the cloud.</p>
+      <p>YThis tutorial will help you set up cloud infrastructure using Terraform, on top of ScyllaDB Cloud and Amazon Web Services
+        to run a 1 million operations/second workload.</p>
       <div class="button-group">
         <a class="button clear" href="https://1m-ops-demo.scylladb.com/stable/">Learn more</a>
         <a class="button clear" href="https://github.com/scylladb/1m-ops-demo">GitHub</a>
@@ -71,9 +70,8 @@
     <img src="/scylladb-docs-developers/stable/_static/img/tutorial_1m_ops.png">
     <div class="card-section">
       <h4>Set up your own 1M OPS benchmark with ScyllaDB</h4>
-      <p>You’ll learn how you can set up cloud infrastructure on top of ScyllaDB Cloud and Amazon Web Services
-        to run a 1 million operations/second workload. We created a Terraform tool to help you set up the minimum
-        infrastructure required to test a heavy workload using ScyllaDB – all in the cloud.</p>
+      <p>This tutorial will help you set up cloud infrastructure using Terraform, on top of ScyllaDB Cloud and Amazon Web Services
+        to run a 1 million operations/second workload.</p>
       <div class="button-group">
         <a class="button clear" href="https://1m-ops-demo.scylladb.com/stable/">Learn more</a>
         <a class="button clear" href="https://github.com/scylladb/1m-ops-demo">GitHub</a>
