@@ -67,15 +67,13 @@
 .. raw:: html
 
   <div class="card cell large-6">
-    <img src="/scylladb-docs-developers/stable/_static/img/tutorial_1m_ops.png">
+    <img src="/scylladb-docs-developers/stable/_static/img/tutorial_ml.png">
     <div class="card-section">
-      <h4>Set up your own 1M OPS benchmark with ScyllaDB</h4>
-      <p>This tutorial will help you set up cloud infrastructure using Terraform, on top of ScyllaDB Cloud and Amazon Web Services
-        to run a 1 million operations/second workload.</p>
+      <h4>Build a feature store with ScyllaDB</h4>
+      <p>This tutorial walks you through a sample feature store application with ScyllaDB Cloud that you will be able to use with your machine learning architecture.</p>
       <div class="button-group">
-        <a class="button clear" href="https://1m-ops-demo.scylladb.com/stable/">Learn more</a>
-        <a class="button clear" href="https://github.com/scylladb/1m-ops-demo">GitHub</a>
-        <a class="button clear" href="https://www.scylladb.com/2023/11/29/set-up-your-own-1m-ops-benchmark-with-scylladb-cloud-terraform/">Blog</a>
+        <a class="button clear" href="https://feature-store.scylladb.com/stable/">Learn more</a>
+        <a class="button clear" href="https://github.com/scylladb/scylladb-feature-store">GitHub</a>
       </div>
     </div>
   </div>
