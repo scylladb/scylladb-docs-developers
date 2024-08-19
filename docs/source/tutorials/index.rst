@@ -81,7 +81,7 @@
 .. raw:: html
 
   <div class="card cell large-6">
-    <img src="/scylladb-docs-developers/stable/_static/img/tutorial_iot.png">
+    <img src="/scylladb-docs-developers/stable/_static/img/tutorial_iot.jpg">
     <div class="card-section">
       <h4>Build a low latency IoT project with a Real-Time NoSQL Database</h4>
       <p>This tutorial is a step-by-step guide to build an IoT project connected to Scylla Cloud.
