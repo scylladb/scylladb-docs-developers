@@ -40,6 +40,11 @@
       <p>You’ll learn how you can set up cloud infrastructure on top of ScyllaDB Cloud and Amazon Web Services
         to run a 1 million operations/second workload. We created a Terraform tool to help you set up the minimum
         infrastructure required to test a heavy workload using ScyllaDB – all in the cloud.</p>
+      <div class="button-group">
+        <a class="button clear" href="https://1m-ops-demo.scylladb.com/stable/">Learn more</a>
+        <a class="button clear" href="https://github.com/scylladb/1m-ops-demo">GitHub</a>
+        <a class="button clear" href="https://www.scylladb.com/2023/11/29/set-up-your-own-1m-ops-benchmark-with-scylladb-cloud-terraform/">Blog</a>
+      </div>
     </div>
   </div>
 
@@ -53,9 +58,9 @@
         After completing the project, you will be able to create back-end services that share data through a Scylla Cloud cluster.
       </p>
       <div class="button-group">
-        <a class="primary button">Learn more</a>
-        <a class="button clear">Lab</a>
-        <a class="button clear">University</a>
+        <a class="button clear" href="https://video-streaming.scylladb.com/stable/">Learn more</a>
+        <a class="button clear" href="https://github.com/scylladb/video-streaming">GitHub</a>
+        <a class="button clear" href="https://www.scylladb.com/2024/01/09/build-a-low-latency-video-streaming-app/">Blog</a>
       </div>
     </div>
   </div>
@@ -69,6 +74,11 @@
       <p>You’ll learn how you can set up cloud infrastructure on top of ScyllaDB Cloud and Amazon Web Services
         to run a 1 million operations/second workload. We created a Terraform tool to help you set up the minimum
         infrastructure required to test a heavy workload using ScyllaDB – all in the cloud.</p>
+      <div class="button-group">
+        <a class="button clear" href="https://1m-ops-demo.scylladb.com/stable/">Learn more</a>
+        <a class="button clear" href="https://github.com/scylladb/1m-ops-demo">GitHub</a>
+        <a class="button clear" href="https://www.scylladb.com/2023/11/29/set-up-your-own-1m-ops-benchmark-with-scylladb-cloud-terraform/">Blog</a>
+      </div>
     </div>
   </div>
 
@@ -82,9 +92,9 @@
         After completing the project, you will be able to create back-end services that share data through a Scylla Cloud cluster.
       </p>
       <div class="button-group">
-        <a class="primary button">Learn more</a>
-        <a class="button clear">Lab</a>
-        <a class="button clear">University</a>
+        <a class="button clear" href="https://video-streaming.scylladb.com/stable/">Learn more</a>
+        <a class="button clear" href="https://github.com/scylladb/video-streaming">GitHub</a>
+        <a class="button clear" href="https://www.scylladb.com/2024/01/09/build-a-low-latency-video-streaming-app/">Blog</a>
       </div>
     </div>
   </div>
