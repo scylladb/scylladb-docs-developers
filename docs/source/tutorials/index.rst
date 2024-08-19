@@ -81,16 +81,15 @@
 .. raw:: html
 
   <div class="card cell large-6">
-    <img src="/scylladb-docs-developers/stable/_static/img/tutorial_video_streaming.png">
+    <img src="/scylladb-docs-developers/stable/_static/img/tutorial_iot.png">
     <div class="card-section">
-      <h4>Build a video streaming application with ScyllaDB</h4>
-      <p>This tutorial is a step-by-step guide to build an Media Player project connected to Scylla Cloud.
+      <h4>Build a low latency IoT project with a Real-Time NoSQL Database</h4>
+      <p>This tutorial is a step-by-step guide to build an IoT project connected to Scylla Cloud.
         After completing the project, you will be able to create back-end services that share data through a Scylla Cloud cluster.
       </p>
       <div class="button-group">
-        <a class="button clear" href="https://video-streaming.scylladb.com/stable/">Learn more</a>
-        <a class="button clear" href="https://github.com/scylladb/video-streaming">GitHub</a>
-        <a class="button clear" href="https://www.scylladb.com/2024/01/09/build-a-low-latency-video-streaming-app/">Blog</a>
+        <a class="button clear" href="https://github.com/scylladb/care-pet">Learn more</a>
+        <a class="button clear" href="https://github.com/scylladb/care-pet">GitHub</a>
       </div>
     </div>
   </div>
