@@ -11,9 +11,6 @@
 .. hero-box::
   :title: Developing Monster Scale
   :image: /scylladb-docs-developers/stable/_static/img/scylladb-monster-lookup-left-pad.png
-  :button_icon: fa fa-github
-  :button_url: https://github.com/scylladb/
-  :button_text: GitHub repository
   :class: hero-box--primary
 
   At ScyllaDB, we give developers the database technology required to achieve predicatable performance at scale, so you can build robust, high-speed applications.
