@@ -62,7 +62,7 @@
   Explore a range of more advanced tutorials for different applications and programming languages.
 
 .. topic-box::
-  :title: Trending Resources
+  :title: Resources
   :link: https://resources.scylladb.com/
   :icon: scylla-icon scylla-icon--news
   :class: large-6
