@@ -32,7 +32,7 @@ extensions = [
     "sphinx.ext.githubpages",
     "sphinx.ext.extlinks",
     "sphinx_sitemap",
-    "sphinx_dark_scylladb_theme",
+    "sphinx_scylladb_theme",
     "sphinx_multiversion",  # optional
     "recommonmark",  # optional
 ]
@@ -123,7 +123,7 @@ html_last_updated_fmt = "%d %b %Y"
 html_sidebars = {"**": ["side-nav.html"]}
 
 # Output file base name for HTML help builder.
-htmlhelp_basename = "ScyllaDocumentationdoc"
+htmlhelp_basename = "ScyllaDB Developers"
 
 # URL which points to the root of the HTML documentation.
 html_baseurl = "https://developers.scylladb.com"
