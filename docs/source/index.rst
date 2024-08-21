@@ -10,7 +10,7 @@
 
 .. hero-box::
   :title: Developing Monster Scale
-  :image: /scylladb-docs-developers/stable/_static/img/scylladb-monster-lookup-left-pad.png
+  :image: https://scylladb.github.io/scylladb-docs-developers/stable/_static/img/scylladb-monster-lookup-left-pad.png
   :class: hero-box--primary
 
   At ScyllaDB, we give developers the database technology required to achieve predicatable performance at scale, so you can build robust, high-speed applications.
@@ -20,6 +20,140 @@
   <div class="landing__content landing__content">
 
 .. raw:: html
+
+  <div class="landing__content landing__content">
+
+  <div class="topics-grid grid-container full">
+    <div class="grid-x grid-margin-x">
+
+.. raw:: html
+
+      <div class="cell large-12">
+          <br/>
+          <br/>
+          <br/>
+          <br/>
+          <br/>
+          <br/>
+          <br/>
+          <br/>
+          <br/>
+
+      </div>
+      <div class="cell large-12">
+        <div class="topic-box">
+          <div class="card">
+            <div class="title-box">
+              <h2 class="title-box__title">Installation</h1>
+            </div>
+
+.. tabs::
+
+   .. group-tab:: Docker
+
+      Running ScyllaDB in Docker is the simplest way to experiment with ScyllaDB when you're getting started.
+
+      .. code-block:: shell
+
+         docker run --name scylla -d scylladb/scylla
+
+   .. group-tab:: Linux
+
+      For a production ready installation try our simple Linux Installer.
+
+      .. code-block:: shell
+
+         curl -sSf get.scylladb.com/server | sudo bash
+
+.. raw:: html
+
+            <div class="topic-box__head">
+              <h1 class="topic-box__title">Sign up for our product updates</h1>
+            </div>
+            <div class="topic-box__body">
+              <p>Stay ahead with the latest tutorials, guides, news and events from ScyllaDB.</p>
+              <div class="docutils container">
+                <form accept-charset="UTF-8" method="post" action="https://lp.scylladb.com/l/934963/2023-05-11/923sq" class="form" id="pardot-form">
+                  <p class="form-field email pd-text required">
+                    <input type="text" name="934963_128676pi_934963_128676" id="934963_128676pi_934963_128676" value="correkthorse@gmail.com" class="text" size="30" maxlength="255" placeholder="Company Email *">
+                  </p>
+                  <p class="form-field utm_source pd-hidden hidden">
+                    <input type="hidden" name="934963_128679pi_934963_128679" id="934963_128679pi_934963_128679" value="">
+                  </p>
+                  <p class="form-field utm_medium pd-hidden hidden">
+                    <input type="hidden" name="934963_128682pi_934963_128682" id="934963_128682pi_934963_128682" value="">
+                  </p>
+                  <p class="form-field utm_campaign pd-hidden hidden">
+                    <input type="hidden" name="934963_128685pi_934963_128685" id="934963_128685pi_934963_128685" value="">
+                  </p>
+                  <p class="form-field utm_adgroup pd-hidden hidden">
+                    <input type="hidden" name="934963_128688pi_934963_128688" id="934963_128688pi_934963_128688" value="">
+                  </p>
+                  <p class="form-field utm_term pd-hidden hidden">
+                    <input type="hidden" name="934963_128691pi_934963_128691" id="934963_128691pi_934963_128691" value="">
+                  </p>
+                  <p class="form-field websitePlacement pd-hidden hidden">
+                    <input type="hidden" name="934963_128694pi_934963_128694" id="934963_128694pi_934963_128694" value="">
+                  </p>
+                  <p style="position:absolute; width:190px; left:-9999px; top: -9999px;visibility:hidden;">
+                    <label for="pi_extra_field">Comments</label>
+                    <input type="text" name="pi_extra_field" id="pi_extra_field">
+                  </p>
+                  <input name="_utf8" type="hidden" value="☃">
+                  <p class="submit">
+                    <input type="submit" accesskey="s" value="Subscribe">
+                  </p>
+                </form>
+                <script type="text/javascript">
+                  function insertBefore(el, referenceNode) {
+                    referenceNode.parentNode.insertBefore(el, referenceNode);
+                  }
+                  var newEl = document.createElement('div');
+                  newEl.innerHTML = '<p><em>* Your information will be handled as detailed in our&nbsp;<a data-mce-href="https://www.scylladb.com/privacy/" href="https://www.scylladb.com/privacy/" target="_blank">privacy policy</a>.</em></p>';
+                  var ref = document.querySelector('.add-text-before');
+                  insertBefore(newEl, ref);
+                </script>
+                <script>
+                  function getParameterByName(name) {
+                    name = name.replace(/[\[]/, "\\[").replace(/[\]]/, "\\]");
+                    var regex = new RegExp("[\\?&]" + name + "=([^&#]*)"),
+                    results = regex.exec(location.search);
+                    return results === null ? "" : decodeURIComponent(results[1].replace(/\+/g, " "));
+                  }
+                  var source = getParameterByName('utm_source');
+                  var medium = getParameterByName('utm_medium');
+                  var campaign = getParameterByName('utm_campaign');
+                  document.querySelector("p.utm_source input").value = source;
+                  document.querySelector("p.utm_medium input").value = medium;
+                  document.querySelector("p.utm_campaign input").value = campaign;
+                </script>
+                <script>
+                  (function() {
+                    window._zi = {formId: '9c7e343e-3ae3-4097-a2ae-e4ff5059a09c', formLoadTimeout:4000};
+                    var zi = document.createElement('script');
+                    zi.type = 'text/javascript';
+                    zi.async = true;
+                    zi.src = 'https://ws-assets.zoominfo.com/formcomplete.js';
+                    var s = document.getElementsByTagName('script')[0];
+                    s.parentNode.insertBefore(zi, s);
+                  })();
+                </script>
+                <script type="text/javascript">
+                  var anchors = document.getElementsByTagName("a");
+                  for (var i=0; i<anchors.length; i++) {
+                    var anchor = anchors[i];
+                    if(anchor.getAttribute("href")&&!anchor.getAttribute("target")) {
+                      anchor.target = "_top";
+                    }
+                  }
+                </script>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
 
   <div class="topics-grid grid-container full">
 
@@ -33,6 +167,15 @@
   :anchor: Learn more
 
   This guide will help you get started with ScyllaDB, from installation to running your first query.
+
+.. topic-box::
+  :title: Tutorials
+  :link: tutorials
+  :icon: scylla-icon scylla-icon--training
+  :class: large-6
+  :anchor: Learn more
+
+  Explore a range of more advanced tutorials for different applications and programming languages.
 
 .. topic-box::
   :title: Labs
@@ -51,33 +194,6 @@
   :anchor: Learn more
 
   Level up your skills at your own pace, with our NoSQL database courses.
-
-.. topic-box::
-  :title: Tutorials
-  :link: tutorials
-  :icon: scylla-icon scylla-icon--training
-  :class: large-6
-  :anchor: Learn more
-
-  Explore a range of more advanced tutorials for different applications and programming languages.
-
-.. topic-box::
-  :title: Resources
-  :link: https://resources.scylladb.com/
-  :icon: scylla-icon scylla-icon--news
-  :class: large-6
-  :anchor: Learn more
-
-  Stay ahead with the latest tutorials, guides, news and events from ScyllaDB.
-
-.. topic-box::
-  :title: Community
-  :link: https://resources.scylladb.com/
-  :icon: scylla-icon scylla-icon--open-source
-  :class: large-6
-  :anchor: Learn more
-
-  Check out these popular open source projects compatible with ScyllaDB.
 
 .. raw:: html
 
