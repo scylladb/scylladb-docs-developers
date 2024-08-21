@@ -17,8 +17,7 @@
 
 .. raw:: html
 
-  <div class="landing__content landing__content">
-  <script type="text/javascript">
+   <script type="text/javascript">
     window.heapReadyCb=window.heapReadyCb||[],window.heap=window.heap||[],heap.load=function(e,t){window.heap.envId=e,window.heap.clientConfig=t=t||{},window.heap.clientConfig.shouldFetchServerConfig=!1;var a=document.createElement("script");a.type="text/javascript",a.async=!0,a.src="https://cdn.us.heap-api.com/config/"+e+"/heap_config.js";var r=document.getElementsByTagName("script")[0];r.parentNode.insertBefore(a,r);var n=["init","startTracking","stopTracking","track","resetIdentity","identify","getSessionId","getUserId","getIdentity","addUserProperties","addEventProperties","removeEventProperty","clearEventProperties","addAccountProperties","addAdapter","addTransformer","addTransformerFn","onReady","addPageviewProperties","removePageviewProperty","clearPageviewProperties","trackPageview"],i=function(e){return function(){var t=Array.prototype.slice.call(arguments,0);window.heapReadyCb.push({name:e,fn:function(){heap[e]&&heap[e].apply(heap,t)}})}};for(var p=0;p<n.length;p++)heap[n[p]]=i(n[p])};
     heap.load("2144880022");
   </script>
@@ -26,23 +25,50 @@
 .. raw:: html
 
   <div class="landing__content landing__content">
+    <div class="topics-grid grid-container full">
+      <div class="grid-x grid-margin-x">
 
-  <div class="topics-grid grid-container full">
-    <div class="grid-x grid-margin-x">
+.. topic-box::
+  :title: Getting Started
+  :link: https://docs.scylladb.com/stable/get-started/
+  :link_target: _self
+  :icon: scylla-icon scylla-icon--getting-started
+  :class: large-6
+  :anchor: Learn more
+
+  This guide will help you get started with ScyllaDB, from installation to running your first query.
+
+.. topic-box::
+  :title: Tutorials
+  :link: tutorials
+  :icon: scylla-icon scylla-icon--training
+  :class: large-6
+  :anchor: Learn more
+
+  Explore a range of more advanced tutorials for different applications and programming languages.
+
+.. topic-box::
+  :title: Labs
+  :link: https://scylladb.instruqt.com/pages/virtual-labs
+  :link_target: _self
+  :icon: scylla-icon scylla-icon--apps
+  :class: large-6
+  :anchor: Learn more
+
+  Experiment with ScyllaDB in your browser with these interactive labs.
+
+.. topic-box::
+  :title: University
+  :link: https://university.scylladb.com/
+  :link_target: _self
+  :icon: scylla-icon scylla-icon--university
+  :class: large-6
+  :anchor: Learn more
+
+  Level up your skills at your own pace, with our NoSQL database courses.
 
 .. raw:: html
 
-      <div class="cell large-12">
-          <br/>
-          <br/>
-          <br/>
-          <br/>
-          <br/>
-          <br/>
-          <br/>
-          <br/>
-          <br/>
-      </div>
       <div class="cell large-12 small-12">
         <div class="topic-box">
           <div class="card">
@@ -165,53 +191,7 @@
     </div>
   </div>
 
-  <div class="topics-grid grid-container full">
-
-  <div class="grid-x grid-margin-x">
-
-.. topic-box::
-  :title: Getting Started
-  :link: https://docs.scylladb.com/stable/get-started/
-  :icon: scylla-icon scylla-icon--getting-started
-  :class: large-6
-  :anchor: Learn more
-
-  This guide will help you get started with ScyllaDB, from installation to running your first query.
-
-.. topic-box::
-  :title: Tutorials
-  :link: tutorials
-  :icon: scylla-icon scylla-icon--training
-  :class: large-6
-  :anchor: Learn more
-
-  Explore a range of more advanced tutorials for different applications and programming languages.
-
-.. topic-box::
-  :title: Labs
-  :link: https://scylladb.instruqt.com/pages/virtual-labs
-  :icon: scylla-icon scylla-icon--apps
-  :class: large-6
-  :anchor: Learn more
-
-  Experiment with ScyllaDB in your browser with these interactive labs.
-
-.. topic-box::
-  :title: University
-  :link: https://university.scylladb.com/
-  :icon: scylla-icon scylla-icon--university
-  :class: large-6
-  :anchor: Learn more
-
-  Level up your skills at your own pace, with our NoSQL database courses.
-
 .. raw:: html
 
-    </div></div></div>
-
-.. toctree::
-   :maxdepth: 5
-   :hidden:
-
-    GitHub repository <https://github.com/scylladb/scylladb-docs-developers>
-    Tutorials <tutorials>
+    </div>
+  </div>
