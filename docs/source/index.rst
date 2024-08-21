@@ -13,7 +13,7 @@
   :image: https://scylladb.github.io/scylladb-docs-developers/stable/_static/img/scylladb-monster-lookup-left-pad.png
   :class: hero-box--primary
 
-  At ScyllaDB, we give developers the database technology required to achieve predicatable performance at scale, so you can build robust, high-speed applications.
+  At ScyllaDB, we give developers the database technology required to achieve predictable performance at scale, so you can build robust, high-speed applications.
 
 .. raw:: html
 
