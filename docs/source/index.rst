@@ -43,7 +43,7 @@
           <br/>
           <br/>
       </div>
-      <div class="cell large-12">
+      <div class="cell large-12 small-12">
         <div class="topic-box">
           <div class="card">
             <div class="title-box">
