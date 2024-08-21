@@ -103,6 +103,11 @@
                   <p class="submit">
                     <input type="submit" accesskey="s" value="Subscribe">
                   </p>
+                  <div class="onboard-form__field onboard-form__field--checkbox">
+                    <input type="hidden" value="No" name="opt_in_consent" id="onboard-opt-in-consent--hidden">
+                    <input name="opt_in_consent" id="onboard-opt-in-consent" type="checkbox" class="form-input" value="Yes">
+                    <label for="opt_in_consent">Yes, I wish to receive future informational and marketing communications from ScyllaDB, and I understand and agree to the&nbsp;<a href="https://www.scylladb.com/privacy/"><b>privacy policy</b></a>.</label>
+                  </div>
                 </form>
                 <script type="text/javascript">
                   function insertBefore(el, referenceNode) {
