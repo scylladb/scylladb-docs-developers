@@ -19,3 +19,11 @@
     box-shadow: 0 4px 25px rgba(0,0,0,.15);
 }
 
+.uberflip.uf-tile-large .uf-tile-wrapper .uf-tile {
+    border-radius: 8px;
+}
+
+.content ul li.uf-item-tile:before {
+    list-style-type: none;
+    content: "";
+}
