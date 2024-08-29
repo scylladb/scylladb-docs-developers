@@ -87,8 +87,6 @@
 
          docker run --name scylla -d scylladb/scylla
 
-      For detailed installation instructions, see our `documentation <https://opensource.docs.scylladb.com/stable/getting-started/install-scylla/index.html>`_.
-
    .. group-tab:: Linux
 
       For a production ready installation try our simple Linux Installer.
@@ -96,6 +94,63 @@
       .. code-block:: shell
 
          curl -sSf get.scylladb.com/server | sudo bash
+
+For detailed installation instructions, see our `documentation <https://opensource.docs.scylladb.com/stable/getting-started/install-scylla/index.html>`_.
+
+**Connect via drivers**
+
+.. tabs::
+
+  .. group-tab:: Rust
+
+    .. code::
+
+        cargo add scylla
+
+  .. group-tab:: Python
+
+    .. code::
+
+        pip install scylla-driver
+
+  .. group-tab:: Java
+
+    .. code:: xml
+
+        <dependency>
+          <groupId>com.scylladb</groupId>
+          <artifactId>java-driver-core</artifactId>
+          <version>${driver.version}</version>
+        </dependency>
+
+        <dependency>
+          <groupId>com.scylladb</groupId>
+          <artifactId>java-driver-query-builder</artifactId>
+          <version>${driver.version}</version>
+        </dependency>
+
+        <dependency>
+          <groupId>com.scylladb</groupId>
+          <artifactId>java-driver-mapper-runtime</artifactId>
+          <version>${driver.version}</version>
+        </dependency>
+
+  .. group-tab:: Go
+
+    Add the following line to your project go.mod file:
+
+        .. code::
+
+            github.com/scylladb/gocql latest
+
+  .. group-tab:: JavaScript
+
+    .. code::
+
+      yarn install cassandra-driver
+
+
+For a full list of drivers, refer to our `doumentation <https://opensource.docs.scylladb.com/master/using-scylla/drivers/cql-drivers/index.html>`_
 
 .. raw:: html
 
@@ -194,47 +249,51 @@
 
 .. raw:: html
 
-  <!-- Uberflip Embedded Hub Widget -->
+  <div class="full">
+    <div class="container">
+      <h2 class="text-center">Featured Resources</h2>
+    <!-- Uberflip Embedded Hub Widget -->
 
-  <div id="UfEmbeddedHub1724201969735"></div>
+    <div id="UfEmbeddedHub1724201969735"></div>
 
-  <script nonce="<?= $nonce ?>">
-  window._ufHubConfig = window._ufHubConfig || [];
-  window._ufHubConfig.push({
-    'containers':{'app':'#UfEmbeddedHub1724201969735'},
-    'collection': '11886924',
-    'openLink':function(url){
-      window.top.location.href=url;
-    },
-    'lazyloader':{
-      'itemDisplayLimit':6,
-      'maxTilesPerRow':4,
-      'maxItemsTotal': 0
-    },
-    'tileSize': 'large',
-    'enablePageTracking':false,
-    'baseUrl': 'https://resources.scylladb.com/',
-    'filesUrl': 'https://resources.scylladb.com/',
-    'generatedAtUTC': '2024-08-21 00:58:53',
-  });
-  </script>
+    <script nonce="<?= $nonce ?>">
+    window._ufHubConfig = window._ufHubConfig || [];
+    window._ufHubConfig.push({
+      'containers':{'app':'#UfEmbeddedHub1724201969735'},
+      'collection': '11886924',
+      'openLink':function(url){
+        window.top.location.href=url;
+      },
+      'lazyloader':{
+        'itemDisplayLimit':6,
+        'maxTilesPerRow':4,
+        'maxItemsTotal': 0
+      },
+      'tileSize': 'large',
+      'enablePageTracking':false,
+      'baseUrl': 'https://resources.scylladb.com/',
+      'filesUrl': 'https://resources.scylladb.com/',
+      'generatedAtUTC': '2024-08-21 00:58:53',
+    });
+    </script>
 
-  <script nonce="<?= $nonce ?>">(function(d,t,u) {
-    function load(){
-      var s=d.createElement(t);s.src=u;d.body.appendChild(s);
-    }
-    if (window.addEventListener) {
-      window.addEventListener('load',load,false);
-    }
-    else if (window.attachEvent) {
-      window.attachEvent('onload',load);
-    }
-    else{
-      window.onload=load;
-    }
-  }(document,'script','https://resources.scylladb.com/hubsFront/embed_collection'));
-  </script>
-  <!-- /End Uberflip Embedded Hub Widget -->
+    <script nonce="<?= $nonce ?>">(function(d,t,u) {
+      function load(){
+        var s=d.createElement(t);s.src=u;d.body.appendChild(s);
+      }
+      if (window.addEventListener) {
+        window.addEventListener('load',load,false);
+      }
+      else if (window.attachEvent) {
+        window.attachEvent('onload',load);
+      }
+      else{
+        window.onload=load;
+      }
+    }(document,'script','https://resources.scylladb.com/hubsFront/embed_collection'));
+    </script>
+    <!-- /End Uberflip Embedded Hub Widget -->
+  </div>
 
 .. raw:: html
 
