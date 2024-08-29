@@ -39,13 +39,14 @@
   This guide will help you get started with ScyllaDB, from installation to running your first query.
 
 .. topic-box::
-  :title: Tutorials
-  :link: tutorials
-  :icon: scylla-icon scylla-icon--training
+  :title: Cloud
+  :link: https://cloud.scylladb.com/
+  :link_target: _self
+  :icon: scylla-icon scylla-icon--cloud
   :class: large-6
   :anchor: Learn more
 
-  Explore a range of more advanced tutorials for different applications and programming languages.
+  Try ScyllaDB Cloud, our managed NoSQL database as a service running ScyllaDB Enterprise.
 
 .. topic-box::
   :title: Labs
