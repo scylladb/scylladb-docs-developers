@@ -154,10 +154,10 @@ For a full list of drivers, refer to our `documentation. <https://opensource.doc
 
 .. raw:: html
 
-            <div class="topic-box__head">
+            <div class="topic-box__head" id="signup">
               <h1 class="topic-box__title">Sign up for our product updates</h1>
             </div>
-            <div class="topic-box__body">
+            <div class="topic-box__body" id="signup_body">
               <p>Stay ahead with the latest tutorials, guides, news and events from ScyllaDB.</p>
               <div class="docutils container">
                 <form accept-charset="UTF-8" method="post" action="http://lp.scylladb.com/l/934963/2024-09-04/bv9ry" class="form" id="pardot-form">
@@ -191,6 +191,28 @@ For a full list of drivers, refer to our `documentation. <https://opensource.doc
                     <label for="opt_in_consent">Yes, I wish to receive future informational and marketing communications from ScyllaDB, and I understand and agree to the <a href="https://www.scylladb.com/privacy/"><b>privacy policy</b></a>.</label>
                   </div>
                 </form>
+                <script>
+                  document.getElementById('pardot-form').addEventListener('submit', function(event) {
+                    event.preventDefault(); // Prevent the default form submission
+                    document.getElementById('pardot-form').style.display = 'none';
+                    document.getElementById('signup').style.display = 'none';
+                    document.getElementById('signup_body').style.display = 'none';
+                    document.cookie = "formSubmitted=true; path=/; max-age=" + (60 * 60 * 24 * 30); // Cookie expires in 30 days
+
+                    var xhr = new XMLHttpRequest();
+                    xhr.open("POST", this.action, true);
+                    xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+                    xhr.send(new FormData(this));
+                  });
+
+                  window.addEventListener('load', function() {
+                    if (document.cookie.split(';').some((item) => item.trim().startsWith('formSubmitted='))) {
+                      document.getElementById('pardot-form').style.display = 'none';
+                      document.getElementById('signup').style.display = 'none';
+                      document.getElementById('signup_body').style.display = 'none';
+                    }
+                  });
+                </script>
                 <script>
                   function getParameterByName(name) {
                     name = name.replace(/[\[]/, "\\[").replace(/[\]]/, "\\]");
