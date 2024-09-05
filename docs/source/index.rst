@@ -95,7 +95,7 @@
 
          curl -sSf get.scylladb.com/server | sudo bash
 
-For detailed installation instructions, see our `documentation <https://opensource.docs.scylladb.com/stable/getting-started/install-scylla/index.html>`_.
+For detailed installation instructions, see our `documentation. <https://opensource.docs.scylladb.com/stable/getting-started/install-scylla/index.html>`_
 
 **Connect via drivers**
 
@@ -150,7 +150,7 @@ For detailed installation instructions, see our `documentation <https://opensour
       yarn install cassandra-driver
 
 
-For a full list of drivers, refer to our `doumentation <https://opensource.docs.scylladb.com/master/using-scylla/drivers/cql-drivers/index.html>`_
+For a full list of drivers, refer to our `documentation. <https://opensource.docs.scylladb.com/master/using-scylla/drivers/cql-drivers/index.html>`_
 
 .. raw:: html
 
