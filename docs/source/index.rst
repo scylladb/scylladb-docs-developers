@@ -162,7 +162,7 @@ For a full list of drivers, refer to our `documentation. <https://opensource.doc
               <div class="docutils container">
                 <form accept-charset="UTF-8" method="post" action="https://lp.scylladb.com/l/934963/2023-05-11/923sq" class="form" id="pardot-form">
                   <p class="form-field email pd-text required">
-                    <input type="text" name="934963_128676pi_934963_128676" id="934963_128676pi_934963_128676" value="correkthorse@gmail.com" class="text" size="30" maxlength="255" placeholder="Company Email *">
+                    <input type="text" name="934963_128676pi_934963_128676" id="934963_128676pi_934963_128676" value="" class="text" size="30" maxlength="255" placeholder="Company Email *">
                   </p>
                   <p class="form-field utm_source pd-hidden hidden">
                     <input type="hidden" name="934963_128679pi_934963_128679" id="934963_128679pi_934963_128679" value="">
