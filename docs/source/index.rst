@@ -160,51 +160,37 @@ For a full list of drivers, refer to our `documentation. <https://opensource.doc
             <div class="topic-box__body">
               <p>Stay ahead with the latest tutorials, guides, news and events from ScyllaDB.</p>
               <div class="docutils container">
-                <form accept-charset="UTF-8" method="post" action="https://lp.scylladb.com/l/934963/2023-05-11/923sq" class="form" id="pardot-form">
+                <form accept-charset="UTF-8" method="post" action="http://lp.scylladb.com/l/934963/2024-09-04/bv9ry" class="form" id="pardot-form">
                   <p class="form-field email pd-text required">
-                    <input type="text" name="934963_128676pi_934963_128676" id="934963_128676pi_934963_128676" value="" class="text" size="30" maxlength="255" placeholder="Company Email *">
-                  </p>
-                  <p class="form-field utm_source pd-hidden hidden">
-                    <input type="hidden" name="934963_128679pi_934963_128679" id="934963_128679pi_934963_128679" value="">
-                  </p>
-                  <p class="form-field utm_medium pd-hidden hidden">
-                    <input type="hidden" name="934963_128682pi_934963_128682" id="934963_128682pi_934963_128682" value="">
+                    <input type="text" name="email" id="email" value="" class="text" size="30" maxlength="255" placeholder="Company Email *">
                   </p>
                   <p class="form-field utm_campaign pd-hidden hidden">
-                    <input type="hidden" name="934963_128685pi_934963_128685" id="934963_128685pi_934963_128685" value="">
+                    <input type="hidden" name="utm_campaign" id="utm_campaign" value="">
                   </p>
-                  <p class="form-field utm_adgroup pd-hidden hidden">
-                    <input type="hidden" name="934963_128688pi_934963_128688" id="934963_128688pi_934963_128688" value="">
+                  <p class="form-field utm_medium pd-hidden hidden">
+                    <input type="hidden" name="utm_medium" id="utm_medium" value="">
                   </p>
-                  <p class="form-field utm_term pd-hidden hidden">
-                    <input type="hidden" name="934963_128691pi_934963_128691" id="934963_128691pi_934963_128691" value="">
+                  <p class="form-field utm_source pd-hidden hidden">
+                    <input type="hidden" name="utm_source" id="utm_source" value="">
                   </p>
-                  <p class="form-field websitePlacement pd-hidden hidden">
-                    <input type="hidden" name="934963_128694pi_934963_128694" id="934963_128694pi_934963_128694" value="">
+                  <p class="form-field source_type pd-hidden hidden">
+                    <input type="hidden" name="source_type" id="source_type" value="">
                   </p>
-                  <p style="position:absolute; width:190px; left:-9999px; top: -9999px;visibility:hidden;">
-                    <label for="pi_extra_field">Comments</label>
-                    <input type="text" name="pi_extra_field" id="pi_extra_field">
+                  <p class="form-latest_sfdc_campaign utm_term pd-hidden hidden">
+                    <input type="hidden" name="latest_sfdc_campaign" id="latest_sfdc_campaign" value="">
+                  </p>
+                  <p class="form-field campaign_status pd-hidden hidden">
+                    <input type="hidden" name="campaign_status" id="campaign_status" value="">
                   </p>
                   <input name="_utf8" type="hidden" value="☃">
                   <p class="submit">
                     <input type="submit" accesskey="s" value="Subscribe">
                   </p>
                   <div class="onboard-form__field onboard-form__field--checkbox">
-                    <input type="hidden" value="No" name="opt_in_consent" id="onboard-opt-in-consent--hidden">
-                    <input name="opt_in_consent" id="onboard-opt-in-consent" type="checkbox" class="form-input" value="Yes">
+                    <input name="opt_in_consent" id="opt_in_consent" type="checkbox" class="form-input" value="Yes">
                     <label for="opt_in_consent">Yes, I wish to receive future informational and marketing communications from ScyllaDB, and I understand and agree to the <a href="https://www.scylladb.com/privacy/"><b>privacy policy</b></a>.</label>
                   </div>
                 </form>
-                <script type="text/javascript">
-                  function insertBefore(el, referenceNode) {
-                    referenceNode.parentNode.insertBefore(el, referenceNode);
-                  }
-                  var newEl = document.createElement('div');
-                  newEl.innerHTML = '<p><em>* Your information will be handled as detailed in our&nbsp;<a data-mce-href="https://www.scylladb.com/privacy/" href="https://www.scylladb.com/privacy/" target="_blank">privacy policy</a>.</em></p>';
-                  var ref = document.querySelector('.add-text-before');
-                  insertBefore(newEl, ref);
-                </script>
                 <script>
                   function getParameterByName(name) {
                     name = name.replace(/[\[]/, "\\[").replace(/[\]]/, "\\]");
@@ -218,26 +204,6 @@ For a full list of drivers, refer to our `documentation. <https://opensource.doc
                   document.querySelector("p.utm_source input").value = source;
                   document.querySelector("p.utm_medium input").value = medium;
                   document.querySelector("p.utm_campaign input").value = campaign;
-                </script>
-                <script>
-                  (function() {
-                    window._zi = {formId: '9c7e343e-3ae3-4097-a2ae-e4ff5059a09c', formLoadTimeout:4000};
-                    var zi = document.createElement('script');
-                    zi.type = 'text/javascript';
-                    zi.async = true;
-                    zi.src = 'https://ws-assets.zoominfo.com/formcomplete.js';
-                    var s = document.getElementsByTagName('script')[0];
-                    s.parentNode.insertBefore(zi, s);
-                  })();
-                </script>
-                <script type="text/javascript">
-                  var anchors = document.getElementsByTagName("a");
-                  for (var i=0; i<anchors.length; i++) {
-                    var anchor = anchors[i];
-                    if(anchor.getAttribute("href")&&!anchor.getAttribute("target")) {
-                      anchor.target = "_top";
-                    }
-                  }
                 </script>
               </div>
             </div>
