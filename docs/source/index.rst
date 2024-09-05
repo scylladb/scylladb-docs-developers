@@ -193,7 +193,6 @@ For a full list of drivers, refer to our `documentation. <https://opensource.doc
                 </form>
                 <script>
                   document.getElementById('pardot-form').addEventListener('submit', function(event) {
-                    event.preventDefault(); // Prevent the default form submission
                     document.getElementById('pardot-form').style.display = 'none';
                     document.getElementById('signup').style.display = 'none';
                     document.getElementById('signup_body').style.display = 'none';
