@@ -197,12 +197,7 @@ For a full list of drivers, refer to our `documentation. <https://opensource.doc
                     document.getElementById('pardot-form').style.display = 'none';
                     document.getElementById('signup').style.display = 'none';
                     document.getElementById('signup_body').style.display = 'none';
-                    document.cookie = "formSubmitted=true; path=/; max-age=" + (60 * 60 * 24 * 30); // Cookie expires in 30 days
-
-                    var xhr = new XMLHttpRequest();
-                    xhr.open("POST", this.action, true);
-                    xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
-                    xhr.send(new FormData(this));
+                    document.cookie = "formSubmitted=true; path=/; max-age=" + (60 * 60 * 24 * 365); // Cookie expires in 365 days
                   });
 
                   window.addEventListener('load', function() {
