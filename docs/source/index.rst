@@ -160,9 +160,9 @@ For a full list of drivers, refer to our `documentation. <https://opensource.doc
             <div class="topic-box__body" id="signup_body">
               <p>Stay ahead with the latest tutorials, guides, news and events from ScyllaDB.</p>
               <div class="docutils container">
-                <form accept-charset="UTF-8" method="post" action="http://lp.scylladb.com/l/934963/2024-09-04/bv9ry" class="form" id="pardot-form">
+                <form accept-charset="UTF-8" method="post" action="http://lp.scylladb.com/l/934963/2024-09-04/bv9ry" class="form" id="pardot-form" autocomplete="off">
                   <p class="form-field email pd-text required">
-                    <input type="text" name="email" id="email" value="" class="text" size="30" maxlength="255" placeholder="Company Email *">
+                    <input type="text" name="email" id="email" value="" class="text" size="30" maxlength="255" placeholder="Company Email *" autocomplete="off">
                   </p>
                   <p class="form-field utm_campaign pd-hidden hidden">
                     <input type="hidden" name="utm_campaign" id="utm_campaign" value="">
