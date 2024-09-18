@@ -29,16 +29,6 @@
       <div class="grid-x grid-margin-x">
 
 .. topic-box::
-  :title: Getting Started
-  :link: https://docs.scylladb.com/stable/get-started/
-  :link_target: _self
-  :icon: scylla-icon scylla-icon--getting-started
-  :class: large-6
-  :anchor: Learn more
-
-  This guide will help you get started with ScyllaDB, from installation to running your first query.
-
-.. topic-box::
   :title: Cloud
   :link: https://cloud.scylladb.com/
   :link_target: _self
@@ -47,6 +37,16 @@
   :anchor: Learn more
 
   Try ScyllaDB Cloud, our managed NoSQL database as a service running ScyllaDB Enterprise.
+
+.. topic-box::
+  :title: Getting Started
+  :link: https://docs.scylladb.com/stable/get-started/
+  :link_target: _self
+  :icon: scylla-icon scylla-icon--getting-started
+  :class: large-6
+  :anchor: Learn more
+
+  This guide will help you get started with ScyllaDB, from installation to running your first query.
 
 .. topic-box::
   :title: Labs
