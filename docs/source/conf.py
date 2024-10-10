@@ -34,7 +34,6 @@ extensions = [
     "sphinx_sitemap",
     "sphinx_scylladb_theme",
     "sphinx_multiversion",  # optional
-    "recommonmark",  # optional
 ]
 
 # The suffix(es) of source filenames.
@@ -106,8 +105,9 @@ html_css_files = [
 # documentation.
 html_theme_options = {
     "conf_py_path": "docs/source/",
-    "hide_edit_this_page_button": "false",
-    "hide_feedback_buttons": "false",
+    "default_branch": "main",
+    "hide_edit_this_page_button": "true",
+    "hide_feedback_buttons": "true",
     "github_issues_repository": "scylladb/developers-scylladb-com",
     "github_repository": "scylladb/developers-scylladb-com",
     "site_description": "ScyllaDB Developers",
