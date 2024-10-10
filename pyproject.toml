@@ -1,8 +1,9 @@
 [tool.poetry]
 name = "sphinx-docs"
-description = "ScyllaDB Documentation"
+description = "ScyllaDB Developers Documentation"
 version = "0.2.0"
-authors = ["ScyllaDB Documentation Contributors"]
+authors = ["ScyllaDB Contributors"]
+package-mode = false
 
 [tool.poetry.dependencies]
 python = "^3.10"
