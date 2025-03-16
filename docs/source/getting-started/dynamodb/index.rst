@@ -7,10 +7,10 @@
 Switching from DynamoDB
 =======================
 .. toctree::
-   :maxdepth: 4
-   :hidden:
+    :hidden:
 
-   ../what
+    labs/index
+    considerations/index
 
 .. raw:: html
 
@@ -20,8 +20,6 @@ Switching from DynamoDB
 **Slash costs with ScyllaDB**
 
 ScyllaDB is a high-performance NoSQL database designed for low-latency, high-throughput workloads. As a drop-in replacement for DynamoDB and Apache Cassandra, ScyllaDB gives you full control over your data, predictable performance, and dramatically lower costs — without sacrificing scalability. Built on a shard-per-core architecture in C++, ScyllaDB takes full advantage of modern hardware to maximize efficiency.
-
-:doc:`Learn more <../what>`
 
 .. raw:: html
 
@@ -46,21 +44,6 @@ Follow a code-complete, hands-on tutorial to learn about switching to ScyllaDB f
 .. raw:: html
 
     <div class="card-grid">
-
-.. card-box::
-    :link: https://aws.amazon.com
-    :image: ../../_static/icons/alternator.svg" style="width:24px
-    :text: ScyllaDB Alternator
-
-.. card-box::
-    :link: https://azure.microsoft.com
-    :image: ../../_static/icons/table_chart.svg
-    :text: Single table design
-
-.. card-box::
-    :link: https://azure.microsoft.com
-    :image: ../../_static/icons/table_rows.svg
-    :text: Multi-table design
 
 .. card-box::
     :link: https://aws.amazon.com

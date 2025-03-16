@@ -1,6 +1,12 @@
 Getting Started with ScyllaDB
 =============================
 
+.. toctree::
+   :maxdepth: 4
+   :hidden:
+
+   what
+
 .. title:: Getting Started with ScyllaDB
 
 .. meta::
