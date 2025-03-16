@@ -77,6 +77,10 @@ redirects: setup
 preview: setup
 	$(POETRY) run sphinx-autobuild -b dirhtml $(ALLSPHINXOPTS) $(BUILDDIR)/dirhtml --port 5500
 
+.PHONY: flightmode
+flightmode:
+	$(POETRY) run sphinx-autobuild -b dirhtml $(ALLSPHINXOPTS) $(BUILDDIR)/dirhtml --port 5500
+
 .PHONY: multiversionpreview
 multiversionpreview: multiversion
 	$(POETRY) run python -m http.server 5500 --directory $(BUILDDIR)/dirhtml
