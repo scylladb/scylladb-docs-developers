@@ -2,10 +2,11 @@ Getting Started with ScyllaDB
 =============================
 
 .. toctree::
-   :maxdepth: 4
-   :hidden:
+    :maxdepth: 4
+    :hidden:
 
-   what
+    what
+    differentiators
 
 .. title:: Getting Started with ScyllaDB
 
@@ -15,7 +16,6 @@ Getting Started with ScyllaDB
 .. raw:: html
 
     <div class="topics-grid topics-grid--scrollable grid-container full">
-
     <div class="grid-x grid-margin-x hs">
 
 .. topic-box::
