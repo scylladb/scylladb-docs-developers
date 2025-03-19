@@ -66,10 +66,9 @@ Internal Caching
     <div class="grid-x grid-margin-x">
         <div class="cell large-8 small-8">
 
-ScyllaDB uses smart, fine-tuned caching to reduce latency and accelerate access to frequently used data. Unlike traditional databases that rely on complex concurrency mechanisms, ScyllaDB processes everything in a single thread per CPU core.
+ScyllaDB completely bypasses the Linux cache during reads, using its own highly efficient row-based cache instead. This approach provides us the control needed to achieve predictable low latencies. It also allows us to offer users full visibility into details like cache hits and misses, evictions, and cache size.
 
 This approach eliminates locking and complex lock-free algorithms, allowing short tasks to execute serially with cooperative preemption. The result? Simpler, more efficient data structures and a system that delivers low-latency, high-performance queries without the overhead of traditional multi-threaded contention.
-
 
 `Learn more <https://www.scylladb.com/2024/01/08/inside-scylladbs-internal-cache/>`_
 
