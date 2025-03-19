@@ -22,12 +22,10 @@ Install the required packages:
 
 To build the site, you need to have Sphinx installed.
 
-    cd docs
-    make setup
+    make -C docs setup
 
 ## Running the site locally
 
 To run the site locally, you need to have Sphinx installed.
 
-    cd docs
-    make preview
+    make -C docs preview
