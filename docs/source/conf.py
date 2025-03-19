@@ -33,7 +33,8 @@ extensions = [
     "sphinx.ext.extlinks",
     "sphinx_sitemap",
     "sphinx_scylladb_theme",
-    "sphinx_multiversion",  # optional
+    "sphinx_multiversion",
+    'ext.card_box'
 ]
 
 # The suffix(es) of source filenames.

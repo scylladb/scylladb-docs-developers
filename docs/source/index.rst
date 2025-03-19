@@ -8,6 +8,13 @@
 
 .. title:: ScyllaDB Developers
 
+.. toctree::
+   :maxdepth: 2
+   :hidden:
+
+   getting-started/index
+   getting-started/dynamodb/index
+
 .. hero-box::
   :title: Developing Monster Scale
   :image: https://scylladb.github.io/scylladb-docs-developers/stable/_static/img/scylladb-monster-lookup-left-pad.png
