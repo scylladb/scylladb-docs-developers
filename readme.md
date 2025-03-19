@@ -12,7 +12,7 @@ Recommended way to install Python is using [Homebrew](https://brew.sh/) with ven
     python3.10 -m pip install --user --upgrade pip
     python3.10 -m pip install --user virtualenv
     python3.10 -m venv .venv
-    source venv/bin/activate
+    source .venv/bin/activate
 
 Install the required packages:
 
