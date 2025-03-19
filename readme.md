@@ -1,6 +1,6 @@
 # developers.scylladb.com
 
-This is the static site for [developers.scylladb.com](developers.scylladb.com). 
+This is the static site for [developers.scylladb.com](https://developers.scylladb.com). 
 It is built using Sphinx and hosted on GitHub Pages.
 
 ## Prerequisites
