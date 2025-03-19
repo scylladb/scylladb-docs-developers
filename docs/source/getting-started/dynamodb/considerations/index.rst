@@ -8,4 +8,4 @@ Considerations
 
     understanding-differences
     alternator-or-cql
-    migration-path
+    migration-paths

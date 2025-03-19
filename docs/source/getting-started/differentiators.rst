@@ -41,7 +41,7 @@ ScyllaDB’s Shard per Core architecture ensures that each shard is bound to a d
 
 Each core also gets dedicated networking I/O channels, eliminating bottlenecks and ensuring efficient data transfer. By operating independently, cores minimize contention and maximize parallelism, allowing ScyllaDB to fully utilize modern hardware for predictable, high-performance scaling.
 
-`Learn more <#>`_
+`Learn more about shard-per-core architecture <#>`_
 
 .. raw:: html
 
@@ -70,7 +70,7 @@ ScyllaDB completely bypasses the Linux cache during reads, using its own highly 
 
 This approach eliminates locking and complex lock-free algorithms, allowing short tasks to execute serially with cooperative preemption. The result? Simpler, more efficient data structures and a system that delivers low-latency, high-performance queries without the overhead of traditional multi-threaded contention.
 
-`Learn more <https://www.scylladb.com/2024/01/08/inside-scylladbs-internal-cache/>`_
+`Learn more about our internal cache <https://www.scylladb.com/2024/01/08/inside-scylladbs-internal-cache/>`_
 
 .. raw:: html
 
@@ -99,7 +99,7 @@ ScyllaDB’s Tablets build on the shard-per-core model, maintaining the same map
 
 Each table in a keyspace is divided into equal-sized Tablets, ensuring balanced distribution. Smaller tables get fewer Tablets, while larger tables scale efficiently. This dynamic approach improves load balancing, resource efficiency, and overall performance, making ScyllaDB even more adaptive to real-world workloads.
 
-`Learn more <https://www.scylladb.com/2024/06/13/why-tablets/>`_
+`Learn more about elasticity <https://www.scylladb.com/2024/06/13/why-tablets/>`_
 
 .. raw:: html
 
@@ -129,7 +129,7 @@ ScyllaDB uses its own built-in CPU and IO schedulers. It can automatically prior
 Even under the most intense workloads ScyllaDB runs smoothly without requiring frequent administrator supervision and intervention.
 
 
-`Learn more <https://www.scylladb.com/2022/08/03/implementing-a-new-io-scheduler-algorithm-for-mixed-read-write-workloads/>`_
+`Learn more about schedulers <https://www.scylladb.com/2022/08/03/implementing-a-new-io-scheduler-algorithm-for-mixed-read-write-workloads/>`_
 
 .. raw:: html
 
@@ -158,7 +158,7 @@ Workload Prioritization controls how different workloads compete for system reso
 
 Common use cases include balancing real-time vs batch processing, splitting writes from reads, and workload/infrastructure consolidation.
 
-`Learn more <https://www.scylladb.com/tech-talk/workload-prioritization-how-to-balance-multiple-workloads-in-a-cluster/>`_
+`Learn more about workload prioritization <https://www.scylladb.com/tech-talk/workload-prioritization-how-to-balance-multiple-workloads-in-a-cluster/>`_
 
 .. raw:: html
 

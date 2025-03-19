@@ -13,6 +13,7 @@ Switching from DynamoDB
     fit/index
     considerations/index
     guides/index
+    users/index
 
 .. raw:: html
 
