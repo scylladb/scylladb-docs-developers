@@ -15,16 +15,16 @@ Switching from DynamoDB
 .. raw:: html
 
     <div class="grid-x grid-margin-x">
-      <div class="cell large-8 small-8">
+        <div class="cell large-8 small-8">
 
-**Slash costs with ScyllaDB**
+**Ditch the DynamoDB Tax**
 
 ScyllaDB is a high-performance NoSQL database designed for low-latency, high-throughput workloads. As a drop-in replacement for DynamoDB and Apache Cassandra, ScyllaDB gives you full control over your data, predictable performance, and dramatically lower costs — without sacrificing scalability. Built on a shard-per-core architecture in C++, ScyllaDB takes full advantage of modern hardware to maximize efficiency.
 
 .. raw:: html
 
-      </div>
-      <div class="cell large-4 small-4">
+        </div>
+    <div class="cell large-4 small-4">
 
 .. figure:: images/placeholder.png
    :width: 300px
@@ -48,17 +48,17 @@ Follow a code-complete, hands-on tutorial to learn about switching to ScyllaDB f
 .. card-box::
     :link: https://aws.amazon.com
     :image: ../../_static/icons/alternator.svg" style="width:24px
-    :text: ScyllaDB Alternator
+    :title: ScyllaDB Alternator
 
 .. card-box::
     :link: https://azure.microsoft.com
     :image: ../../_static/icons/table_chart.svg
-    :text: Single table design
+    :title: Single table design
 
 .. card-box::
     :link: https://azure.microsoft.com
     :image: ../../_static/icons/table_rows.svg
-    :text: Multi-table design
+    :title: Multi-table design
 
 .. raw:: html
 
@@ -72,28 +72,25 @@ Featured Documentation
 
 .. raw:: html
 
-    <div class="topics-grid topics-grid--scrollable grid-container full">
+    <div class="card-grid">
 
-    <div class="grid-x grid-margin-x hs">
+.. card-box::
+    :link: https://aws.amazon.com
+    :title: ScyllaDB Alternator
+    :description: I'm baby grailed tumblr shoreditch marfa kickstarter intelligentsia asymmetrical.
 
-.. topic-box::
-    :title: Getting Started
-    :link: https://docs.scylladb.com/stable/get-started/
-    :class: large-4
-    :anchor: Learn more
+.. card-box::
+    :link: https://azure.microsoft.com
+    :title: Single table design
+    :description: I'm baby grailed tumblr shoreditch marfa kickstarter intelligentsia asymmetrical.
 
-    Learn how to get started with ScyllaDB, the NoSQL database for data-intensive applications. This guide covers everything from installation to running your first query.
+.. card-box::
+    :link: https://azure.microsoft.com
+    :title: Multi-table design
+    :description: blah blah blah
 
-.. topic-box::
-    :title: Switching from DynamoDB
-    :link: dynamodb
-    :class: large-4
-    :anchor: Learn more
+.. raw:: html
 
-    Make the switch from DynamoDB to ScyllaDB. This guide covers the differences between the two databases and how to migrate your data.
+    </div>&nbsp;
 
-.. topic-box::
-    :title: Switching from Cassandra
-    :link: dynamodb
-    :class: large-4
-    :anchor: Learn more
+:doc:`See more labs <../what>`
