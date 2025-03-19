@@ -4,8 +4,8 @@ Hands on Labs
 =============
 
 .. toctree::
-    :maxdepth: 2
+    :hidden:
 
     simple-application
-    single-table
-    multiple-tables
+    load-balancing
+    single-vs-multi-region

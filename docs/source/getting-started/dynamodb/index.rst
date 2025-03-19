@@ -11,6 +11,8 @@ Switching from DynamoDB
 
     labs/index
     fit/index
+    considerations/index
+    guides/index
 
 .. raw:: html
 
