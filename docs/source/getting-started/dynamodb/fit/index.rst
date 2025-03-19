@@ -1,7 +1,7 @@
 :hide-secondary-sidebar:
 
-Important Considerations
-========================
+Is It Right for My Project
+==========================
 
 .. toctree::
     :maxdepth: 2

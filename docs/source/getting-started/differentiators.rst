@@ -11,14 +11,17 @@ ScyllaDB is known for engineering optimizations that enable predictable performa
 
 .. card-box::
     :link: #
+    :image: ../../_static/icons/architecture.svg" style="width:24px
     :title: Architecture for Extreme Scale
 
 .. card-box::
     :link: #
+    :image: ../../_static/icons/video_library.svg" style="width:24px
     :title: 10 Years and Beyond with ScyllaDB
 
 .. card-box::
     :link: #
+    :image: ../../_static/icons/architecture.svg" style="width:24px
     :title: A Deep Dive into ScyllaDB's Architecture
 
 .. raw:: html
