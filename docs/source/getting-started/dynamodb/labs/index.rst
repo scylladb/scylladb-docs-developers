@@ -6,6 +6,6 @@ Hands on Labs
 .. toctree::
     :maxdepth: 2
 
-    alternator
+    simple-application
     single-table
     multiple-tables
