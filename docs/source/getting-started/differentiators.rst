@@ -37,9 +37,9 @@ Shard per Core
     <div class="grid-x grid-margin-x">
         <div class="cell large-8 small-8">
 
-ScyllaDB’s Shard per Core architecture ensures that each shard is bound to a dedicated CPU core, along with its own share of data. This means every core has dedicated resources—its own cache, memtables, and SSTables—residing in its own RAM and persistent storage.
+With ScyllaDB’s unique shard-per-core architecture, each CPU core gets its own dedicated slice of resources (memory, network, and storage). Since there is minimal interaction between the cores, each core runs independently and efficiently, without context switching, locking, or waiting.
 
-Each core also gets dedicated networking I/O channels, eliminating bottlenecks and ensuring efficient data transfer. By operating independently, cores minimize contention and maximize parallelism, allowing ScyllaDB to fully utilize modern hardware for predictable, high-performance scaling.
+By eliminating resource contention, this design enables consistent low latencies and true linear scaling (e.g., doubling the number of cores doubles the performance). Since ScyllaDB can extract more power from modern hardware, we can provide exceptional price performance.
 
 `Learn more about shard-per-core architecture <#>`_
 
@@ -66,9 +66,9 @@ Internal Caching
     <div class="grid-x grid-margin-x">
         <div class="cell large-8 small-8">
 
-ScyllaDB completely bypasses the Linux cache during reads, using its own highly efficient row-based cache instead. This approach provides us the control needed to achieve predictable low latencies. It also allows us to offer users full visibility into details like cache hits and misses, evictions, and cache size.
+ScyllaDB completely bypasses the Linux cache during reads and uses its own highly efficient row-based integrated internal cache instead. This unified cache can dynamically tune itself to any workload.
 
-This approach eliminates locking and complex lock-free algorithms, allowing short tasks to execute serially with cooperative preemption. The result? Simpler, more efficient data structures and a system that delivers low-latency, high-performance queries without the overhead of traditional multi-threaded contention.
+This provides ScyllaDB the control needed to deliver ultra-low latency without an external cache It enables each ScyllaDB node to serve more data, which in turn lets users run smaller clusters of more powerful nodes with larger disks.
 
 `Learn more about our internal cache <https://www.scylladb.com/2024/01/08/inside-scylladbs-internal-cache/>`_
 
@@ -95,9 +95,9 @@ Tablets Elasticity
     <div class="grid-x grid-margin-x">
         <div class="cell large-8 small-8">
 
-ScyllaDB’s Tablets build on the shard-per-core model, maintaining the same mapping as vNodes but with greater flexibility. Unlike vNodes, Tablets can be dynamically reallocated within a node to optimize CPU and storage usage.
+Each ScyllaDB table is split into smaller fragments (“tablets”) to evenly distribute data and load across the system. Tablets are then replicated to multiple ScyllaDB nodes for high availability and fault tolerance. This approach separates token ownership from servers – ultimately allowing ScyllaDB to scale faster and in parallel.
 
-Each table in a keyspace is divided into equal-sized Tablets, ensuring balanced distribution. Smaller tables get fewer Tablets, while larger tables scale efficiently. This dynamic approach improves load balancing, resource efficiency, and overall performance, making ScyllaDB even more adaptive to real-world workloads.
+With tablets, data is dynamically redistributed as the workload and topology evolve. New nodes can be spun up in parallel and start adapting to the load in near real-time. This means teams can quickly scale out in response to traffic spikes – satisfying latency SLAs without needing to overprovision “just in case.”
 
 `Learn more about elasticity <https://www.scylladb.com/2024/06/13/why-tablets/>`_
 
@@ -127,7 +127,6 @@ Schedulers
 ScyllaDB uses its own built-in CPU and IO schedulers. It can automatically prioritize its own activities due to real-time, real-world conditions.
 
 Even under the most intense workloads ScyllaDB runs smoothly without requiring frequent administrator supervision and intervention.
-
 
 `Learn more about schedulers <https://www.scylladb.com/2022/08/03/implementing-a-new-io-scheduler-algorithm-for-mixed-read-write-workloads/>`_
 
