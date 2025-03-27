@@ -9,7 +9,7 @@ Is It Right for My Project?
 
     reducing-costs
     improving-latency
-    maximizing-throughput
+    freedom-from-lock-in
 
 ScyllaDB is a powerful option for organizations dealing with data-intensive applications that require high performance, scalability, and cost-efficiency. Its ability to handle massive workloads with low latency makes it particularly attractive for use cases in real-time analytics, IoT, and financial services.
 

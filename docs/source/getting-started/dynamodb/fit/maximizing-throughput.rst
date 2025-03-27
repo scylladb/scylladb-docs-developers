@@ -1,4 +1,4 @@
 :hide-secondary-sidebar:
 
-Maximizing Throughput
-=====================
+Freedom from Cloud Vendor Lock-In
+=================================
