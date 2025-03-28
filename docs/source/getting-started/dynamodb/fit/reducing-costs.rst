@@ -3,6 +3,16 @@
 Reducing Costs
 ==============
 
+.. image:: reducing-costs-light.png
+    :alt: Reducing Costs
+    :width: 90%
+    :class: light-mode
+
+.. image:: reducing-costs-dark.png
+    :alt: Reducing Costs
+    :width: 90%
+    :class: dark-mode
+
 ScyllaDB offers a compelling cost-saving proposition for organizations dealing with data-intensive applications. Its close-to-the-metal architecture and efficient use of hardware resources allow for significant reductions in infrastructure costs.
 
 Its ability to scale to petabytes of data and millions of operations per second without interruption means that organizations can grow their data footprint and keep latencies in check in peak workloads during events. This smooth scaling capability, combined with ScyllaDB's high throughput and low latency, allows companies to handle increasing workloads without surprising increases in infrastructure investment.
