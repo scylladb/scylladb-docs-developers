@@ -2,7 +2,7 @@
 
 .. meta::
    :description: Switching from DynamoDB to ScyllaDB. This guide covers the differences between the two databases and how to migrate your data.
-   :keywords: dynamodb, scylladb, migration, switch, guide
+   :keywords: DynamoDB, ScyllaDB, migration, switch, guide
 
 =======================
 Switching from DynamoDB
