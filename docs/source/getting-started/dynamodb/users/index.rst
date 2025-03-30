@@ -1,7 +1,7 @@
 :hide-secondary-sidebar:
 
 User Examples
-=============
+-------------
 
 .. toctree::
     :hidden:
@@ -9,3 +9,6 @@ User Examples
     yieldmo
     digital-turbine
     ifood
+    ge-healthcare
+
+ScyllaDB is the ideal database for a wide range of use cases. Here are a few examples of how ScyllaDB is used in production by some of our customers.
