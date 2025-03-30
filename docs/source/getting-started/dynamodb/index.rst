@@ -71,6 +71,93 @@ Follow a code-complete, hands-on tutorial to learn about switching to ScyllaDB f
 
 `See more labs <#>`_
 
+========================
+Important Considerations
+========================
+
+.. raw:: html
+
+    <div class="card-grid">
+
+.. card-box::
+    :link: considerations/understanding-differences
+    :title: Understanding Differences
+    :description: How the databases compare: data model, query language, and more.
+
+.. card-box::
+    :link: considerations/alternator-or-cql
+    :title: Alternator or CQL
+    :description: How Alternator and CQL differ – and tips on which to choose.
+
+.. card-box::
+    :link: considerations/migration-paths
+    :title: Migration Paths
+    :description: What’s required to migrate with to ScyllaDB with Alternator and CQL.
+
+.. raw:: html
+
+    </div>&nbsp;
+
+:doc:`See more considerations <considerations/index>`
+
+================
+Practical Guides
+================
+
+.. raw:: html
+
+    <div class="card-grid">
+
+.. card-box::
+    :link: guides/index
+    :title: Multiple Data Centers
+    :description: Tips for setting up tables in multiple regions.
+
+.. card-box::
+    :link: guides/index
+    :title: Migrating from DynamoDB
+    :description: A step-by-step look at what a migration involves.
+
+.. card-box::
+    :link: guides/index
+    :title: Avoiding Migration Pitfalls
+    :description: What mistakes commonly arise and how to avoid them.
+
+.. raw:: html
+
+    </div>&nbsp;
+
+:doc:`View more guides <guides/index>`
+
+=================
+Popular Use Cases
+=================
+
+.. raw:: html
+
+    <div class="card-grid">
+
+.. card-box::
+    :link: guides/index
+    :title: Yieldmo
+    :description: Yieldmo moved from DynamoDB for lower costs, improved latencies, and the freedom to run on GCP as well as AWS.
+
+.. card-box::
+    :link: guides/index
+    :title: Digital Turbine
+    :description: As part of an organization-wide AWS to GCP migration, Digital Turbine moved their DynamoDB workloads to GCP in just one sprint.
+
+.. card-box::
+    :link: guides/index
+    :title: Zee
+    :description: Zee moved from DynamoDB to ScyllaDB so they could handle an increased volume of database traffic faster and at significantly lower costs.
+
+.. raw:: html
+
+    </div>&nbsp;
+
+:doc:`View more guides <guides/index>`
+
 ======================
 Featured Documentation
 ======================
@@ -91,7 +178,7 @@ Featured Documentation
 
 .. card-box::
     :link: https://opensource.docs.scylladb.com/stable/alternator/compatibility.html
-    :title: Differences
+    :title: Compatibility Reference
     :description: The purpose of this document is to highlight differences between the API and ScyllaDB Alternator.
 
 .. raw:: html
