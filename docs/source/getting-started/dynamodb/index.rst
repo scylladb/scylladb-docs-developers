@@ -93,7 +93,7 @@ Important Considerations
 .. card-box::
     :link: considerations/migration-paths
     :title: Migration Paths
-    :description: What’s required to migrate with to ScyllaDB with Alternator and CQL.
+    :description: What’s required to migrate to ScyllaDB with Alternator and CQL.
 
 .. raw:: html
 
