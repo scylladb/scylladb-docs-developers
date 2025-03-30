@@ -34,9 +34,9 @@ To simplify migration, we offer ScyllaDB Alternator, an open-source DynamoDB-com
         </div>
     <div class="cell large-4 small-4">
 
-.. figure:: images/placeholder.png
+.. figure:: images/ditch-the-tax.png
    :width: 300px
-   :alt: Placeholder Image
+   :alt: Ditch the DynamoDB Tax
 
 .. raw:: html
 
