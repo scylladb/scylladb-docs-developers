@@ -1,7 +1,11 @@
 :hide-secondary-sidebar:
 
+.. meta::
+   :description: ScyllaDB is known for engineering optimizations that enable predictable performance at scale. If you are interested in database internals, we encourage you to browse our engineering blog, watch our tech talks from past and present conferences, and review our architecture details.
+   :keywords: ScyllaDB, database, internals, engineering, optimizations, performance, scale, blog, tech talks, conferences, architecture
+
 Technical Differentiators
-=========================
+-------------------------
 
 ScyllaDB is known for engineering optimizations that enable predictable performance at scale. If you are interested in database internals, we encourage you to browse our `engineering blog <https://www.scylladb.com/category/engineering/>`_, watch our tech talks from `past <https://www.scylladb.com/resources/tech-talks/?presentation-type=878>`_ and `present conferences <https://www.scylladb.com/monster-scale-summit/on-demand/>`_, and review our `architecture details <https://www.scylladb.com/product/technology/>`_.
 
@@ -28,7 +32,6 @@ ScyllaDB is known for engineering optimizations that enable predictable performa
 
     </div>&nbsp;
 
-==============
 Shard per Core
 ==============
 
@@ -57,7 +60,6 @@ By eliminating resource contention, this design enables consistent low latencies
       </div>
     </div>
 
-================
 Internal Caching
 ================
 
@@ -86,7 +88,6 @@ This provides ScyllaDB the control needed to deliver ultra-low latency without a
       </div>
     </div>
 
-==================
 Tablets Elasticity
 ==================
 
@@ -115,7 +116,6 @@ With tablets, data is dynamically redistributed as the workload and topology evo
       </div>
     </div>
 
-==========
 Schedulers
 ==========
 
@@ -144,7 +144,6 @@ Even under the most intense workloads ScyllaDB runs smoothly without requiring f
       </div>
     </div>
 
-=======================
 Workload Prioritization
 =======================
 

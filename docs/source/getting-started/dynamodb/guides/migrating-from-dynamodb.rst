@@ -1,3 +1,7 @@
+.. meta::
+   :description: Migrating from DynamoDB to ScyllaDB, the NoSQL database for data-intensive applications. Learn how to migrate from DynamoDB to ScyllaDB, whether you're using Alternator or CQL.
+   :keywords: migrating from DynamoDB, DynamoDB to ScyllaDB, DynamoDB to Alternator, DynamoDB to CQL
+
 Migrating from DynamoDB
 -----------------------
 

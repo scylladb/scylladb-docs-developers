@@ -1,6 +1,10 @@
 :hide-secondary-sidebar:
 
-Yieldmo
+.. meta::
+   :description: iFood, Latin America's largest food delivery company, faced challenges with their database infrastructure as they experienced rapid growth from 1 million to 20 million orders per month in under two years. Learn how they migrated from DynamoDB to ScyllaDB to address these challenges.
+    :keywords: ScyllaDB, DynamoDB, iFood, migration, cost reduction, scalability
+
+iFood
 -------
 
 .. raw:: html

@@ -4,6 +4,7 @@
    :description: Switching from DynamoDB to ScyllaDB. This guide covers the differences between the two databases and how to migrate your data.
    :keywords: dynamodb, scylladb, migration, switch, guide
 
+=======================
 Switching from DynamoDB
 =======================
 .. toctree::
@@ -20,7 +21,9 @@ Switching from DynamoDB
     <div class="grid-x grid-margin-x">
         <div class="cell large-8 small-8">
 
-**Ditch the DynamoDB Tax**
+
+Ditch the DynamoDB Tax
+----------------------
 
 ScyllaDB is a cost-effective and flexible alternative to DynamoDB – at least 50% lower cost and lower latency under most workloads. This exceptional price-performance results from a close-to-the-metal architecture and numerous engineering optimizations for performance, elasticity, and efficiency. Another advantage: with ScyllaDB, you can take your DynamoDB workloads beyond AWS and run on any cloud, bare metal, or hybrid.
 
@@ -40,9 +43,8 @@ To simplify migration, we offer ScyllaDB Alternator, an open-source DynamoDB-com
       </div>
     </div>
 
-=============
 Featured Labs
-=============
+-------------
 
 Follow a code-complete, hands-on tutorial to learn about switching to ScyllaDB from DynamoDB.
 
@@ -71,9 +73,8 @@ Follow a code-complete, hands-on tutorial to learn about switching to ScyllaDB f
 
 `See more labs <#>`_
 
-========================
 Important Considerations
-========================
+------------------------
 
 .. raw:: html
 
@@ -100,9 +101,8 @@ Important Considerations
 
 :doc:`See more considerations <considerations/index>`
 
-================
 Practical Guides
-================
+----------------
 
 .. raw:: html
 
@@ -129,28 +129,27 @@ Practical Guides
 
 :doc:`View more guides <guides/index>`
 
-=================
 Popular Use Cases
-=================
+-----------------
 
 .. raw:: html
 
     <div class="card-grid">
 
 .. card-box::
-    :link: guides/index
+    :link: guides/yieldmo
     :title: Yieldmo
     :description: Yieldmo moved from DynamoDB for lower costs, improved latencies, and the freedom to run on GCP as well as AWS.
 
 .. card-box::
-    :link: guides/index
+    :link: guides/digital-turbine
     :title: Digital Turbine
     :description: As part of an organization-wide AWS to GCP migration, Digital Turbine moved their DynamoDB workloads to GCP in just one sprint.
 
 .. card-box::
-    :link: guides/index
-    :title: Zee
-    :description: Zee moved from DynamoDB to ScyllaDB so they could handle an increased volume of database traffic faster and at significantly lower costs.
+    :link: guides/ifood
+    :title: iFood
+    :description: iFood migrated from DynamoDB to ScyllaDB for lower costs, better performance, and the ability to run on any cloud.
 
 .. raw:: html
 
@@ -158,9 +157,8 @@ Popular Use Cases
 
 :doc:`View more guides <guides/index>`
 
-======================
 Featured Documentation
-======================
+----------------------
 
 .. raw:: html
 

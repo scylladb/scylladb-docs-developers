@@ -1,5 +1,9 @@
 :hide-secondary-sidebar:
 
+.. meta::
+   :description: Digital Turbine migrated from DynamoDB to ScyllaDB to improve performance and cost efficiency. Learn how they did it.
+   :keywords: ScyllaDB, DynamoDB, Digital Turbine, migration, performance, cost efficiency
+
 Digital Turbine
 ---------------
 

@@ -1,5 +1,9 @@
 :hide-secondary-sidebar:
 
+.. meta::
+   :description: Yieldmo faced challenges with DynamoDB due to rising costs and limitations in cross-cloud deployment. They chose ScyllaDB for its cost-effectiveness, performance, and compatibility with DynamoDB.
+   :keywords: ScyllaDB, DynamoDB, Yieldmo, migration, cost-effectiveness, performance, compatibility
+
 Yieldmo
 -------
 

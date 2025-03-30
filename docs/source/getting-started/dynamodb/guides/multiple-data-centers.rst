@@ -1,5 +1,9 @@
 :hide-secondary-sidebar:
 
+.. meta::
+   :description: ScyllaDB Alternator supports tables in multi-regions by default. On a multi-datacenter cluster, tables are always created using Replication Factor = 3 and covering all regions. That means that all tables are Global Tables by default.
+   :keywords: ScyllaDB Alternator, DynamoDB, Multi-DC, Multi-Region, Global Tables
+
 Multiple Data Centers
 ---------------------
 

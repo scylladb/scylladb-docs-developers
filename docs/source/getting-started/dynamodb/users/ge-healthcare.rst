@@ -1,7 +1,11 @@
 :hide-secondary-sidebar:
 
-Yieldmo
--------
+.. meta::
+   :description: GE Healthcare’s Edison AI platform faced the challenge of deploying their AWS cloud-based Edison AI Workbench on-premises for research customers who required it within their own data centers. Learn how they avoided vendor lock-in with ScyllaDB.
+   :keywords: ScyllaDB, DynamoDB, migration, cost-effectiveness, performance, compatibility
+
+GE Healthcare
+-------------
 
 .. raw:: html
 
