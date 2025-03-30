@@ -137,7 +137,7 @@ DynamoDB takes a different approach, enforcing keys rather than a complete schem
 #. Primary key
 #. Sharding key
 #. DynamoDB native types
-#  Local secondary indexes
+#. Local secondary indexes
 #. Global secondary indexes
 #. DynamoDB streams (implemented as Alternator streams in ScyllaDB)
 

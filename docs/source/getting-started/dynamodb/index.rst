@@ -12,6 +12,7 @@ Switching from DynamoDB
 
     labs/index
     fit/index
+    cost/index
     considerations/index
     guides/index
     users/index
