@@ -167,19 +167,19 @@ Featured Documentation
     <div class="card-grid">
 
 .. card-box::
-    :link: https://opensource.docs.scylladb.com/stable/using-scylla/alternator/
-    :title: ScyllaDB Alternator
-    :description: Project Alternator is an open-source project for an Amazon DynamoDB™-compatible API written in C++.
+    :link: https://enterprise.docs.scylladb.com/stable/using-scylla/alternator/
+    :title: Alternator DynamoDB API
+    :description: Project Alternator is an Amazon DynamoDB compatible API written in C++.
 
 .. card-box::
-    :link: https://docs.aws.amazon.com/amazondynamodb/latest/APIReference/Welcome.html
-    :title: API Reference
-    :description: Amazon DynamoDB provides low-level API documentation.
+    :link: https://enterprise.docs.scylladb.com/stable/alternator/compatibility.html
+    :title: Alternator API differences
+    :description: The Alternator API is designed to be compatible with the DynamoDB API, but there are some differences.
 
 .. card-box::
-    :link: https://opensource.docs.scylladb.com/stable/alternator/compatibility.html
-    :title: Compatibility Reference
-    :description: The purpose of this document is to highlight differences between the API and ScyllaDB Alternator.
+    :link: https://enterprise.docs.scylladb.com/stable/alternator/new-apis.html
+    :title: Alternator specific APIs
+    :description: The Alternator API has several additional features and APIs that are not available in DynamoDB.
 
 .. raw:: html
 
