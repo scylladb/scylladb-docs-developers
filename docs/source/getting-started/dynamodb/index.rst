@@ -109,17 +109,17 @@ Practical Guides
     <div class="card-grid">
 
 .. card-box::
-    :link: guides/index
+    :link: guides/multiple-data-centers
     :title: Multiple Data Centers
     :description: Tips for setting up tables in multiple regions.
 
 .. card-box::
-    :link: guides/index
+    :link: guides/migrating-from-dynamodb
     :title: Migrating from DynamoDB
     :description: A step-by-step look at what a migration involves.
 
 .. card-box::
-    :link: guides/index
+    :link: guides/avoiding-pitfalls
     :title: Avoiding Migration Pitfalls
     :description: What mistakes commonly arise and how to avoid them.
 
