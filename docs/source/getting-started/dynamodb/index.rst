@@ -137,17 +137,17 @@ Popular Use Cases
     <div class="card-grid">
 
 .. card-box::
-    :link: guides/yieldmo
+    :link: users/yieldmo
     :title: Yieldmo
     :description: Yieldmo moved from DynamoDB for lower costs, improved latencies, and the freedom to run on GCP as well as AWS.
 
 .. card-box::
-    :link: guides/digital-turbine
+    :link: users/digital-turbine
     :title: Digital Turbine
     :description: As part of an organization-wide AWS to GCP migration, Digital Turbine moved their DynamoDB workloads to GCP in just one sprint.
 
 .. card-box::
-    :link: guides/ifood
+    :link: users/ifood
     :title: iFood
     :description: iFood migrated from DynamoDB to ScyllaDB for lower costs, better performance, and the ability to run on any cloud.
 
