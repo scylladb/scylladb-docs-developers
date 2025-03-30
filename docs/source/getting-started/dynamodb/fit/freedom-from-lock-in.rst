@@ -1,7 +1,5 @@
-:hide-secondary-sidebar:
-
-Freedom from Cloud Vendor Lock-In
-=================================
+Freedom from Cloud Vendor Lock-in
+---------------------------------
 
 .. image:: ../images/vendor-lock-in-light.png
     :alt: Vendor Lock-in

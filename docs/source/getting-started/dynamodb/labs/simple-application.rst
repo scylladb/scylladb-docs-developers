@@ -1,7 +1,7 @@
 :hide-secondary-sidebar:
 
 Simple Application
-==================
+------------------
 
 Alternator is an open-source `project <https://github.com/scylladb/scylla/blob/master/docs/alternator/alternator.md>`_ that gives ScyllaDB compatibility with Amazon DynamoDB.
 

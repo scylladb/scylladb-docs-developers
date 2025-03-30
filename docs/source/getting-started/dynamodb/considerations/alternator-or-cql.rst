@@ -1,5 +1,5 @@
 Alternator or CQL
-=================
+-----------------
 
 .. image:: ../images/alternator-or-cql-light.png
     :alt: Alternator or CQL
@@ -19,7 +19,6 @@ ScyllaDB uses CQL (Cassandra Query Language), which serves three purposes:
 
 **Alternator** is ScyllaDB’s DynamoDB-compatible API. It is not a translation layer. Instead, DynamoDB API queries are interpreted directly by ScyllaDB’s native mechanisms. This avoids performance loss caused by translation and ensures efficient execution. Alternator also uses standard data transport protocols.
 
-===================
 What is Alternator?
 ===================
 
@@ -33,7 +32,6 @@ ScyllaDB launched in 2015 with support for Cassandra's CQL API. In 2019, ScyllaD
 
 A single ScyllaDB cluster can simultaneously support both CQL and DynamoDB API requests.
 
-=============
 Compatibility
 =============
 
@@ -44,7 +42,6 @@ ScyllaDB’s Alternator project aims to achieve full compatibility with the Dyna
 
 A complete list of supported and unsupported features is maintained in the `documentation <https://docs.scylladb.com/manual/stable/alternator/compatibility.html>`_.
 
-=========================
 Architectural Differences
 =========================
 
@@ -61,7 +58,6 @@ DynamoDB and Alternator/ScyllaDB operate on fundamentally different architectura
 
 The `ScyllaDB Alternator for DynamoDB users docs page <https://docs.scylladb.com/manual/stable/alternator/compatibility.html>`_ contains a detailed breakdown of different and not yet implemented features. Keep in mind that even if some features are not yet implemented, you might be able to achieve the same functionality in ScyllaDB in other ways.
 
-==============
 Load Balancing
 ==============
 
@@ -72,7 +68,6 @@ In traditional DynamoDB applications, a single endpoint URL (like a US-East-1 re
 
 This creates a challenge for efficiently routing requests in ScyllaDB Alternator.
 
-==========================
 Server-Side Load Balancing
 ==========================
 
@@ -91,7 +86,6 @@ There are two primary approaches to server-side load balancing:
 
 Both approaches function correctly but come with infrastructure and performance costs.
 
-==========================
 Client-Side Load Balancing
 ==========================
 
@@ -114,7 +108,6 @@ The benefits include:
 #. Reduced networking costs (avoiding cross-availability zone traffic)
 #. Improved request latency (fewer network hops)
 
-=================
 CQL or Alternator
 =================
 ScyllaDB implements CQL (Cassandra Query Language), which serves as a comprehensive ecosystem. CQL functions simultaneously as:

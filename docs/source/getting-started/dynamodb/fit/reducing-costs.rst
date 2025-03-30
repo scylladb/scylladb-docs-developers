@@ -1,7 +1,5 @@
-:hide-secondary-sidebar:
-
 Reducing Costs
-==============
+--------------
 
 .. image:: ../images/reducing-costs-light.png
     :alt: Reducing Costs

@@ -1,7 +1,5 @@
-:hide-secondary-sidebar:
-
 Is It Right for My Project?
-===========================
+---------------------------
 
 .. toctree::
     :maxdepth: 2
@@ -22,8 +20,7 @@ When deciding if ScyllaDB is a good fit, consider the following:
 #. **API compatibility**: If you're already using DynamoDB, transitioning to ScyllaDB could be relatively straightforward due to its API compatibility.
 #. **Flexibility**: ScyllaDB runs anywhere - from any public cloud to private on-prem datacenters. This alows users to port their DynamoDB applications out of the AWS ecosystem with minimal effort.
 
-=====================================================
-Use cases where ScyllaDB might not be the best option
+Use Cases Where ScyllaDB Might Not Be the Best Option
 =====================================================
 
 While ScyllaDB is a powerful database, it may not be the best choice for every project. Here are some scenarios where you might want to consider other options:

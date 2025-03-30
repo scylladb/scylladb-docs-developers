@@ -1,7 +1,5 @@
-:hide-secondary-sidebar:
-
 Improving Latency
-=================
+-----------------
 
 .. image:: ../images/improving-latency-light.png
     :alt: Improving Latency

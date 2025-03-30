@@ -1,7 +1,7 @@
 :hide-secondary-sidebar:
 
 Practical Guides
-================
+----------------
 
 .. toctree::
     :hidden:

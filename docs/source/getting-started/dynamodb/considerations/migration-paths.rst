@@ -1,5 +1,5 @@
 Migration Paths
-===============
+---------------
 
 .. image:: ../images/migration-paths-light.png
     :alt: Migration Paths
@@ -17,7 +17,6 @@ The process for moving from DynamoDB to ScyllaDB depends on whether you decide t
 
 #. **Migrating to ScyllaDB CQL**: Requires application refactoring. You need to rewrite the application to use CQL drivers and modify table schemas to fit CQL’s data model. The tradeoff is access to ScyllaDB’s richer feature set and higher performance.
 
-======================
 DynamoDB to Alternator
 ======================
 
@@ -30,7 +29,6 @@ Migrating from DynamoDB to Alternator (ScyllaDB's DynamoDB-compatible API):
 
 Note: Application adjustments may be necessary to work with Alternator's load balancing libraries.
 
-===============
 DynamoDB to CQL
 ===============
 

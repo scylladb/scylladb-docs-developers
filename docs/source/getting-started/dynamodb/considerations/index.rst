@@ -1,7 +1,7 @@
 :hide-secondary-sidebar:
 
 Considerations
-==============
+--------------
 
 .. toctree::
     :hidden:

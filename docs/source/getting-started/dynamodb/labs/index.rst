@@ -1,7 +1,7 @@
 :hide-secondary-sidebar:
 
 Hands on Labs
-=============
+-------------
 
 .. toctree::
     :hidden:
