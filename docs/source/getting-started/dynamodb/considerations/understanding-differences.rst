@@ -1,12 +1,12 @@
 Understanding Differences
 =========================
 
-.. image:: understanding-differences-light.png
+.. image:: ../images/understanding-differences-light.png
     :alt: Understanding Differences
     :width: 90%
     :class: light-mode
 
-.. image:: understanding-differences-dark.png
+.. image:: ../images/understanding-differences-dark.png
     :alt: Understanding Differences
     :width: 90%
     :class: dark-mode

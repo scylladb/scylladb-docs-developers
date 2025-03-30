@@ -3,12 +3,12 @@
 Reducing Costs
 ==============
 
-.. image:: reducing-costs-light.png
+.. image:: ../images/reducing-costs-light.png
     :alt: Reducing Costs
     :width: 90%
     :class: light-mode
 
-.. image:: reducing-costs-dark.png
+.. image:: ../images/reducing-costs-dark.png
     :alt: Reducing Costs
     :width: 90%
     :class: dark-mode

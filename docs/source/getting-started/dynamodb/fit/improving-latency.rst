@@ -3,12 +3,12 @@
 Improving Latency
 =================
 
-.. image:: improving-latency-light.png
+.. image:: ../images/improving-latency-light.png
     :alt: Improving Latency
     :width: 90%
     :class: light-mode
 
-.. image:: improving-latency-dark.png
+.. image:: ../images/improving-latency-dark.png
     :alt: Improving Latency
     :width: 90%
     :class: dark-mode

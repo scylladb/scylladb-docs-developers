@@ -3,12 +3,12 @@
 Freedom from Cloud Vendor Lock-In
 =================================
 
-.. image:: vendor-lock-in-light.png
+.. image:: ../images/vendor-lock-in-light.png
     :alt: Vendor Lock-in
     :width: 90%
     :class: light-mode
 
-.. image:: vendor-lock-in-dark.png
+.. image:: ../images/vendor-lock-in-dark.png
     :alt: Vendor Lock-in
     :width: 90%
     :class: dark-mode

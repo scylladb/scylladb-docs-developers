@@ -1,12 +1,12 @@
 Alternator or CQL
 =================
 
-.. image:: alternator-or-cql-light.png
+.. image:: ../images/alternator-or-cql-light.png
     :alt: Alternator or CQL
     :width: 90%
     :class: light-mode
 
-.. image:: alternator-or-cql-dark.png
+.. image:: ../images/alternator-or-cql-dark.png
     :alt: Alternator or CQL
     :width: 90%
     :class: dark-mode
