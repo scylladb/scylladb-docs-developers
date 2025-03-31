@@ -19,7 +19,7 @@ placeholder
 
 .. raw:: html
 
-    <div style="position: relative; width: 100%; padding-bottom: 140%; height: 0; overflow: hidden;">
+    <div style="position: relative; width: 100%; padding-bottom: 170%; height: 0; overflow: hidden;">
         <iframe
             style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: transparent;"
             src="https://calculator.scylladb.com"
