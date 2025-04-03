@@ -130,8 +130,8 @@ Read-heavy workloads are those that have a high number of read requests compared
     * 100% read consistency
     * Upfront payment for reserved capacity included in monthly estimates
 
-How this Compares to ScyllaDB
-=============================
+How these Models Compare to ScyllaDB
+====================================
 
 ScyllaDB offers a different pricing model than DynamoDB. ScyllaDB charges based on the number of cores/storage you use, rather than the number of read and write requests. This can make it more cost-effective for applications with high-volume traffic, as you don't have to worry about exceeding your provisioned capacity and being throttled.
 
