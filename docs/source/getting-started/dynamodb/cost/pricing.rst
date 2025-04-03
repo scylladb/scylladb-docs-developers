@@ -1,7 +1,3 @@
-.. contents::
-   :depth: 4
-   :local:
-
 Understanding Pricing Models
 ----------------------------
 
