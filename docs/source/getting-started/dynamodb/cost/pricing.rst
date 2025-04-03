@@ -11,17 +11,17 @@ DynamoDB offers three pricing models: On Demand, Provisioned, and Reserved Capac
 On Demand
 .........
 
-On Demand pricing is a pay-as-you-go model that charges you based on the number of read and write requests your application makes. This model is suited for applications with unpredictable workloads or for those that are just starting out. However there is a premium for this flexibility, and costs can quickly add up if your application has unpredictable or high-volume traffic.
+On Demand pricing is a pay-as-you-go model that charges you based on the number of read and write requests your application makes. This model is suited for applications with variable workloads or for those that are just starting out. However there is a premium for this flexibility, and costs can quickly add up if your application has unpredictable or high-volume traffic.
 
 Provisioned
 ...........
 
-Provisioned pricing allows you to reserve read and write capacity for your tables. You pay a fixed hourly rate for the capacity you reserve, regardless of how much you use. This model is ideal for applications with predictable workloads, as it can help you save money by reserving capacity in advance. However, if you exceed your reserved capacity, your requests will be throttled, which can impact your application's performance.
+Provisioned pricing allows you to reserve read and write capacity for your tables. You pay a fixed rate for the capacity you reserve, regardless of how much you use. This model is ideal for applications with predictable workloads, as it can help you save money by reserving capacity in advance. However, if you exceed your reserved capacity, your requests will be throttled, which can impact your application's performance.
 
 Reserved Capacity
 ..................
 
-Reserved Capacity pricing allows you to reserve read and write capacity for your tables for a one or three year term. You pay an upfront fee for the capacity you reserve, and receive a discount on the hourly rate. This model is ideal for applications with steady workloads, as it can help you save money in the long run. However, you will be charged for the reserved capacity even if you don't use it.
+Reserved Capacity pricing allows you to reserve read and write capacity for your tables for a fixed term. You pay an upfront fee for the capacity you reserve, and receive a discount on the provisioned rate. This model is ideal for applications with steady workloads, as it can help you save money in the long run. However, you will be charged for the reserved capacity even if you don't use it.
 
 How these Models Compare to Themselves
 ======================================
