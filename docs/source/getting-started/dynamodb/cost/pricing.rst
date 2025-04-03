@@ -5,7 +5,7 @@
 Understanding Pricing Models
 ----------------------------
 
-We've put together an overview of each pricing model to help you understand the differences and choose the one that's right for you when considering DynamoDB. We also show you how these models compare to each other and the savings you can achieve by switching to ScyllaDB.
+We've put together an overview of each pricing model to help you understand the differences and choose the one that's right for you when considering DynamoDB. We also show you `how these models compare to each other <#how-these-models-compare-to-themselves>`_ and the `savings you can achieve by switching to ScyllaDB <#how-these-models-compare-to-scylladb>`_.
 
 Pricing Model Overview
 ======================
