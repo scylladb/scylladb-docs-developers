@@ -135,7 +135,7 @@ For example, all of the above scenarios would cost $7k  per month for ScyllaDB. 
 
 .. raw:: html
 
-    <p class="mark">In fact, we're so confident in our pricing model that guarantee 50% off your existing DynamoDB workload costs.</p>
+    <p class="mark">In fact, we're so confident in our pricing model that we guarantee 50% off your existing DynamoDB workload costs.</p>
 
 When comparing DynamoDB and ScyllaDB, it's important to consider your application's requirements and usage patterns. If you have relatively low volume workloads, DynamoDB's On Demand pricing may still  be the best option for you. If you have a relatively static workload, DynamoDB's Reserved Capacity pricing may be the best option for you.
 
