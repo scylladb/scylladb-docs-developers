@@ -151,3 +151,19 @@ html.dark .light-mode {
 html.dark .dark-mode {
     display: flex;
 }
+
+.mark {
+    font-weight: bolder;
+    color: rgba(30, 32, 49);
+    margin: 0 -0.4em;
+    padding: 0.1em 0.4em;
+    border-radius: 0.8em 0.3em;
+    background: transparent linear-gradient(
+            to right,
+            rgba(255, 225, 0, 0.3),
+            rgba(255, 225, 0, 0.7) 4%,
+            rgba(255, 225, 0, 0.4)
+    );
+    -webkit-box-decoration-break: clone;
+    box-decoration-break: clone;
+}
