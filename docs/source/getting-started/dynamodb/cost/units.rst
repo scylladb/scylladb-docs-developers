@@ -1,7 +1,7 @@
 Understanding Cost Units
 ------------------------
 
-DynamoDB offers two pricing models: On Demand abd Provisioned. Each model has its own pricing structure and is designed to meet different needs. The pricing model you choose will depend on your application's requirements and usage patterns.
+DynamoDB offers two pricing models: On Demand and Provisioned. Each model has its own pricing structure and is designed to meet different needs. The pricing model you choose will depend on your application's requirements and usage patterns.
 
 Linked to these pricing models are different cost units that you need to understand to estimate your costs accurately.
 
