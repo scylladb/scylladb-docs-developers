@@ -1,7 +1,7 @@
 DAX Caching
 -----------
 
-DynamoDB Accelerator (DAX) is a managed, in-memory caching layer designed to improve the read performance of DynamoDB. It offloads frequently accessed data for read-heavy applications.
+DynamoDB Accelerator (DAX) is a managed, in-memory caching layer designed to improve the read performance of DynamoDB. It offloads frequently accessed data for read heavy applications.
 
 When to use DAX
 ===============
@@ -9,7 +9,7 @@ When to use DAX
 Use DAX when:
 
 #. You have read-heavy workloads with high latency sensitivity.
-    DAX shines when you’re hitting the same keys repeatedly and need sub-millisecond reads (vs. DynamoDB’s typical single-digit millisecond range).
+    DAX shines when you’re hitting the same keys repeatedly and need sub-millisecond reads (vs. DynamoDB’s typical millisecond range).
 
 #. Your data access patterns are predictable and cache-friendly.
     For example, if you’re querying product catalogs, session data, or user profiles that don’t change often, DAX can cut read latencies significantly.
@@ -21,7 +21,7 @@ Use DAX when:
     DAX caches data after a read or write through it. If your app can handle some staleness, it’ll benefit from DAX’s performance gains.
 
 #. You want a managed, drop-in cache.
-    AWS abstracts away the operational work (e.g., scaling, patching, failover), and DAX integrates directly with existing DynamoDB SDKs (no code rewrite required).
+    AWS abstracts away the operational work (e.g., patching, failover), and DAX integrates directly with existing DynamoDB SDKs (no code rewrite required).
 
 When to avoid DAX
 =================
@@ -53,16 +53,16 @@ Cost Considerations
 ===================
 .. raw:: html
 
-    <p class="mark">DAX is fast — but not cheap.</p>
+    <p class="mark">DAX is fast - but not cheap.</p>
 
 #. You pay per node-hour.
-    Unlike DynamoDB’s usage-based billing, DAX is provisioned like EC2. Each node has a fixed cost based on instance type.
+    Unlike DynamoDB’s usage based billing, DAX is provisioned like EC2. Each node has a fixed cost based on instance type.
 
-#. No serverless/on-demand model.
-    DAX requires pre-allocated clusters with fixed sizes. You manage (and pay for) the full capacity 24/7, whether you use it or not.
+#. No serverless model.
+    DAX requires pre-allocated clusters with fixed sizes. You manage (and pay for) the full capacity 24/7, whether you use it or not. This is a big difference from DynamoDB’s pricing.
 
 #. Scaling is manual.
-    You must add/remove nodes yourself — and resizing takes time. This can lead to overprovisioning “just in case.”
+    You must add/remove nodes yourself, and resizing takes time. This can lead to overprovisioning for "just in case" scenarios.
 
 #. No cost offset from DynamoDB RCU savings.
     While DAX reduces RCU usage, it doesn’t reduce your table minimums or burst capacity limits. You’re paying both for the base table and the cache.
@@ -85,12 +85,12 @@ At first glance, DAX and ScyllaDB’s caching seem similar: both aim to improve 
     DAX, on the other hand, is a separate caching cluster that sits between your application and DynamoDB. It acts as a read-through cache, meaning reads are intercepted by DAX and only forwarded to DynamoDB if the item isn’t in cache. Writes go directly to DynamoDB and may update DAX depending on the access path. It adds an extra moving part, with all the AWS magic — and all the limitations that come with it.
 
 #. Read Consistency and Cache Staleness.
-    ScyllaDB gives you tunable consistency even with the cache in play. You can read with QUORUM or LOCAL_ONE and still get strong guarantees depending on your need. The built-in cache respects this model and serves hot data where valid.
+    ScyllaDB gives you tunable consistency even with the cache in play. You can read with ``QUORUM`` or ``LOCAL_ONE`` and still get strong guarantees depending on your need. The built-in cache respects this model and serves hot data where valid.
 
     DAX doesn’t support strongly consistent reads at all. It’s eventually consistent by design. If you write an item and immediately read it through DAX, you might get stale data. For many apps, that’s fine. But if correctness matters, DAX is a liability.
 
 #. Control and Observability.
-    ScyllaDB has deep visibility: cache hit/miss rates, eviction stats, memory usage — all via ScyllaDB Monitoring Stack. You can size the cache, understand performance at the shard level, and tune it like a high-performance engine.
+    ScyllaDB has deep visibility: cache hit/miss rates, eviction stats, memory usage — all via `ScyllaDB Monitoring Stack <https://monitoring.docs.scylladb.com/stable/>`_. You can size the cache, understand performance at the shard level, and tune it like a high-performance engine.
 
     With DAX you get some CloudWatch metrics and health indicators, but no insight into which keys are hot, what’s being evicted, or how cache memory is being used. You can’t control TTLs per key or evict specific entries. It’s a managed service, for better or worse.
 
@@ -98,15 +98,16 @@ At first glance, DAX and ScyllaDB’s caching seem similar: both aim to improve 
     ScyllaDB’s cache is constantly adapting to access patterns. Since it’s local to the node and shard, latency stays consistent, even on cache misses. There’s no separate tier to worry about, and no manual cluster resizing. Just fast reads.
 
     DAX can be extremely fast when it’s hot but that’s assuming:
-	* The item is in cache,
-	* The DAX cluster is warm,
-	* There’s no failover or rebalancing event,
-	* Your app tolerates stale reads.
+
+    * The item is in cache.
+    * The DAX cluster is warm.
+    * There’s no failover or rebalancing event.
+    * Your app tolerates stale reads.
 
     When DAX is cold or the data changes often, hit rates drop and latency jumps as it hits the base table. You’re also subject to DAX cluster sizing. Under-provision and it bottlenecks. Over-provision and you’re wasting money.
 
 #. Cost, Lock-in, and Flexibility.
-    ScyllaDB’s row cache is included with no separate charge. You’re not locked to AWS.
+    ScyllaDB’s row cache is included with no separate charge. You’re not locked in to AWS.
 
     DAX adds cost per node-hour and doesn’t scale down automatically. You pay for provisioned nodes 24/7. With high availability you’re running at least three nodes across AZs. Combine that with DynamoDB’s table costs and transfer fees, and your caching bill quickly adds up.
 
