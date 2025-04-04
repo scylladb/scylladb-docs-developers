@@ -14,17 +14,6 @@ One read unit represents one strongly consistent read per second, or two eventua
 
 Consistent reads are more expensive than eventually consistent reads because they require more resources to ensure that the data is up-to-date. If you can tolerate some lag in the data, you can use eventually consistent reads to save on costs.
 
-Streams Read Request Units Explained
-====================================
-
-DynamoDB Streams is a feature that captures changes to items in your DynamoDB tables and stores the information in a stream. You can use this stream to trigger AWS Lambda functions, process data in real-time, or replicate data to other systems.
-
-When you read from a DynamoDB Stream, you are charged for the number of read request units consumed. The cost of reading from a stream is based on the size of the data returned and the number of read request units consumed. Each stream read request unit can return up to 1 MB of data.
-
-.. note::
-
-    Such operations are not supported by ScyllaDB, hence they are not included in the cost calculator.
-
 Writes Explained
 ================
 
@@ -42,14 +31,6 @@ When using DynamoDB global tables, your data is written automatically to multipl
 .. warning::
 
     This can significantly increase your costs, especially if you are replicating large amounts of data or if you are using multiple regions for your application. Be sure to factor in these costs when estimating your overall DynamoDB costs.
-
-Transactional Reads/Writes Explained
-====================================
-Transactional read/write units are a special type of read/write unit that is used when you perform a transactional operation in DynamoDB. A transactional operation is an operation that is performed as part of a transaction, which is a set of operations that are executed together as a single unit of work.
-
-.. note::
-
-    Such operations are not supported by ScyllaDB, hence they are not included in the cost calculator.
 
 Storage Explained
 =================
@@ -110,8 +91,8 @@ Change data capture (CDC) is a technique used to track changes to data in a data
 
     Such operations are supported in ScyllaDB with the `Change Data Capture <https://docs.scylladb.com/manual/stable/features/cdc/cdc-intro.html>`_ feature, but they are not included in the cost calculator.
 
-DynamoDB Table Classes Explained
-================================
+Table Classes Explained
+=======================
 
 DynamoDB offers two table classes designed to help you optimize for cost. The DynamoDB Standard table class is the default and recommended for the vast majority of workloads. The DynamoDB Standard-Infrequent Access (DynamoDB Standard-IA) table class is optimized for tables that store data that is accessed infrequently, where storage is the dominant cost. Each table class offers different pricing for data storage as well as read and write requests. You can select the most cost-effective table class based on your table’s storage requirements and data access patterns.
 
