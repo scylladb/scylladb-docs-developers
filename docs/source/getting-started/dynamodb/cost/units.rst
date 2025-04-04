@@ -39,6 +39,10 @@ Replicated Writes Explained
 
 When using DynamoDB global tables, your data is written automatically to multiple AWS Regions of your choice. Each write occurs in the local Region as well as the replicated Regions. This is known as a replicated write capacity unit (rWCU). The cost of rWCUs is the same as the cost of WCUs, but you will be charged for each Region that you replicate your data to.
 
+.. warning::
+
+    This can significantly increase your costs, especially if you are replicating large amounts of data or if you are using multiple regions for your application. Be sure to factor in these costs when estimating your overall DynamoDB costs.
+
 Transactional Reads/Writes Explained
 ====================================
 Transactional read/write units are a special type of read/write unit that is used when you perform a transactional operation in DynamoDB. A transactional operation is an operation that is performed as part of a transaction, which is a set of operations that are executed together as a single unit of work.
@@ -53,6 +57,16 @@ Storage Explained
 Storage costs are based on the amount of data stored in DynamoDB. You are charged based on the amount of data stored in your tables, indexes, and backups.
 
 DynamoDB automatically scales storage for your tables based on the size of your items and the number of items in your tables. You do not need to provision storage in advance, and you only pay for the storage you use.
+
+.. note::
+
+    DynamoDB storage costs are based on the amount of data stored in your tables, indexes, and backups. You are charged for the total amount of data stored in your tables, including any indexes and backups.
+
+    For example:
+
+    * If you store 1 GB of data in your table, you will be charged for 1 GB of storage.
+    * If you store 1 GB of data in your table and 1 GB of data in an index, you will be charged for 2 GB of storage.
+    * If you store 1 GB of data in your table and 1 GB of data in a backup, you will be charged for 2 GB of storage.
 
 Item Size Explained
 ===================
