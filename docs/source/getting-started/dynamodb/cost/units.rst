@@ -52,7 +52,7 @@ DynamoDB automatically scales storage for your tables based on the size of your 
 Item Size Explained
 ===================
 
-The size of your items in DynamoDB affects the cost of your reads and writes. DynamoDB charges based on the size of the items you read and write, rounded up to the nearest 1 KB. If your items are larger than 1 KB, you will need to consume additional RCUs and WCUs to read and write the items.
+The size of your items in DynamoDB affects the cost of your reads and writes. DynamoDB charges based on the size of the items you read and write, rounded up to the nearest block size (for reads this is 4 KB and writes is 1 KB). If your items are larger than this block size, you will need to consume additional RCUs and WCUs to read and write the items.
 
 .. warning::
 
