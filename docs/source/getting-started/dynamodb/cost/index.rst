@@ -7,6 +7,7 @@ The True Cost of DynamoDB
     :maxdepth: 3
     :hidden:
 
+    calculator
     pricing
     units
     billing
@@ -14,11 +15,11 @@ The True Cost of DynamoDB
     dax
     scenarios
 
-If you’re building on DynamoDB, understanding its cost model is critical, especially as workloads scale. But AWS’s pricing complexity often makes that easier said than done. That’s why we built the DynamoDB Cost Calculator: a tool that gives you a clear, fast estimate of what your workloads will really cost.
+If you’re building on DynamoDB, understanding its cost model is critical, especially as workloads scale. But AWS’s pricing complexity often makes that easier said than done. That’s why we built the `DynamoDB Cost Calculator <calculator>`_: a tool that gives you a clear, fast estimate of what your workloads will really cost.
 
 Whether you’re running production systems or just exploring alternatives like ScyllaDB, this tool helps you break down the key cost drivers and compare options with confidence.
 
-This calculator is available at `calculator.scylladb.com <https://calculator.scylladb.com>`_ if you want to share or you can try it below.
+This calculator is also available at `calculator.scylladb.com <https://calculator.scylladb.com>`_ if you want to share it with your team or use it in a different context.
 
 Why We Built It
 ===============
@@ -40,17 +41,3 @@ If you’re a developer, architect, or decision-maker trying to evaluate DynamoD
 * Justify architectural decisions with real data
 
 Whether you’re optimizing an existing deployment or planning a migration, this calculator gives you the numbers you need to move forward with confidence.
-
-.. raw:: html
-
-    <div style="position: relative; width: 100%; padding-bottom: 170%; height: 0; overflow: hidden;">
-        <iframe
-            style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: transparent;"
-            src="https://calculator.scylladb.com"
-            title="DynamoDB Cost Calculator"
-            frameborder="0"
-            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-            referrerpolicy="strict-origin-when-cross-origin"
-            allowfullscreen>
-        </iframe>
-    </div>
