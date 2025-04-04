@@ -1,6 +1,16 @@
 DAX Caching
 -----------
 
+.. image:: ../images/dax-light.png
+    :alt: DAX
+    :width: 90%
+    :class: light-mode
+
+.. image:: ../images/dax-dark.png
+    :alt: DAX
+    :width: 90%
+    :class: dark-mode
+
 DynamoDB Accelerator (DAX) is a managed, in-memory caching layer designed to improve the read performance of DynamoDB. It offloads frequently accessed data for read heavy applications.
 
 When to use DAX

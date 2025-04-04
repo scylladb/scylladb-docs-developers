@@ -1,5 +1,16 @@
 Global Tables
 -------------
+
+.. image:: ../images/global-tables-light.png
+    :alt: Global Tables
+    :width: 90%
+    :class: light-mode
+
+.. image:: ../images/global-tables-dark.png
+    :alt: Global Tables
+    :width: 90%
+    :class: dark-mode
+
 DynamoDB Global Tables are a managed solution for multi-region, active-active replication. They allow you to create tables that automatically replicate data across multiple AWS regions, providing low-latency access to your data from anywhere in the world.
 
 When to Use Global Tables
