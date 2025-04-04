@@ -15,7 +15,7 @@ The True Cost of DynamoDB
     dax
     scenarios
 
-If you’re building on DynamoDB, understanding its cost model is critical, especially as workloads scale. But AWS’s pricing complexity often makes that easier said than done. That’s why we built the `DynamoDB Cost Calculator <calculator>`_: a tool that gives you a clear, fast estimate of what your workloads will really cost.
+If you’re building on DynamoDB, understanding its cost model is critical, especially as workloads scale. But AWS’s pricing complexity often makes that easier said than done. That’s why we built the :doc:`DynamoDB Cost Calculator <calculator>`: a tool that gives you a clear, fast estimate of what your workloads will really cost.
 
 Whether you’re running production systems or just exploring alternatives like ScyllaDB, this tool helps you break down the key cost drivers and compare options with confidence.
 
@@ -41,3 +41,8 @@ If you’re a developer, architect, or decision-maker trying to evaluate DynamoD
 * Justify architectural decisions with real data
 
 Whether you’re optimizing an existing deployment or planning a migration, this calculator gives you the numbers you need to move forward with confidence.
+
+Understanding Costs
+===================
+
+Once you use the calculator to estimate your costs, you’ll want to understand what those costs mean. This section breaks down the key cost drivers in DynamoDB and how they affect your bill. We cover the different pricing models, the cost units you’ll encounter, and the hidden costs that can catch you off guard. We also provide tips for optimizing your costs and avoiding common pitfalls.

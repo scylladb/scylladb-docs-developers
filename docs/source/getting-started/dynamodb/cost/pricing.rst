@@ -6,7 +6,7 @@ We've put together an overview of each pricing model to help you understand the 
 Pricing Model Overview
 ======================
 
-DynamoDB offers two distinct pricing models: On Demand and Provisioned. Provisioned has an additional option called Reserved Capacity. Each model has its own pricing structure and is designed to meet different needs. The pricing model you choose will depend on your application's requirements and usage patterns.
+DynamoDB offers two distinct pricing models: `On Demand <https://aws.amazon.com/dynamodb/pricing/on-demand/>`_ and `Provisioned <https://aws.amazon.com/dynamodb/pricing/provisioned/>`_. Provisioned has an additional option called Reserved Capacity. Each model has its own pricing structure and is designed to meet different needs. The pricing model you choose will depend on your application's requirements and usage patterns.
 
 On Demand
 .........
