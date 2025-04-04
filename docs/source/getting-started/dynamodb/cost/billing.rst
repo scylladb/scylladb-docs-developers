@@ -1,6 +1,16 @@
 Request Patterns and Billing Surprises
 --------------------------------------
 
+.. image:: ../images/billing-light.png
+    :alt: Billing
+    :width: 90%
+    :class: light-mode
+
+.. image:: ../images/billing-dark.png
+    :alt: Billing
+    :width: 90%
+    :class: dark-mode
+
 DynamoDB’s pricing is heavily tied to how your application interacts with it. Small changes in request patterns can lead to big cost swings especially if you’re not monitoring usage or optimizing access. This makes operating with DynamoDB a bit like walking a tightrope: one misstep and you could be looking at a hefty bill.
 
 Here’s what you need to watch out for.

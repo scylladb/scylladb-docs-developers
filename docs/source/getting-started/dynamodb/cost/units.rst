@@ -1,6 +1,16 @@
 Understanding Cost Units
 ------------------------
 
+.. image:: ../images/units-light.png
+    :alt: Pricing Units
+    :width: 90%
+    :class: light-mode
+
+.. image:: ../images/units-dark.png
+    :alt: Pricing Units
+    :width: 90%
+    :class: dark-mode
+
 DynamoDB offers two pricing models: `On Demand <https://aws.amazon.com/dynamodb/pricing/on-demand/>`_ and `Provisioned <https://aws.amazon.com/dynamodb/pricing/provisioned/>`_. Each model has its own pricing structure and is designed to meet different needs. The pricing model you choose will depend on your application's requirements and usage patterns.
 
 Linked to these pricing models are different cost units that you need to understand to estimate your costs accurately.
