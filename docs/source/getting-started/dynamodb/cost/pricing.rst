@@ -6,7 +6,7 @@ We've put together an overview of each pricing model to help you understand the 
 Pricing Model Overview
 ======================
 
-DynamoDB offers three pricing models: On Demand, Provisioned, and Reserved Capacity. Each model has its own pricing structure and is designed to meet different needs. The pricing model you choose will depend on your application's requirements and usage patterns.
+DynamoDB offers two distinct pricing models: On Demand and Provisioned. Provisioned has an additional option called Reserved Capacity. Each model has its own pricing structure and is designed to meet different needs. The pricing model you choose will depend on your application's requirements and usage patterns.
 
 On Demand
 .........
@@ -18,23 +18,23 @@ Provisioned
 
 Provisioned pricing allows you to reserve read and write capacity for your tables. You pay a fixed rate for the capacity you reserve, regardless of how much you use. This model is ideal for applications with predictable workloads, as it can help you save money by reserving capacity in advance. However, if you exceed your reserved capacity, your requests will be throttled, which can impact your application's performance.
 
-Reserved Capacity
-..................
+Provisioned + Reserved Capacity
+...............................
 
 Reserved Capacity pricing allows you to reserve read and write capacity for your tables for a fixed term. You pay an upfront fee for the capacity you reserve, and receive a discount on the provisioned rate. This model is ideal for applications with steady workloads, as it can help you save money in the long run. However, you will be charged for the reserved capacity even if you don't use it.
 
 How these Models Compare to Themselves
 ======================================
 
-When comparing the three pricing models, it's important to consider your application's requirements and usage patterns. If you have relatively low volume workloads, On Demand pricing may still be the best option for you. If you have a relatively static workload, Provisioned pricing may be the best option for you.
+When comparing the pricing models, it's important to consider your application's requirements and usage patterns. If you have relatively low volume workloads, On Demand pricing may still be the best option for you. If you have a relatively static workload, Provisioned pricing may be the best option for you.
 
-Relative cost can vary significantly depending on your application's usage patterns. In general, On Demand pricing is the most expensive option, while Reserved Capacity pricing is the cheapest option. Provisioned pricing falls in between the two.
+Relative cost can vary significantly depending on your application's usage patterns. In general, On Demand pricing is the most expensive option, while Provisioned with Reserved Capacity pricing is the cheapest option. Provisioned pricing falls in between the two.
 
 .. raw:: html
 
     <p class="mark">What you need to know up front is that the On Demand pricing model is the most expensive option. You will be paying up to a +700% premium for the flexibility of not having to provision capacity.</p>
 
-The Reserved Capacity pricing model is the cheapest option, but it requires you to pay for the reserved capacity even if you don't use it.
+Provisioned with Reserved Capacity pricing is the cheapest option, but it requires you to pay for the reserved capacity even if you don't use it.
 
 Take a look at the tables below for a quick comparison of the three pricing models.
 
@@ -49,7 +49,7 @@ Write-heavy workloads are those that have a high number of write requests compar
 
     * - On Demand
       - Provisioned
-      - Reserved Capacity
+      - + Reserved Capacity
     * - `$170k <https://calculator.scylladb.com/?pricing=demand&storageGB=512&itemSizeB=1024&tableClass=standard&ratio=50&baselineReads=20000&baselineWrites=100000&peakReads=20000&peakWrites=100000&peakDurationReads=0&peakDurationWrites=0&reserved=0&readConst=100>`_ per month
 
         most expensive
@@ -66,7 +66,7 @@ Write-heavy workloads are those that have a high number of write requests compar
 
     * - On Demand
       - Provisioned
-      - Reserved Capacity
+      - + Reserved Capacity
     * - `$251k <https://calculator.scylladb.com/?pricing=demand&storageGB=512&itemSizeB=1024&tableClass=standard&ratio=50&baselineReads=20000&baselineWrites=100000&peakReads=20000&peakWrites=500000&peakDurationReads=0&peakDurationWrites=3&reserved=0&readConst=100>`_ per month
 
         most expensive
@@ -88,7 +88,7 @@ Read-heavy workloads are those that have a high number of read requests compared
 
     * - On Demand
       - Provisioned
-      - Reserved Capacity
+      - + Reserved Capacity
     * - `$65k <https://calculator.scylladb.com/?pricing=demand&storageGB=512&itemSizeB=1024&tableClass=standard&ratio=50&baselineReads=100000&baselineWrites=20000&peakReads=100000&peakWrites=20000&peakDurationReads=0&peakDurationWrites=0&reserved=0&readConst=100>`_ per month
 
         most expensive
@@ -105,7 +105,7 @@ Read-heavy workloads are those that have a high number of read requests compared
 
     * - On Demand
       - Provisioned
-      - Reserved Capacity
+      - + Reserved Capacity
     * - `$82k <https://calculator.scylladb.com/?pricing=demand&storageGB=512&itemSizeB=1024&tableClass=standard&ratio=50&baselineReads=100000&baselineWrites=20000&peakReads=500000&peakWrites=20000&peakDurationReads=3&peakDurationWrites=0&reserved=0&readConst=100>`_ per month
 
         most expensive
@@ -137,7 +137,7 @@ For example, all of the above scenarios would cost $7k  per month for ScyllaDB. 
 
     <p class="mark">In fact, we're so confident in our pricing model that we guarantee 50% off your existing DynamoDB workload costs.</p>
 
-When comparing DynamoDB and ScyllaDB, it's important to consider your application's requirements and usage patterns. If you have relatively low volume workloads, DynamoDB's On Demand pricing may still  be the best option for you. If you have a relatively static workload, DynamoDB's Reserved Capacity pricing may be the best option for you.
+When comparing DynamoDB and ScyllaDB, it's important to consider your application's requirements and usage patterns. If you have relatively low volume workloads, DynamoDB's On Demand pricing may still  be the best option for you. If you have a relatively static workload, DynamoDB's Provisioned with Reserved Capacity pricing may be the best option for you.
 
 However, if you have real-life unpredictable workloads, or high-volume traffic and want to avoid throttling, ScyllaDB's pricing model is likely to be more cost-effective. Many of ScyllaDB's customers have reported significant cost savings after switching from DynamoDB for these reasons:
 

@@ -1,62 +1,51 @@
 Understanding Cost Units
 ------------------------
 
-DynamoDB offers three pricing models: On Demand, Provisioned, and Reserved Capacity. Each model has its own pricing structure and is designed to meet different needs. The pricing model you choose will depend on your application's requirements and usage patterns.
+DynamoDB offers two pricing models: On Demand abd Provisioned. Each model has its own pricing structure and is designed to meet different needs. The pricing model you choose will depend on your application's requirements and usage patterns.
 
 Linked to these pricing models are different cost units that you need to understand to estimate your costs accurately.
 
 Reads Explained
 ===============
 
-On Demand pricing consumes Read Request Units (RCUs) for reads. Provisioned pricing consumes Read Capacity Units (RCUs) for reads. Both terms refer to the same thing: a unit of read throughput for reads of up to 4 KB.
+On Demand pricing consumes Read Request Units and Provisioned pricing consumes Read Capacity Units (RCUs) for reads. Both terms refer to the same thing: a unit of read throughput for reads of up to 4 KB.
 
-One read unit represents one strongly consistent read, or two eventually consistent reads, for an item up to 4 KB in size. The prices for read requests depend on your table class.
-
-The math is simple:
-
-.. code-block:: javascript
-    :class: hide-copy-button
-
-    function calculateReadUnits(itemSizeKB, consistency = 'strong') {
-        let readUnits = Math.ceil(itemSizeKB / 4);
-        if (consistency === 'eventually') {
-            readUnits *= 0.5;
-        }
-        return readUnits;
-    }
-
-
-.. note::
-    Item size affects the cost of reads in DynamoDB. DynamoDB will always round up the item size to the nearest 4 KB when calculating the cost of reads. If the item size is larger than 4 KB, DynamoDB will need to consume additional units to read the item. For example:
-
-    * If you read an item that is 300B in size, you will need to consume 1 RCU for a strongly consistent read, or 0.5 RCUs for an eventually consistent read.
-    * if you read an item that is 5000 B in size, you will need to consume 2 RCUs for a strongly consistent read, or 1 RCUs for an eventually consistent read.
+One read unit represents one strongly consistent read per second, or two eventually consistent reads per second, for an item up to 4 KB in size. The prices for read requests depend on your table class.
 
 Consistent reads are more expensive than eventually consistent reads because they require more resources to ensure that the data is up-to-date. If you can tolerate some lag in the data, you can use eventually consistent reads to save on costs.
+
+Streams Read Request Units Explained
+====================================
+
+DynamoDB Streams is a feature that captures changes to items in your DynamoDB tables and stores the information in a stream. You can use this stream to trigger AWS Lambda functions, process data in real-time, or replicate data to other systems.
+
+When you read from a DynamoDB Stream, you are charged for the number of read request units consumed. The cost of reading from a stream is based on the size of the data returned and the number of read request units consumed. Each stream read request unit can return up to 1 MB of data.
+
+.. note::
+
+    Such operations are not supported by ScyllaDB, hence they are not included in the cost calculator.
 
 Writes Explained
 ================
 
-On Demand pricing consumes Write Request Units (WCUs) for writes. Provisioned pricing consumes Write Capacity Units (WCUs) for writes. Both terms refer to the same thing: a unit of write throughput for writes of up to 1 KB.
+On Demand pricing consumes Write Request Units and Provisioned pricing consumes Write Capacity Units (WCUs) for writes. Both terms refer to the same thing: a unit of write throughput for writes of up to 1 KB.
 
 One write unit represents one write for an item up to 1 KB in size. The prices for write requests depend on your table class.
 
-The math is simple:
+Writes are more expensive than reads because they require more resources to ensure that the data is written to the database. If you can batch your writes, you can save on costs by writing multiple items in a single request.
 
-.. code-block:: javascript
-    :class: hide-copy-button
+Replicated Writes Explained
+===========================
 
-    function calculateWriteUnits(itemSizeKB) {
-        return Math.ceil(itemSizeKB / 1);
-    }
+When using DynamoDB global tables, your data is written automatically to multiple AWS Regions of your choice. Each write occurs in the local Region as well as the replicated Regions. This is known as a replicated write capacity unit (rWCU). The cost of rWCUs is the same as the cost of WCUs, but you will be charged for each Region that you replicate your data to.
+
+Transactional Reads/Writes Explained
+====================================
+Transactional read/write units are a special type of read/write unit that is used when you perform a transactional operation in DynamoDB. A transactional operation is an operation that is performed as part of a transaction, which is a set of operations that are executed together as a single unit of work.
 
 .. note::
-    Item size affects the cost of writes in DynamoDB. DynamoDB will always round up the item size to the nearest 1 KB when calculating the cost of writes. If the item size is larger than 1 KB, DynamoDB will need to consume additional units to write the item. For example:
 
-    * If you write an item that is 300B in size, you will need to consume 1 WCU.
-    * If you write an item that is 5000 B in size, you will need to consume 5 WCUs.
-
-Writes are more expensive than reads because they require more resources to ensure that the data is written to the database. If you can batch your writes, you can save on costs by writing multiple items in a single request.
+    Such operations are not supported by ScyllaDB, hence they are not included in the cost calculator.
 
 Storage Explained
 =================
@@ -70,7 +59,66 @@ Item Size Explained
 
 The size of your items in DynamoDB affects the cost of your reads and writes. DynamoDB charges based on the size of the items you read and write, rounded up to the nearest 1 KB. If your items are larger than 1 KB, you will need to consume additional RCUs and WCUs to read and write the items.
 
+.. warning::
+
+    DynamoDB will always round up the item size to the nearest block size when calculating the cost of reads and writes. This can significantly affect your costs, especially if you are working with large or varying sized items.
+
+    For example:
+
+    * If you read an item that is 300B in size, you will need to consume 1 RCU for a strongly consistent read, or 0.5 RCUs for an eventually consistent read.
+    * If you read an item that is 5000 B in size, you will need to consume 2 RCUs for a strongly consistent read, or 1 RCUs for an eventually consistent read.
+    * If you write an item that is 300B in size, you will need to consume 1 WCU.
+    * If you write an item that is 5000 B in size, you will need to consume 5 WCUs.
+
 Network Transfer Explained
 ==========================
 
 Network transfer costs are based on the amount of data transferred in and out of DynamoDB. You are charged based on the amount of data transferred between your application and DynamoDB, as well as between DynamoDB and other AWS services generally when they are in different regions.
+
+DynamoDB charges for data transferred out of the service, but there are no charges for data transferred into the service. The cost of data transfer is based on the amount of data transferred in GB. The first 1 GB of data transferred out is free, and you are charged for any additional data transferred out.
+
+.. warning::
+
+    DynamoDB does not charge for data transferred between AWS services in the same region. However, if you transfer data between different regions, you will be charged for the data transfer. These costs can add up quickly, especially if you are transferring large amounts of data or if you are using multiple regions for your application with global tables.
+
+    For example:
+
+    * If you transfer 1 GB of data out of DynamoDB to another AWS service in the same region, you will not be charged.
+    * If you transfer 1 GB of data out of DynamoDB to another AWS service in a different region, you will be charged for the data transfer.
+    * If you transfer 1 GB of data out of DynamoDB as part of global tables, you will be charged for the data transfer.
+
+Change Data Capture Units Explained
+===================================
+
+Change data capture (CDC) is a technique used to track changes to data in a database. In DynamoDB, CDC is used to capture changes to items in your tables and replicate them to other AWS services. DynamoDB charges for change data capture units based on the number of changes captured and the size of the items being captured. DynamoDB charges one change data capture unit for each write to your table (up to 1 KB). For items larger than 1 KB, additional change data capture units are required.
+
+.. note::
+
+    Such operations are supported in ScyllaDB with the `Change Data Capture <https://docs.scylladb.com/manual/stable/features/cdc/cdc-intro.html>`_ feature, but they are not included in the cost calculator.
+
+DynamoDB Table Classes Explained
+================================
+
+DynamoDB offers two table classes designed to help you optimize for cost. The DynamoDB Standard table class is the default and recommended for the vast majority of workloads. The DynamoDB Standard-Infrequent Access (DynamoDB Standard-IA) table class is optimized for tables that store data that is accessed infrequently, where storage is the dominant cost. Each table class offers different pricing for data storage as well as read and write requests. You can select the most cost-effective table class based on your table’s storage requirements and data access patterns.
+
+.. note::
+
+    The DynamoDB Standard-IA table class is not supported in ScyllaDB. If you are using the DynamoDB Standard-IA table class, you will need to migrate your data to the DynamoDB Standard table class before migrating to ScyllaDB.
+
+Global Tables Explained
+=======================
+
+Global tables are a feature of DynamoDB that allows you to replicate your data across multiple AWS Regions. This is useful for applications that require low-latency access to data from multiple regions or for disaster recovery purposes. Global tables are charged based on the number of write request units consumed in each region, as well as the amount of data transferred between regions.
+
+.. warning::
+
+    Global Tables costs can add up quickly, especially if you are replicating large amounts of data or if you are using multiple regions for your application. Be sure to factor in these costs when estimating your overall DynamoDB costs.
+
+DynamoDB Accelerator (DAX) Explained
+====================================
+
+DynamoDB Accelerator (DAX) is a fully managed, in-memory caching service for DynamoDB. DAX is designed to improve the performance of read-heavy workloads by caching frequently accessed data in memory. DAX is charged based on the number of DAX nodes you provision and the amount of data stored in the cache.
+
+.. note::
+
+    ScyllaDB implements a similar caching mechanism called `ScyllaDB Cache <https://docs.scylladb.com/architecture/scylla-cache/>`_ that is designed to improve the performance of read-heavy workloads. However, ScyllaDB does not charge for caching, as it is included in the overall cost of running ScyllaDB.
