@@ -16,7 +16,7 @@ On Demand pricing is a pay-as-you-go model that charges you based on the number 
 Provisioned
 ...........
 
-Provisioned pricing allows you to reserve read and write capacity for your tables. You pay a fixed rate for the capacity you reserve, regardless of how much you use. This model is ideal for applications with predictable workloads, as it can help you save money by reserving capacity in advance. However, if you exceed your reserved capacity, your requests will be throttled, which can impact your application's performance.
+Provisioned pricing allows you to specify the read and writes per second that you expect your table to use. You pay a fixed rate for any capacity you reserve, regardless of how much you use. This model is ideal for applications with predictable workloads, as it can help you save money by reserving capacity in advance. However, if you exceed your capacity, your requests will be throttled, which will negatively impact your application's performance.
 
 Provisioned + Reserved Capacity
 ...............................
