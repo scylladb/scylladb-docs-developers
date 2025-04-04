@@ -10,4 +10,4 @@ When to avoid DAX
 Cost Considerations
 ===================
 
-placeholder
+
