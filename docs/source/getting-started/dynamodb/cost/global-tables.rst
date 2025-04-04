@@ -25,7 +25,7 @@ DynamoDB Global Tables are useful when:
     Global Tables provide multi-region, active-active replication, which can keep your app online even if one AWS region goes down.
 
 #. You want a managed multi-region replication solution.
-    With Global Tables, AWS handles all the complexity of syncing data between replicas at a cost.
+    With Global Tables, AWS handles all the complexity of syncing data between replicas (at a cost).
 
 #. Your workload can tolerate DynamoDB’s eventual consistency model.
     Global Tables resolve conflicts using last writer wins (LWW) based on timestamps.
@@ -51,7 +51,7 @@ Global Tables come with architectural constraints and hidden complexity. Avoid t
     Global Tables replication introduces unpredictable latencies. You can’t control internals like replication buffer size or timing. ScyllaDB’s architecture allows you to optimize for your specific workload and latency requirements.
 
 #. You’re sensitive to vendor lock-in.
-    Global Tables are tightly coupled with AWS infrastructure. No way to replicate them outside of AWS regions, or integrate with other systems easily. ScyllaDB runs anywhere, from any public cloud to on-premise.
+    Global Tables are tightly coupled with AWS infrastructure. There's no way to replicate them outside of AWS regions or integrate with other systems easily. ScyllaDB runs anywhere, from any public cloud to on-premise.
 
 #. You want cost transparency.
     Costs are opaque and can spike unexpectedly. You pay for every write in every region, plus cross-region data transfer fees. This can lead to unpredictable bills, especially if you’re not monitoring usage closely. Use :doc:`DynamoDB Cost Calculator <calculator>` to model expected workloads and costs.
@@ -82,14 +82,14 @@ Cost Considerations
     When you add a new Region to a global table, DynamoDB bootstraps the new Region automatically and charges you as if it were a table restore, based on the GB size of the table. It also charges cross region data transfer fees.
 
 #. Operational overhead is hidden but real.
-    Monitoring, diagnosing replication lag, dealing with silent conflicts. These things cost you development and operations time, even if they’re "managed" or "serverless".
+    Monitoring, diagnosing replication lag, dealing with silent conflicts. These things cost you development and operations time, even if they’re "managed" or "serverless."
 
 #. Inflexibility in capacity scaling.
     Even with On Demand, costs can balloon unpredictably when replication spikes.
 
 .. tip::
 
-    If you’re building a global application with modest write rates and minimal write conflicts, Global Tables might work, at a price. But if you want control, visibility, and efficiency, ScyllaDB, with custom replication or external CDC-based tooling, gives you more power and fewer surprises.
+    If you’re building a global application with modest write rates and minimal write conflicts, Global Tables might work, at a price. But if you want control, visibility, and efficiency, ScyllaDB -- with custom replication or external CDC-based tooling -- gives you more power and fewer surprises.
 
 How Global Tables Compare to ScyllaDB
 =====================================
