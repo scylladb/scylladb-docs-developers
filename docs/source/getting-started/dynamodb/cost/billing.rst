@@ -7,7 +7,7 @@ Here’s what you need to watch out for.
 
 Request Spikes = Cost Spikes
 ============================
-DynamoDB charges per read/write unit. In On-Demand mode, every request costs money. If your app suddenly increases request volume, due to a bug, traffic spike, or misconfigured job, you’ll see it directly reflected on your bill.
+DynamoDB charges per read/write unit. In On Demand mode, every request costs money. If your app suddenly increases request volume, due to a bug, traffic spike, or misconfigured job, you’ll see it directly reflected on your bill.
 
 If you’re using Provisioned mode, overestimating capacity means paying for what you don’t use. Underestimating means throttling, retries, and possibly even more costs depending on how your client handles retries.
 
