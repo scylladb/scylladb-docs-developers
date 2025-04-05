@@ -89,7 +89,7 @@ Cost Considerations
 
 .. tip::
 
-    If you’re building a global application with modest write rates and minimal write conflicts, Global Tables might work, at a price. But if you want control, visibility, and efficiency, ScyllaDB -- with custom replication or external CDC-based tooling -- gives you more power and fewer surprises.
+    If you’re building a global application with modest write rates and minimal write conflicts, Global Tables might work, at a price. But if you want control, visibility, and efficiency, ScyllaDB — with custom replication or external CDC-based tooling — gives you more power and fewer surprises.
 
 How Global Tables Compare to ScyllaDB
 =====================================
