@@ -36,7 +36,7 @@ Writes are more expensive than reads because they require more resources to ensu
 Replicated Writes Explained
 ===========================
 
-When using DynamoDB Global Tables, your data is written automatically to multiple AWS regions of your choice. Each write occurs in the local region as well as the replicated regions. This is known as a replicated Write Capacity Unit (rWCU). The cost of rWCUs is the same as the cost of WCUs, but you will be charged for each region that you replicate your data to.
+When using DynamoDB Global Tables, your data is automatically written to multiple AWS regions of your choice. Each write occurs in the local region as well as the replicated regions. This is known as a replicated Write Capacity Unit (rWCU). The cost of rWCUs is the same as the cost of WCUs, but you will be charged for each region that you replicate your data to.
 
 .. warning::
 
@@ -62,7 +62,7 @@ DynamoDB automatically scales storage for your tables based on the size of your 
 Item Size Explained
 ===================
 
-The size of your items in DynamoDB affects the cost of your reads and writes. DynamoDB charges based on the size of the items you read and write, rounded up to the nearest block size (for reads this is 4 KB and writes is 1 KB). If your items are larger than this block size, you will need to consume additional RCUs and WCUs to read and write the items.
+The size of your items in DynamoDB affects the cost of your reads and writes. DynamoDB charges based on the size of the items you read and write, rounded up to the nearest block size (for reads, this is 4 KB; for writes, this is 1 KB). If your items are larger than this block size, you will need to consume additional RCUs and WCUs to read and write the items.
 
 .. warning::
 
@@ -71,16 +71,16 @@ The size of your items in DynamoDB affects the cost of your reads and writes. Dy
     For example:
 
     * If you read an item that is 300B in size, you will need to consume 1 RCU for a strongly consistent read, or 0.5 RCUs for an eventually consistent read.
-    * If you read an item that is 5000 B in size, you will need to consume 2 RCUs for a strongly consistent read, or 1 RCUs for an eventually consistent read. This is because the item size is rounded up to the nearest block size of 4 KB. i.e. 5000/4096 = 1.22, which is rounded up to 2.
+    * If you read an item that is 5000B in size, you will need to consume 2 RCUs for a strongly consistent read, or 1 RCU for an eventually consistent read. This is because the item size is rounded up to the nearest block size of 4 KB. i.e. 5000/4096 = 1.22, which is rounded up to 2.
     * If you write an item that is 300B in size, you will need to consume 1 WCU.
-    * If you write an item that is 5000 B in size, you will need to consume 5 WCUs. This is because the item size is rounded up to the nearest block size of 1 KB i.e. 5000/1024 = 4.88, which is rounded up to 5.
+    * If you write an item that is 5000B in size, you will need to consume 5 WCUs. This is because the item size is rounded up to the nearest block size of 1 KB i.e. 5000/1024 = 4.88, which is rounded up to 5.
 
 Network Transfer Explained
 ==========================
 
 Network transfer costs are based on the amount of data transferred in and out of DynamoDB. You are charged based on the amount of data transferred between your application and DynamoDB, as well as between DynamoDB and other AWS services generally when they are in different regions.
 
-DynamoDB charges for data transferred out of the service, but there are no charges for data transferred into the service. The cost of data transfer is based on the amount of data transferred in GB. The first 1 GB of data transferred out is free, and you are charged for any additional data transferred out.
+DynamoDB charges for data transferred out of the service, but there are no charges for data transferred into the service. The cost of data transfer is based on the amount of data transferred in GB. The first 1 GB of data transferred out is free, but you are charged for any additional data transferred out.
 
 .. warning::
 
@@ -104,16 +104,16 @@ Change data capture (CDC) is a technique used to track changes to data in a data
 Table Classes Explained
 =======================
 
-DynamoDB offers two table classes designed to help you optimize for cost. The DynamoDB Standard table class is the default and recommended for the vast majority of workloads. The DynamoDB Standard-Infrequent Access (DynamoDB Standard-IA) table class is optimized for tables that store data that is accessed infrequently, where storage is the dominant cost. Each table class offers different pricing for data storage as well as read and write requests. You can select the most cost-effective table class based on your table’s storage requirements and data access patterns.
+DynamoDB offers two table classes designed to help you optimize for cost. The DynamoDB Standard table class is the default, and it's recommended for the vast majority of workloads. The DynamoDB Standard-Infrequent Access (DynamoDB Standard-IA) table class is optimized for tables that store data that is accessed infrequently, where storage is the dominant cost. Each table class offers different pricing for data storage as well as read and write requests. You can select the most cost-effective table class based on your table’s storage requirements and data access patterns.
 
 .. note::
 
     The DynamoDB Standard-IA table class is not supported in ScyllaDB. If you are using the DynamoDB Standard-IA table class, you will need to migrate your data to the DynamoDB Standard table class before migrating to ScyllaDB.
 
-Global Tables Explained
+Global Tables Explained 
 =======================
 
-Global Tables are a feature of DynamoDB that allows you to replicate your data across multiple AWS regions. This is useful for applications that require low latency access to data from multiple regions or for disaster recovery purposes. Global Tables are charged based on the number of write request units consumed in each region, as well as the amount of data transferred between regions.
+Global Tables are a DynamoDB feature that allows you to replicate your data across multiple AWS regions. This is useful for applications that require low latency access to data from multiple regions or for disaster recovery purposes. Global Tables are charged based on the number of write request units consumed in each region, as well as the amount of data transferred between regions.
 
 .. warning::
 
