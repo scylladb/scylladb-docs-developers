@@ -11,12 +11,12 @@ Understanding Pricing Models
     :width: 90%
     :class: dark-mode
 
-We've put together an overview of each DynamoDB pricing model to help you understand the differences and choose the one that's right for you. We also show you `how these models compare to each other <#how-these-models-compare-to-themselves>`_ and the `savings you can achieve by switching to ScyllaDB <#how-these-models-compare-to-scylladb>`_.
+We've put together an overview of each DynamoDB pricing [#r1]_ model to help you understand the differences and choose the one that's right for you. We also show you `how these models compare to each other <#how-these-models-compare-to-themselves>`_ and the `savings you can achieve by switching to ScyllaDB <#how-these-models-compare-to-scylladb>`_.
 
 Pricing Model Overview
 ======================
 
-DynamoDB offers two distinct pricing models: On Demand [#r1]_ and Provisioned [#r2]_. Provisioned has an additional option called Reserved Capacity. Each model has its own pricing structure and is designed to meet different needs. The pricing model you choose will depend on your application's requirements and usage patterns.
+DynamoDB offers two distinct pricing models: On Demand [#r2]_ and Provisioned [#r3]_. Provisioned has an additional option called Reserved Capacity. Each model has its own pricing structure and is designed to meet different needs. The pricing model you choose will depend on your application's requirements and usage patterns.
 
 On Demand
 .........
@@ -170,5 +170,6 @@ References
 ..........
 .. rubric::
 
-.. [#r1] `AWS DynamoDB On Demand Pricing <https://aws.amazon.com/dynamodb/pricing/on-demand/>`_: For more information on the On Demand pricing model, see the AWS documentation.
-.. [#r2] `AWS DynamoDB Provisioned Pricing <https://aws.amazon.com/dynamodb/pricing/provisioned/>`_. For more information on the Provisioned pricing model, see the AWS documentation. This includes the Reserved Capacity option.
+.. [#r1] `Amazon DynamoDB pricing <https://aws.amazon.com/dynamodb/pricing/>`_: For general information on DynamoDB pricing.
+.. [#r2] `AWS DynamoDB On Demand Pricing <https://aws.amazon.com/dynamodb/pricing/on-demand/>`_: For more information on the On Demand pricing model, see the AWS documentation.
+.. [#r3] `AWS DynamoDB Provisioned Pricing <https://aws.amazon.com/dynamodb/pricing/provisioned/>`_. For more information on the Provisioned pricing model, see the AWS documentation. This includes the Reserved Capacity option.
