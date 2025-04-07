@@ -78,7 +78,7 @@ The size of your items in DynamoDB affects the cost of your reads and writes. Dy
 Network Transfer Explained
 ==========================
 
-Network transfer costs are based on the amount of data transferred in and out of DynamoDB. You are charged based on the amount of data transferred between your application and DynamoDB, as well as between DynamoDB and other AWS services generally when they are in different regions.
+Network transfer costs are based on the amount of data transferred in and out of DynamoDB. You are charged based on the amount of data transferred between your application and DynamoDB, as well as between DynamoDB and other general AWS services (when they are in different regions).
 
 DynamoDB charges for data transferred out of the service, but there are no charges for data transferred into the service. The cost of data transfer is based on the amount of data transferred in GB. The first 1 GB of data transferred out is free, but you are charged for any additional data transferred out.
 
