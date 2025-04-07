@@ -68,3 +68,15 @@ Here are the key differences in performance and scalability between DynamoDB and
 
 #. **DynamoDB**: Requires pre-configuring read and write capacity units (RCUs and WCUs), leading to potential over- or under-provisioning.
 #. **ScyllaDB**: Automatically balances workloads across nodes as the cluster scales. The CQL driver reacts to topology changes, ensuring even load distribution without manual intervention.
+
+Monitoring and Metrics
+======================
+
+Here are the key differences in monitoring and metrics between DynamoDB and ScyllaDB:
+
+#. **DynamoDB**: Provides basic user-oriented metrics over CloudWatch.
+#. **ScyllaDB**: Through the powerful `ScyllaDB Monitoring stack <https://monitoring.docs.scylladb.com/stable/>`_, provides in-depth metrics on user operations as well as database internals.
+
+.. image:: ../images/monitor.png
+    :alt: Understanding Differences
+    :width: 90%
