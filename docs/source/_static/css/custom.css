@@ -167,3 +167,17 @@ html.dark .dark-mode {
     -webkit-box-decoration-break: clone;
     box-decoration-break: clone;
 }
+
+aside.footnote {
+    display: flex;
+    align-items: baseline;
+    gap: 0.5em;
+}
+
+aside.footnote .label {
+    white-space: nowrap;
+}
+
+aside.footnote p {
+    margin: 0;
+}

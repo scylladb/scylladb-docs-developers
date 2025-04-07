@@ -16,7 +16,7 @@ We've put together an overview of each DynamoDB pricing model to help you unders
 Pricing Model Overview
 ======================
 
-DynamoDB offers two distinct pricing models: `On Demand <https://aws.amazon.com/dynamodb/pricing/on-demand/>`_ and `Provisioned <https://aws.amazon.com/dynamodb/pricing/provisioned/>`_. Provisioned has an additional option called Reserved Capacity. Each model has its own pricing structure and is designed to meet different needs. The pricing model you choose will depend on your application's requirements and usage patterns.
+DynamoDB offers two distinct pricing models: On Demand [#r1]_ and Provisioned [#r2]_. Provisioned has an additional option called Reserved Capacity. Each model has its own pricing structure and is designed to meet different needs. The pricing model you choose will depend on your application's requirements and usage patterns.
 
 On Demand
 .........
@@ -165,3 +165,10 @@ However, ScyllaDB's pricing model will be more cost-effective if you want to avo
     * 9 x i4i.xlarge (4 vCPUs, 32 GB RAM, 937 GB storage)
     * Disk storage 8.24 TB
     * Total vCPU 36
+
+References
+..........
+.. rubric::
+
+.. [#r1] `AWS DynamoDB On Demand Pricing <https://aws.amazon.com/dynamodb/pricing/on-demand/>`_: For more information on the On Demand pricing model, see the AWS documentation.
+.. [#r2] `AWS DynamoDB Provisioned Pricing <https://aws.amazon.com/dynamodb/pricing/provisioned/>`_. For more information on the Provisioned pricing model, see the AWS documentation. This includes the Reserved Capacity option.
