@@ -72,7 +72,7 @@ Cost Considerations
 #. Provisioned capacity needs to be sized per region.
     You can’t provision one write unit and have it replicated; each region must handle its own load.
 
-#. Writing to Global Secondary Indexes count.
+#. Writing to Global Secondary Indexes counts.
     Writing to a global secondary index (GSI) is considered a local write operation and uses regular write units.
 
 #. rWCUs cannot be reserved.
