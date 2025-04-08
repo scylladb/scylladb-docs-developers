@@ -16,3 +16,16 @@ DynamoDB Cost Calculator
             allowfullscreen>
         </iframe>
     </div>
+
+You might be wondering: "AWS already offers a `DynamoDB pricing calculator <https://calculator.aws/#/createCalculator/DynamoDB/>`_. Why create another one?" 
+
+Short answer: Because teams comparing DynamoDB costs with ScyllaDB costs report that the official AWS calculator is:
+ 
+* Overly complex
+* Not developer friendly
+* Insufficient for estimating the costs of real-world workloads (e.g., with bursty traffic or uneven access patterns)
+
+To enable simpler, more accurate comparisons, we designed something a bit different. 
+
+Long answer: See `the intro page <../index.html>`_. 
+
