@@ -166,9 +166,7 @@ However, ScyllaDB's pricing model will be more cost-effective if you want to avo
     * Disk storage 8.24 TB
     * Total vCPU 36
 
-References
-..........
-.. rubric::
+.. rubric:: **References**
 
 .. [#r1] `Amazon DynamoDB pricing <https://aws.amazon.com/dynamodb/pricing/>`_: For general information on DynamoDB pricing.
 .. [#r2] `AWS DynamoDB On Demand Pricing <https://aws.amazon.com/dynamodb/pricing/on-demand/>`_: For more information on the On Demand pricing model, see the AWS documentation.
