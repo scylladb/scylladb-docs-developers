@@ -21,8 +21,8 @@ Whether you’re running production systems or just exploring DynamoDB alternati
 
 This calculator is also available at `calculator.scylladb.com <https://calculator.scylladb.com>`_ if you want to share it with your team or use it in a different context.
 
-Why We Built It
-===============
+Why We Built a(nother) DynamoDB Cost Calculator
+===============================================
 
 DynamoDB pricing isn’t straightforward. Costs can balloon based on read/write patterns, data volume, provisioned capacity, and usage spikes, especially if you’re using on-demand mode. While AWS offers a pricing calculator, it’s not exactly developer friendly, and it often misses the nuance of real-world workloads (e.g., bursty traffic or uneven access patterns).
 
@@ -42,7 +42,7 @@ If you’re a developer, architect, or decision-maker trying to evaluate DynamoD
 
 Whether you’re optimizing an existing deployment or planning a migration, this calculator gives you the numbers you need to move forward with confidence.
 
-Understanding Costs
-===================
+Understanding DynamoDB Pricing and Costs
+========================================
 
 Once you use the calculator to estimate your costs, you’ll want to understand what those costs mean. This section breaks down the key cost drivers in DynamoDB and how they affect your bill. We cover the different pricing models, the cost units you’ll encounter, and the hidden costs that can catch you off guard. We also provide tips for optimizing your costs and avoiding common pitfalls.
