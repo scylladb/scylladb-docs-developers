@@ -1,5 +1,8 @@
 Understanding Pricing Models
 ----------------------------
+.. meta::
+   :description: Make sense of DynamoDB's On Demand, Provisioned, and Reserved Capacity pricing models. Compare costs for different workloads (read-heavy, write-heavy...) and see how ScyllaDB's pricing model provides a more predictable and cost-effective option.
+
 
 .. image:: ../images/pricing-model-light.png
     :alt: Pricing Models
@@ -13,8 +16,8 @@ Understanding Pricing Models
 
 We've put together an overview of each DynamoDB pricing [#r1]_ model to help you understand the differences and choose the one that's right for you. We also show you `how these models compare to each other <#how-these-models-compare-to-themselves>`_ and the `savings you can achieve by switching to ScyllaDB <#how-these-models-compare-to-scylladb>`_.
 
-Pricing Model Overview
-======================
+DynamoDB Pricing Model Overview
+===============================
 
 DynamoDB offers two distinct pricing models: On Demand [#r2]_ and Provisioned [#r3]_. Provisioned has an additional option called Reserved Capacity. Each model has its own pricing structure and is designed to meet different needs. The pricing model you choose will depend on your application's requirements and usage patterns.
 
