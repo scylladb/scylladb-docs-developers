@@ -1,6 +1,10 @@
 DAX Caching
 -----------
 
+.. meta::
+   :description: Understand when DynamoDB DAX caching is worth it—and when it’s not. Explore performance trade-offs, cost implications, cache limitations, and how it compares to ScyllaDB’s built-in row cache.
+
+
 .. image:: ../images/dax-light.png
     :alt: DAX
     :width: 90%
@@ -13,8 +17,8 @@ DAX Caching
 
 DynamoDB Accelerator (DAX) is a managed, in-memory caching layer designed to improve DynamoDB's read performance. It offloads frequently accessed data for read heavy applications.
 
-When to use DAX
-===============
+When to use DynamoDB DAX
+========================
 
 Use DAX when:
 
