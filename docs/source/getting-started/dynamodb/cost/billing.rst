@@ -1,5 +1,7 @@
-Request Patterns and Billing Surprises
---------------------------------------
+How Request Patterns Lead to DynamoDB Billing Surprises
+-------------------------------------------------------
+.. meta::
+   :description: Learn how DynamoDB request patterns drive unexpected costs. From traffic spikes to TTL deletes, Global Tables, and DAX—understand hidden billing risks and how to manage them.
 
 .. image:: ../images/billing-light.png
     :alt: Billing
@@ -46,8 +48,8 @@ We've spoken to many DynamoDB users and experts about workarounds for managing c
 
     <p class="mark">DynamoDB is a powerful tool, but it can be expensive if you’re not careful. If you’re hitting scale or budget limits, or don't have time to manage these complexities, ScyllaDB will give you predictable performance and cost control at any scale.</p>
 
-Hidden Costs You Shouldn’t Ignore
-=================================
+Hidden DynamoDB Costs You Shouldn’t Ignore
+==========================================
 
 These can silently eat your budget:
 
