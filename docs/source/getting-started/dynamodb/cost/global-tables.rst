@@ -1,6 +1,10 @@
 Global Tables
 -------------
 
+.. meta::
+   :description: DynamoDB Global Tables simplify multi-region replication, but at a steep cost. Learn how write multiplication, cross-region transfer fees, and operational overhead impact your bill, and why ScyllaDB offers a more cost-effective alternative.
+
+
 .. image:: ../images/global-tables-light.png
     :alt: Global Tables
     :width: 90%
