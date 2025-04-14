@@ -1,7 +1,7 @@
 Real World Scenarios
 --------------------
 
-This section describes the different scenarios that can be used to evaluate the cost of using DynamoDB. Each scenario is designed to simulate a different use case and provides a detailed breakdown of the costs associated with each scenario.
+This section describes different scenarios that can be used to evaluate the cost of using DynamoDB. Each scenario is designed to describe a different use case and provides a detailed breakdown of the costs associated with each scenario.
 
 On Demand Scenario
 ==================
