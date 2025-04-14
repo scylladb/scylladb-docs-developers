@@ -96,15 +96,15 @@ A Note on Auto Scaling
 
 DynamoDB’s auto scaling for provisioned tables adjusts capacity automatically based on usage patterns and configured parameters. It allows you to scale capacity throughout the day without manual intervention. This can be seen in the graph above, where the blue line represents the provisioned capacity and the orange line represents the consumed capacity. The difference between the two represents both wasted resources and a buffer to prevent throttling.
 
-Even with auto scaling, over-provisioning is unavoidable. You’ll need to fine-tune the trade-off between excess capacity and acceptable levels of throttling to align with your workload characteristics. It's certainly possible to autoscale around perfectly sinusoidal traffic patterns, but it requires a lot of tuning and testing. This is not something you can just set and forget.
+Even with auto scaling, some level of over-provisioning is inevitable. Tuning the balance between extra capacity and acceptable throttling takes effort and experimentation. While you can technically autoscale around smooth traffic patterns, it’s not a plug-and-play solution—you’ll need to test and adjust over time.
 
-DynamoDB’s pricing models are complex and require precise planning to avoid costly over- or under-provisioning. If you’re not careful, you could end up with a lot of wasted resources and a high bill. Conversely, if you under-provision, you could end up with throttled requests and a bad user experience. This is why we recommend using our `DynamoDB Cost Calculator <https://calculator.scylladb.com>`_ to simulate your workloads and get a better understanding of your costs.
+DynamoDB’s pricing models are intricate and require deliberate planning. Without careful sizing, you risk either paying for idle capacity or facing throttling that degrades performance. Use our `DynamoDB Cost Calculator <https://calculator.scylladb.com>`_ to simulate your workloads and avoid surprises.
 
-The reason ScyllaDB is so much more competitive is that it uses a different pricing model. ScyllaDB charges based on the number of nodes in your cluster, not the amount of capacity you provision up front or the number individual requests you consume. While it's true ScyllaDB is a form of over-provisioning, it is much more predictable and manageable. You can start with a small cluster and scale up as needed, without worrying about over-provisioning or under-provisioning of individual requests.
+ScyllaDB follows a fundamentally different pricing model. Instead of charging per request or provisioned capacity, you pay for the infrastructure—specifically, the number and size of nodes in your cluster. While this is technically a form of over-provisioning, it's far more predictable and manageable. You can start with a small cluster and scale out as your workload grows, without worrying about request-level provisioning limits or surprise costs.
 
 .. raw:: html
 
-    <p class="mark">This is why we say that ScyllaDB is the best alternative to DynamoDB and guarantee 50% off your existing DynamoDB workload costs.</p>
+    <p class="mark">This is why ScyllaDB is a strong alternative to DynamoDB—we offer a 50% cost guarantee against your existing workload.</p>
 
 Global Tables Scenario
 ======================
