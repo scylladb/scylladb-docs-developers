@@ -47,7 +47,7 @@ As a rough estimate we will assume the following:
 
 The `estimate for this workload on DynamoDB <https://calculator.scylladb.com/?pricing=demand&storageGB=512&itemSizeB=1024&tableClass=standard&ratio=50&baselineReads=2000&baselineWrites=2000&peakReads=4000&peakWrites=6000&peakDurationReads=6&peakDurationWrites=4&reserved=0&readConst=100>`_ is around **$5,300/month** in On Demand mode.
 
-ScyllaDB's smallest cluster configuration would be 3 nodes of i3en.xlarge, which would cost around **$3,000/month**. This cluster would easily sustain up to 58,000 ops/sec with peaks up to 90,000 ops/sec. This is more than enough for the 6,000 writes/sec and 4,000 reads/sec in this scenario.
+ScyllaDB's `smallest cluster configuration would be 3 nodes of i3en.xlarge <https://www.scylladb.com/product/scylla-cloud/get-pricing?reads=10000&writes=10000&itemSize=1&storage=1&cloudProvider=AWS>`_, which would cost around **$3,196/month**. This cluster would easily sustain up to 58,000 ops/sec with peaks up to 90,000 ops/sec. This is more than enough for the 6,000 writes/sec and 4,000 reads/sec in this scenario.
 
 Provisioned Scenario
 ====================
