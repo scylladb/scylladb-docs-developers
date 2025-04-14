@@ -18,7 +18,7 @@ The example graphs below illustrate this type of workload.
 .. image:: ../images/demand-wcu.png
     :alt: Demand WCU
 
-This graph shows Write Capacity Units (WCUs) over time. To convert this to operations per second, we know that 1 WCU = 1 write per second, so assuming the writes are ≤ 1 KB:
+This graph shows Write Capacity Units (WCUs) over time. To convert this to ops/sec, we know that 1 WCU = 1 write per second, so assuming the writes are ≤ 1 KB:
 
 * At the peak we can observe ~12,000 writes/sec.
 * In quieter periods it’s ~1,000 writes/sec.
@@ -26,7 +26,7 @@ This graph shows Write Capacity Units (WCUs) over time. To convert this to opera
 .. image:: ../images/demand-rcu.png
     :alt: Demand RCU
 
-This graph shows Read Capacity Units (RCUs) over time. To convert this to operations per second, we know that 1 RCU = 1 strongly consistent read per second for an item up to 4 KB in size. So assuming you’re making strongly consistent reads and the reads are ≤ 4 KB:
+This graph shows Read Capacity Units (RCUs) over time. To convert this to ops/sec, we know that 1 RCU = 1 strongly consistent read per second for an item up to 4 KB in size. So assuming you’re making strongly consistent reads and the reads are ≤ 4 KB:
 
 * At the peak we can observe ~5,000 reads/sec.
 * In quieter periods it’s ~1,000 reads/sec.
@@ -40,14 +40,14 @@ Our `DynamoDB Cost Calculator <https://calculator.scylladb.com>`_ allows you to 
 
 As a rough estimate we will assume the following:
 
-* Baseline of 1,000 writes/sec for the nighttime period, plus a baseline of 3,000 writes/sec for the daytime period. Assuming a daytime period of 12 hours, the 24 hour period average might be 2,000 writes/sec.
-* With at least 3 sustained peaks of 6,000 writes/sec for total 3 hours, plus another short peak of 12,000 writes/sec for 30 minutes, the combined might be 6,000 writes/sec for 4 hours.
-* Baseline of 1,000 reads/sec for the nighttime period, plus a baseline of 3,000 reads/sec for the daytime period. The 24 hour period average might be 2,000 reads/sec.
-* A much more spiky read pattern with peaks between 3,000 and 5,000 reads/sec for the daytime might be 4,000 for at least 6 hours a day.
+* Baseline of 1,000 writes/sec for the nighttime period, plus a baseline of 3,000 writes/sec for the daytime period. Assuming a daytime period of 12 hours, the 24 hour period average averages to 2,000 writes/sec.
+* With at least 3 sustained peaks of 6,000 writes/sec for a total 3 hours, plus another short peak of 12,000 writes/sec for 30 minutes, the combined averages to 6,000 writes/sec for 4 hours.
+* Baseline of 1,000 reads/sec for the nighttime period, plus a baseline of 3,000 reads/sec for the daytime period. The 24 hour period average averages to 2,000 reads/sec.
+* A much more variable read pattern with peaks between 3,000 and 5,000 reads/sec for the daytime averages to 4,000 for at least 6 hours a day.
 
 The `estimate for this workload on DynamoDB <https://calculator.scylladb.com/?pricing=demand&storageGB=512&itemSizeB=1024&tableClass=standard&ratio=50&baselineReads=2000&baselineWrites=2000&peakReads=4000&peakWrites=6000&peakDurationReads=6&peakDurationWrites=4&reserved=0&readConst=100>`_ is around **$5,300/month** in On Demand mode.
 
-ScyllaDB's `smallest cluster configuration would be 3 nodes of i3en.xlarge <https://www.scylladb.com/product/scylla-cloud/get-pricing?reads=10000&writes=10000&itemSize=1&storage=1&cloudProvider=AWS>`_, which would cost around **$3,196/month**. This cluster would easily sustain up to 58,000 ops/sec with peaks up to 90,000 ops/sec. This is more than enough for the 6,000 writes/sec and 4,000 reads/sec in this scenario.
+ScyllaDB's `smallest cluster configuration would be 3 nodes of i3en.xlarge <https://www.scylladb.com/product/scylla-cloud/get-pricing?reads=10000&writes=10000&itemSize=1&storage=1&cloudProvider=AWS>`_, which would cost around **$3,196/month**. This cluster can easily sustain up to 58,000 ops/sec with peaks up to 90,000 ops/sec. This is more than enough for the 6,000 writes/sec and 4,000 reads/sec in this scenario.
 
 Provisioned Scenario
 ====================
@@ -64,7 +64,7 @@ The following example graphs illustrate this type of workload.
 
 Because traffic patterns are typically more predictable within an hour or day, you can provision table capacity closer to actual usage. Cost optimization in provisioned capacity mode is about minimizing the gap between provisioned capacity (blue line) and consumed capacity (orange line) without increasing ThrottledRequests. The difference between the two represents both wasted resources and a buffer to prevent throttling. If your application’s throughput is predictable and you value cost control, provisioned tables remain a viable option.
 
-Assuming the Y-Axis was measured in' 000s, in a simplistic provisioned scenario, you might provision 125,000 ops/sec for the baseline, plus 250,000 ops/sec to cover 2 peaks of roughly 6 hours total duration. This chart only shows writes, so we'll set near zero for reads.
+Assuming the Y-Axis was measured in thousands ('000s), in a simplistic provisioned scenario, you might provision 125,000 ops/sec for the baseline, plus 250,000 ops/sec to cover 2 peaks of roughly 6 hours total duration. This chart only shows writes, so we'll set near zero for reads.
 
 The `estimate for this workload on DynamoDB <https://calculator.scylladb.com/?pricing=provisioned&storageGB=512&itemSizeB=1024&tableClass=standard&ratio=50&baselineReads=1000&baselineWrites=125000&peakReads=1000&peakWrites=306000&peakDurationReads=0&peakDurationWrites=6&reserved=0&readConst=100>`_ is around **$80,000/month** in Provisioned mode.
 
@@ -84,7 +84,7 @@ Provisioned with reserved capacity is a good option for workloads that are stead
 .. image:: ../images/reserved-wcu.png
     :alt: Reserved WCU
 
-This graph shows the difference between reserved capacity (dotted line) and consumed capacity (orange line). The difference between the two represents both wasted resources and a buffer to prevent throttling. If your application’s throughput is predictable and you value cost control, reserved capacity remains a viable option. However this leads to over-provisioning, which can be costly.
+This graph shows the difference between reserved capacity (dotted line) and consumed capacity (orange line). The difference between the two represents both wasted resources and a buffer to prevent throttling. If your application’s throughput is predictable and you value cost control, reserved capacity remains a viable option. However, this leads to over-provisioning, which can be costly.
 
 Assuming a baseline of 300,000 writes/sec and a peak of 600,000 writes/sec for 3 hours a day, the `estimate for this workload on DynamoDB <https://calculator.scylladb.com/?pricing=provisioned&storageGB=512&itemSizeB=1024&tableClass=standard&ratio=50&baselineReads=1000&baselineWrites=300000&peakReads=1000&peakWrites=600000&peakDurationReads=0&peakDurationWrites=3&reserved=100&readConst=100>`_ is around **$450,000 upfront plus $45,000/month** in Provisioned + Reserved capacity mode.
 
@@ -100,7 +100,7 @@ Even with auto scaling, some level of over-provisioning is inevitable. Tuning th
 
 DynamoDB’s pricing models are intricate and require deliberate planning. Without careful sizing, you risk either paying for idle capacity or facing throttling that degrades performance. Use our `DynamoDB Cost Calculator <https://calculator.scylladb.com>`_ to simulate your workloads and avoid surprises.
 
-ScyllaDB follows a fundamentally different pricing model. Instead of charging per request or provisioned capacity, you pay for the infrastructure—specifically, the number and size of nodes in your cluster. While this is technically a form of over-provisioning, it's far more predictable and manageable. You can start with a small cluster and scale out as your workload grows, without worrying about request-level provisioning limits or surprise costs.
+ScyllaDB follows a fundamentally different pricing model. Instead of charging per request or provisioned capacity, you pay for the infrastructure—specifically, the number and size of nodes in your cluster. While this is technically a form of over-provisioning, it's far more predictable and manageable. You can start with a small cluster and scale out as your workload grows, without worrying about request-level provisioning limits or unexpected costs.
 
 .. raw:: html
 
