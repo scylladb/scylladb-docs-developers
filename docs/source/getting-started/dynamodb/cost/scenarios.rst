@@ -116,7 +116,7 @@ For more understanding of when to choose and when to avoid Global Tables, please
 
 To understand the cost of Global Tables, we will use one of our customers as an example. They had a workload with the following characteristics, backing a recommendation engine for a large streaming platform.
 
-Their average item size was 8 KB, which as we described in our :doc:`Units <units>` section, means that each read and write operation would consume 2 RCUs and 8 WCUs respectively. They had a total of 224 TB of replicated data in their table, which was replicated across 5 regions. The table was using eventual consistency.
+Their average item size was 8 KB, which as we described in our :doc:`Units <units>` section, means that each read and write operation would consume 1 RCUs (for eventually consistent reads) and 8 WCUs respectively. They had a total of 224 TB of replicated data in their table, which was replicated across 5 regions. The table was using eventual consistency for reads.
 
 The workload had the following characteristics:
 
