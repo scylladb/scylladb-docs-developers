@@ -150,9 +150,7 @@ DAX Scenario
 
 Another cost amplifier of DynamoDB is DAX. This is a caching layer that sits in front of your DynamoDB tables and can help reduce the number of read requests to DynamoDB. However, it also comes with its own costs.
 
-DAX costs scale with the number of provisioned nodes and cached data volume. DAX costs scale with the number of provisioned nodes and cached data volume.
-
-To illustrate this, we will use a customer example. They had a workload with the following characteristics:
+DAX costs scale with the number of provisioned nodes and cached data volume. To illustrate this, we will use a customer example. They had a workload with the following characteristics:
 
 * Reads: 4,000 reads/sec
 * Peak: 105,000 reads/sec with a duration of 4 hours
