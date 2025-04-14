@@ -54,7 +54,7 @@ Follow a code-complete, hands-on tutorial to learn about switching to ScyllaDB f
     <div class="card-grid">
 
 .. card-box::
-    :link: #
+    :link: labs/simple-application
     :image: ../../_static/icons/alternator.svg" style="width:24px
     :title: ScyllaDB Alternator
 
