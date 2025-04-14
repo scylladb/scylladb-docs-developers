@@ -68,7 +68,7 @@ Assuming the Y-Axis was measured in' 000s, in a simplistic provisioned scenario,
 
 The `estimate for this workload on DynamoDB <https://calculator.scylladb.com/?pricing=provisioned&storageGB=512&itemSizeB=1024&tableClass=standard&ratio=50&baselineReads=1000&baselineWrites=125000&peakReads=1000&peakWrites=306000&peakDurationReads=0&peakDurationWrites=6&reserved=0&readConst=100>`_ is around **$80,000/month** in Provisioned mode.
 
-In comparison, a cluster of 9 nodes of i4i.xlarge would cost around **$3000/month**. This cluster could sustain up to 175k ops/sec with peaks up to 270k ops/sec.
+In comparison, `a cluster of 9 nodes of i4i.large <https://www.scylladb.com/product/scylla-cloud/get-pricing?reads=10000&writes=110000&itemSize=1&storage=1&cloudProvider=AWS>`_ would cost around **$3,025/month**. This cluster could sustain up to 175,000 ops/sec with peaks up to 270,000 ops/sec.
 
 .. raw:: html
 
