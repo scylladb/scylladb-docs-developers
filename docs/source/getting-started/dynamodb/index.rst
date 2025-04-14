@@ -184,4 +184,4 @@ Featured Documentation
 
     </div>&nbsp;
 
-`See more documentation <https://opensource.docs.scylladb.com/stable/index.html>`_
+`See more documentation <https://docs.scylladb.com/stable/index.html>`_
