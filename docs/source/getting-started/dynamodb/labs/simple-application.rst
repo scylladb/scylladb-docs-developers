@@ -7,7 +7,7 @@ Alternator is an open-source `project <https://github.com/scylladb/scylla/blob/m
 
 This lab starts with an introduction to the project. Afterward, you’ll create a one-node ScyllaDB cluster with Alternator enabled, and performing some basic operations on it, using Python.
 
-The goal of Alternator is to provide a fully compatible DynamoDB API, so that users can run their existing applications without any changes. It is designed to be compatible with the DynamoDB API, but it is not a drop-in replacement. Alternator is deployable wherever a user would want: on-premises, on other public clouds like AWS, Microsoft Azure or Google Cloud Platform. DynamoDB users can keep their same client code unchanged. Alternator is written in C++ and is a part of ScyllaDB.
+The goal of Alternator is to provide a fully compatible DynamoDB API, so that users can run their existing applications without any changes. It is designed to be compatible with the DynamoDB API, but it is not a drop-in replacement. Alternator is deployable on-premise or on public clouds like Amazon Web Services, Microsoft Azure or Google Cloud Platform. DynamoDB users can keep their same client code unchanged. Alternator is written in C++ and is a part of ScyllaDB.
 
 .. tabs::
 
