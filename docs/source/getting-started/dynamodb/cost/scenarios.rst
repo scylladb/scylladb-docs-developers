@@ -73,8 +73,8 @@ In comparison, a cluster of 9 nodes of i4i.xlarge would cost around **$3000/mont
 .. raw:: html
 
     <p class="mark">
-This underscores just how expensive DynamoDB can be, especially for write-heavy workloads.
-</[\p>
+      This underscores just how expensive DynamoDB can be, especially for write-heavy workloads.
+    </p>
 
 Reserved Capacity Scenario
 ==========================
