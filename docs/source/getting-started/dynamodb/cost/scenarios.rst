@@ -34,7 +34,7 @@ This graph shows Read Capacity Units (RCUs) over time. To convert this to operat
 But what's the cost of this workload in On Demand mode?
 .......................................................
 
-Herein lies a problem with estimating workloads without the raw data. The `AWS calculator <https://calculator.aws/#/>`_ only lets you input the average number of reads and writes per second, not the actual usage patterns. This means that if your workload has a lot of spikes or fluctuations, you may end up underestimating your costs.
+The problem with estimating workloads is the lack of real usage data. The `AWS calculator <https://calculator.aws/#/>`_ only lets you input the average number of reads and writes per second, not the actual usage patterns. This means that if your workload has a lot of spikes or fluctuations, you may end up underestimating your costs.
 
 Our `DynamoDB Cost Calculator <https://calculator.scylladb.com>`_ allows you to input a baseline plus a peak usage pattern, which is more accurate.
 
@@ -68,7 +68,13 @@ Assuming the Y-Axis was measured in' 000s, in a simplistic provisioned scenario,
 
 The `estimate for this workload on DynamoDB <https://calculator.scylladb.com/?pricing=provisioned&storageGB=512&itemSizeB=1024&tableClass=standard&ratio=50&baselineReads=1000&baselineWrites=125000&peakReads=1000&peakWrites=306000&peakDurationReads=0&peakDurationWrites=6&reserved=0&readConst=100>`_ is around **$80,000/month** in Provisioned mode.
 
-In comparison, a cluster of 9 nodes of i4i.xlarge would cost around **$3000/month**. This cluster could sustain up to 175k ops/sec with peaks up to 270k ops/sec. Y ou can start to see why we say that DynamoDB is expensive. This is a huge difference in cost for the same workload, especially for write heavy workloads.
+In comparison, a cluster of 9 nodes of i4i.xlarge would cost around **$3000/month**. This cluster could sustain up to 175k ops/sec with peaks up to 270k ops/sec.
+
+.. raw:: html
+
+    <p class="mark">
+This underscores just how expensive DynamoDB can be, especially for write-heavy workloads.
+</[\p>
 
 Reserved Capacity Scenario
 ==========================
@@ -90,9 +96,9 @@ A Note on Auto Scaling
 
 DynamoDB’s auto scaling for provisioned tables adjusts capacity automatically based on usage patterns and configured parameters. It allows you to scale capacity throughout the day without manual intervention. This can be seen in the graph above, where the blue line represents the provisioned capacity and the orange line represents the consumed capacity. The difference between the two represents both wasted resources and a buffer to prevent throttling.
 
-However, auto scaling still results in some level of over-provisioning. You’ll need to fine-tune the trade-off between excess capacity and acceptable levels of throttling to align with your workload characteristics. It's certainly possible to autoscale around perfectly sinusoidal traffic patterns, but it requires a lot of tuning and testing. This is not something you can just set and forget.
+Even with auto scaling, over-provisioning is unavoidable. You’ll need to fine-tune the trade-off between excess capacity and acceptable levels of throttling to align with your workload characteristics. It's certainly possible to autoscale around perfectly sinusoidal traffic patterns, but it requires a lot of tuning and testing. This is not something you can just set and forget.
 
-All of these pricing models with DynamoDB are complex and require careful planning and forecasting to ensure that you reserve the right amount of capacity. If you’re not careful, you could end up with a lot of wasted resources and a high bill. Conversely, if you under-provision, you could end up with throttled requests and a bad user experience. This is why we recommend using our `DynamoDB Cost Calculator <https://calculator.scylladb.com>`_ to simulate your workloads and get a better understanding of your costs.
+DynamoDB’s pricing models are complex and require precise planning to avoid costly over- or under-provisioning. If you’re not careful, you could end up with a lot of wasted resources and a high bill. Conversely, if you under-provision, you could end up with throttled requests and a bad user experience. This is why we recommend using our `DynamoDB Cost Calculator <https://calculator.scylladb.com>`_ to simulate your workloads and get a better understanding of your costs.
 
 The reason ScyllaDB is so much more competitive is that it uses a different pricing model. ScyllaDB charges based on the number of nodes in your cluster, not the amount of capacity you provision up front or the number individual requests you consume. While it's true ScyllaDB is a form of over-provisioning, it is much more predictable and manageable. You can start with a small cluster and scale up as needed, without worrying about over-provisioning or under-provisioning of individual requests.
 
@@ -144,7 +150,7 @@ DAX Scenario
 
 Another cost amplifier of DynamoDB is DAX. This is a caching layer that sits in front of your DynamoDB tables and can help reduce the number of read requests to DynamoDB. However, it also comes with its own costs.
 
-DAX is charged based on the number of DAX nodes you provision and the amount of data stored in the cache. The cost of DAX can add up quickly, especially if you have a lot of data being cached.
+DAX costs scale with the number of provisioned nodes and cached data volume. DAX costs scale with the number of provisioned nodes and cached data volume.
 
 To illustrate this, we will use a customer example. They had a workload with the following characteristics:
 
@@ -189,7 +195,7 @@ Estimating the cost of DAX upfront is difficult, as it depends on the number of 
 
 You can use our `DynamoDB Cost Calculator <https://calculator.scylladb.com>`_ to simulate your workloads and get a better understanding of your costs, including DAX. Our calculator uses DAX cluster sizing to approximate the cost of DAX based on the number of nodes you provision and the amount of data stored in the cache [#r5]_. This can help you get a better understanding of your costs.
 
-By using ScyllaDB, you can avoid the costs associated with DAX and still get the cache performance you need. ScyllaDB has a built-in caching layer that is automatically managed and does not require any additional provisioning or configuration. This can help you reduce your costs and simplify your architecture. Read our :doc:`DAX Caching <dax>` guide to see how DAX compares to ScyllaDB.
+By using ScyllaDB, you can avoid the costs associated with DAX and still get the cache performance you need. ScyllaDB has a built-in caching layer that is automatically managed and does not require any additional provisioning or configuration. This reduces both operational complexity and cost. Read our :doc:`DAX Caching <dax>` guide to see how DAX compares to ScyllaDB.
 
 .. rubric:: **References**
 
