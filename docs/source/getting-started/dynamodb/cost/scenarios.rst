@@ -45,7 +45,7 @@ As a rough estimate we will assume the following:
 * Baseline of 1,000 reads/sec for the nighttime period, plus a baseline of 3,000 reads/sec for the daytime period. The 24 hour period average averages to 2,000 reads/sec.
 * A much more variable read pattern with peaks between 3,000 and 5,000 reads/sec for the daytime averages to 4,000 for at least 6 hours a day.
 
-The `estimate for this workload on DynamoDB <https://calculator.scylladb.com/?pricing=demand&storageGB=512&itemSizeB=1024&tableClass=standard&ratio=50&baselineReads=2000&baselineWrites=2000&peakReads=4000&peakWrites=6000&peakDurationReads=6&peakDurationWrites=4&reserved=0&readConst=100>`_ is around **$5,300/month** in On Demand mode.
+The `estimate for this On Demand workload on DynamoDB <https://calculator.scylladb.com/?pricing=demand&storageGB=512&itemSizeB=1024&tableClass=standard&ratio=50&baselineReads=2000&baselineWrites=2000&peakReads=4000&peakWrites=6000&peakDurationReads=6&peakDurationWrites=4&reserved=0&readConst=100>`_ is around **$5,300/month** in On Demand mode.
 
 ScyllaDB's `smallest cluster configuration would be 3 nodes of i3en.xlarge <https://www.scylladb.com/product/scylla-cloud/get-pricing?reads=10000&writes=10000&itemSize=1&storage=1&cloudProvider=AWS>`_, which would cost around **$3,196/month**. This cluster can easily sustain up to 58,000 ops/sec with peaks up to 90,000 ops/sec. This is more than enough for the 6,000 writes/sec and 4,000 reads/sec in this scenario.
 
@@ -66,7 +66,7 @@ Because traffic patterns are typically more predictable within an hour or day, y
 
 Assuming the Y-Axis was measured in thousands ('000s), in a simplistic provisioned scenario, you might provision 125,000 ops/sec for the baseline, plus 250,000 ops/sec to cover 2 peaks of roughly 6 hours total duration. This chart only shows writes, so we'll set near zero for reads.
 
-The `estimate for this workload on DynamoDB <https://calculator.scylladb.com/?pricing=provisioned&storageGB=512&itemSizeB=1024&tableClass=standard&ratio=50&baselineReads=1000&baselineWrites=125000&peakReads=1000&peakWrites=306000&peakDurationReads=0&peakDurationWrites=6&reserved=0&readConst=100>`_ is around **$80,000/month** in Provisioned mode.
+The `estimate for this Provisioned workload on DynamoDB <https://calculator.scylladb.com/?pricing=provisioned&storageGB=512&itemSizeB=1024&tableClass=standard&ratio=50&baselineReads=1000&baselineWrites=125000&peakReads=1000&peakWrites=306000&peakDurationReads=0&peakDurationWrites=6&reserved=0&readConst=100>`_ is around **$80,000/month** in Provisioned mode.
 
 In comparison, `a cluster of 9 nodes of i4i.large <https://www.scylladb.com/product/scylla-cloud/get-pricing?reads=10000&writes=110000&itemSize=1&storage=1&cloudProvider=AWS>`_ would cost around **$3,025/month**. This cluster could sustain up to 175,000 ops/sec with peaks up to 270,000 ops/sec.
 
