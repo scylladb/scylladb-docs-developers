@@ -1,9 +1,8 @@
-DAX Caching
------------
-
 .. meta::
    :description: Understand when DynamoDB DAX caching is worth it—and when it’s not. Explore performance trade-offs, cost implications, cache limitations, and how it compares to ScyllaDB’s built-in row cache.
 
+DAX Caching
+-----------
 
 .. image:: ../images/dax-light.png
     :alt: DAX

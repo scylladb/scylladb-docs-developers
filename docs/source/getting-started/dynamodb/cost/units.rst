@@ -1,7 +1,8 @@
-Understanding Cost Units
-------------------------
 .. meta::
    :description: Understand how DynamoDB pricing units—such as read, write, and storage—affect costs across On Demand, Provisioned, and Reserved Capacity models. See how the nuances of cost units like RCUs, WCUs, and storage impact your DynamoDB costs.
+
+Understanding Cost Units
+------------------------
 
 .. image:: ../images/units-light.png
     :alt: DynamoDB Cost Units Pricing

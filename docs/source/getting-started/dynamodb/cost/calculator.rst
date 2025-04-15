@@ -1,4 +1,5 @@
 :hide-secondary-sidebar:
+
 .. meta::
    :description: Advanced DynamoDB cost calculator for real-world workloads, with bursty traffic, Global Tables, DAX, and more. Geared for developers who need accurate cost estimates fast.
 

@@ -1,4 +1,5 @@
 :hide-secondary-sidebar:
+
 .. meta::
    :description: Struggling with DynamoDB pricing complexity? Use our DynamoDB Cost Calculator to estimate real-world costs, compare with ScyllaDB, and uncover hidden cost drivers. Fast, accurate, and built for developers.
 

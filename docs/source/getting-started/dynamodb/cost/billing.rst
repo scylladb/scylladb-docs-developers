@@ -1,7 +1,8 @@
-How Request Patterns Lead to DynamoDB Billing Surprises
--------------------------------------------------------
 .. meta::
    :description: Learn how DynamoDB request patterns drive unexpected costs. From traffic spikes to TTL deletes, Global Tables, and DAX—understand hidden billing risks and how to manage them.
+
+How Request Patterns Lead to DynamoDB Billing Surprises
+-------------------------------------------------------
 
 .. image:: ../images/billing-light.png
     :alt: Billing
