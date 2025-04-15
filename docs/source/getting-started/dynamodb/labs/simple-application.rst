@@ -379,7 +379,10 @@ The goal of Alternator is to provide a fully compatible DynamoDB API, so that us
       :class: hide-copy-button
 
       Responses
-      mutant_data : [{'last_name': 'Jeffries', 'address': '1211 Hollywood Lane', 'first_name': 'Jim'}, {'last_name': 'Loblaw', 'address': '1313 Mockingbird Lane', 'first_name': 'Bob'}]
+      mutant_data : [
+        {'last_name': 'Jeffries', 'address': '1211 Hollywood Lane', 'first_name': 'Jim'},
+        {'last_name': 'Loblaw', 'address': '1313 Mockingbird Lane', 'first_name': 'Bob'}
+      ]
       ...
       HTTPStatusCode : 200
 
