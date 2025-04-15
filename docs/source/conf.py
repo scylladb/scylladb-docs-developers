@@ -99,6 +99,10 @@ html_theme_path = ["../.."]
 # They are copied to the output’s _static directory.
 html_static_path = ["_static"]
 
+html_js_files = [
+    'js/heap.js',
+]
+
 html_css_files = [
     'css/custom.css',
 ]# Theme options are theme-specific and customize the look and feel of a theme
