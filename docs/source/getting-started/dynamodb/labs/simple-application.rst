@@ -18,7 +18,7 @@ The goal of Alternator is to provide a fully compatible DynamoDB API, so that us
       <iframe width="1140"
        height="640"
        sandbox="allow-forms allow-modals allow-popups allow-same-origin allow-scripts allow-popups-to-escape-sandbox"
-       src="https://play.instruqt.com/embed/scylladb/tracks/alternator-getting-started?token=em_OBJmJZ1tHYu_9K4K" style="border: 0;"
+       src="https://play.instruqt.com/embed/scylladb/tracks/alternator-getting-started?token=em_OBJmJZ1tHYu_9K4K&show_description=true" style="border: 0;"
        allowfullscreen>
       </iframe>
 
