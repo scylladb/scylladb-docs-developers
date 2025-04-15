@@ -11,7 +11,7 @@ The goal of Alternator is to provide a fully compatible DynamoDB API, so that us
 
 .. tabs::
 
-  .. group-tab:: Try It
+  .. group-tab:: Hands On
 
     .. raw:: html
 
@@ -22,7 +22,7 @@ The goal of Alternator is to provide a fully compatible DynamoDB API, so that us
        allowfullscreen>
       </iframe>
 
-  .. group-tab:: Walk Through
+  .. group-tab:: Screen Cast
 
     .. raw:: html
 
@@ -35,9 +35,39 @@ The goal of Alternator is to provide a fully compatible DynamoDB API, so that us
            </iframe>
        </div>
 
-  .. group-tab:: Code Examples Used
+  .. group-tab:: ASCII Cast
 
-    Run a single node container with ScyllaDB and Alternator enabled.
+    Welcome to this interactive lab on ScyllaDB Alternator, ScyllaDB’s DynamoDB-compatible API.
+
+    In this lab, we’ll deploy a ScyllaDB container with Alternator enabled, use the AWS CLI to interact with it, and run a simple Python app using the AWS SDK — specifically, boto3.
+
+    Let’s jump in.
+
+    ScyllaDB Alternator is a drop-in replacement for DynamoDB, providing API compatibility.
+
+    If you already have apps written against DynamoDB, you can point them at Alternator without changing the client code.
+
+    Why does this matter?
+
+    Three key reasons:
+
+    * Cost: DynamoDB bills you per operation — read and write units. ScyllaDB doesn’t.
+    * Performance: ScyllaDB is written in modern C++. It runs shard-per-core, uses async I/O, and gives you low-latency, high-throughput access.
+    * Flexibility: Run it anywhere — AWS, GCP, Azure, or on-prem.
+
+    Alternator is built into ScyllaDB, no separate component needed.
+
+    More info is in the docs and on the developers site — links are in the lab instructions.
+
+    Let’s kick things off by launching a ScyllaDB container with Alternator enabled.
+
+    We’re using Docker here to spin up a one-node ScyllaDB instance. This is strictly for learning — don’t use this setup in production.
+
+    For production-grade deployments, check ScyllaDB’s `requirements <https://docs.scylladb.com/manual/stable/getting-started/requirements.html>`_ and `best practices <https://docs.scylladb.com/manual/stable/operating-scylla/procedures/tips/index.html>`_. Links are there for you in the lab.
+
+    **Step 1: Run the Container**
+
+    Paste this into your terminal tab:
 
     .. code-block:: shell
 
@@ -49,13 +79,88 @@ The goal of Alternator is to provide a fully compatible DynamoDB API, so that us
         --overprovisioned 1 \
         --smp 1 --memory 1G
 
-    Check the status of the node.
+    This does a few things:
+
+    * Launches the ``scylladb/scylla:2025.1.0`` image
+    * Exposes port ``8000`` — that’s where Alternator will listen
+    * Configures write isolation to only use LWT for conditional writes
+    * Restricts the container to 1 CPU and 1 GB RAM
+    * Tells ScyllaDB to behave nicely on resource-constrained environments
+
+    Once the container starts, you’ll see a long hash — that’s the Docker container ID.
+
+    **Step 2: Check Cluster Status**
+
+    Next, let’s confirm that ScyllaDB is actually up and running:
 
     .. code-block:: shell
 
       docker exec -it scylla-node1 nodetool status
 
-    Create a table.
+    You should see something like this:
+
+    .. code-block:: shell
+      :class: hide-copy-button
+
+      Status=Up/Down
+      |/ State=Normal/Leaving/Joining/Moving
+      UN 172.17.0.2 ... rack1
+
+    The key part here is ``UN`` — Up and Normal. That’s the healthy state we want.
+
+    **Step 3: Understanding the Parameters**
+
+    Let’s quickly break down what each part of the docker run command is doing:
+
+    * ``--name scylla-node1``: Gives the container a fixed name. Useful for repeated interactions.
+    * ``-p 8000:8000``: Maps port ``8000`` from the container to your host — so we can interact with Alternator from the outside.
+    * ``-d scylladb/scylla:2025.1.0``: Specifies the image to run.
+    * ``--alternator-port=8000``: Enables the Alternator API on port 8000.
+    * ``--alternator-write-isolation=only_rmw_uses_lwt``: Only use LWT for read-modify-write or conditional updates.
+    * ``--overprovisioned 1``: Reduces ScyllaDB’s resource footprint. No core pinning or aggressive polling.
+    * ``--smp 1``: Use a single CPU core.
+    * ``--memory 1G``: Cap RAM usage at 1 GB — enough for this lab.
+
+    You can read more about these and other ScyllaDB options in the `config reference <https://docs.scylladb.com/manual/stable/reference/configuration-parameters.html>`_.
+
+    **Wrap-up for this Challenge**
+
+    At this point, you’ve got a one-node ScyllaDB instance running locally with Alternator exposed on port 8000. Next up, we’ll use the AWS CLI to interact with this instance like it’s DynamoDB.
+
+    Let’s move on to the next challenge.
+
+    Now that we have our ScyllaDB container with Alternator running, let’s see how we can interact with it using the AWS CLI.
+
+    Because Alternator is DynamoDB API-compatible, anything that works with DynamoDB works here — that includes the CLI and SDKs.
+
+    **Step 1: AWS CLI Installation (Optional)**
+
+    In this lab environment, AWS CLI is already installed. But here’s how you’d install it on a Debian-based system like Ubuntu:
+
+    .. code-block:: shell
+
+      sudo apt install -y unzip curl
+      curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
+      unzip awscliv2.zip
+      sudo ./aws/install
+
+    For other OSes, just check the `AWS CLI docs <https://docs.aws.amazon.com/cli/latest/userguide/install-cliv2.html>`_.
+
+    **Step 2: Set Environment Variables**
+
+    Next, let’s prep the environment so the CLI knows how to connect.
+
+    .. code-block:: shell
+
+      export AWS_DEFAULT_REGION=local
+      export AWS_ACCESS_KEY_ID=foo
+      export AWS_SECRET_ACCESS_KEY=bar
+
+    Even though Alternator doesn’t do any actual authentication by default, the CLI still expects these to be set.
+
+    **Step 3: Create a Table**
+
+    Let’s create a DynamoDB-style table using the CLI — and point it at our local Alternator instance:
 
     .. code-block:: shell
 
@@ -66,7 +171,15 @@ The goal of Alternator is to provide a fully compatible DynamoDB API, so that us
         --provisioned-throughput ReadCapacityUnits=1,WriteCapacityUnits=1 \
         --endpoint http://localhost:8000
 
-    Insert an item.
+    Even though Alternator ignores provisioned throughput, we still need to include the ``ReadCapacityUnits`` and ``WriteCapacityUnits`` — the CLI requires them.
+
+    Also, note the ``--endpoint`` flag — everything points to ``localhost:8000`` because that’s where Alternator is listening.
+
+    You should see a JSON response with ``"TableStatus": "ACTIVE"`` — that means it worked.
+
+    **Step 4: Put an Item**
+
+    Now let’s insert some data into that table:
 
     .. code-block:: shell
 
@@ -79,7 +192,11 @@ The goal of Alternator is to provide a fully compatible DynamoDB API, so that us
           }' \
         --endpoint http://localhost:8000
 
-    Query the table.
+    This inserts one item into ``MusicCollection``.
+
+    **Step 5: Query the Table**
+
+    Let’s now query using both the **partition key** and the **sort key**, with a ``KeyConditionExpression``:
 
     .. code-block:: shell
 
@@ -91,14 +208,87 @@ The goal of Alternator is to provide a fully compatible DynamoDB API, so that us
           }' \
       --endpoint http://localhost:8000
 
-    Delete the table.
+    You should get back the item we just inserted, along with some metadata like ``Count`` and ``ScannedCount``.
+
+    **Step 6: Delete the Table**
+
+    Finally, let’s clean up by deleting the table we just created:
 
     .. code-block:: shell
 
       aws dynamodb delete-table --table-name MusicCollection \
         --endpoint http://localhost:8000
 
-    Create a table using Python.
+    This deletes the table from our local Alternator instance — just like you would with a real DynamoDB endpoint.
+
+    **Wrap-up for this Challenge**
+
+    And that’s it.
+
+    You just created, queried, and deleted a table in ScyllaDB Alternator — using nothing but the AWS CLI.
+
+    In the next challenge, we’ll do the same thing from code, using Python and boto3.
+
+    Let’s go.
+
+    We’ve already interacted with ScyllaDB Alternator using the AWS CLI.
+
+    Now, let’s do the same from code — using Python and the boto3 SDK, which is AWS’s official SDK for Python.
+
+    **Step 1: Install boto3 (Optional)**
+
+    All dependencies are already installed in this lab environment. But here’s how you’d install boto3 on your own machine:
+
+    For Debian-based systems:
+
+    .. code-block:: shell
+
+      sudo apt install python3-boto3
+
+    Or, use pip:
+
+    .. code-block:: shell
+
+      pip install boto3
+
+    Once that’s done, you’re ready to go.
+
+    **Step 2: Review Python App Code**
+
+    Let’s open the app.
+
+    Head over to the **Editor tab** and open create.py.
+
+    Focus on lines 3 and 4:
+
+    .. code-block:: python
+      :class: hide-copy-button
+
+      dynamodb = boto3.resource(
+        'dynamodb',
+        endpoint_url='http://localhost:8000',
+        region_name='None',
+        aws_access_key_id='None',
+        aws_secret_access_key='None'
+      )
+
+    This is where the override happens.
+
+    By setting endpoint_url to ``http://localhost:8000``, we’re telling boto3 to skip the real DynamoDB service and talk to our **local Alternator container** instead.
+
+    The other values like region and credentials don’t matter — Alternator doesn’t require authentication by default.
+
+    .. note:: In production, you’ll want to avoid hardcoding a single endpoint — doing so introduces a single point of failure. We’ll cover high-availability setups in a later lab.
+
+    **Step 3: Create the Table**
+
+    .. code-block:: shell
+
+      python3 alternator-getting-started/create.py
+
+    This script will create a table on the Alternator instance using the same schema we used earlier in the CLI section.
+
+    If successful, you’ll see a confirmation message printed to stdout.
 
     .. code-block:: python
 
@@ -126,7 +316,19 @@ The goal of Alternator is to provide a fully compatible DynamoDB API, so that us
 
       print("Finished creating table ", table.table_name ,". Status: ", table.table_status)
 
-    Write an item using Python.
+    **Step 4: Write Data**
+
+    Let’s insert some data now.
+
+    Open write.py in the Editor tab and review what it’s doing — it performs a simple PutItem operation.
+
+    When ready, go to the **Terminal tab** and run it:
+
+    .. code-block:: shell
+
+      python3 alternator-getting-started/write.py
+
+    The script will report that the data was successfully inserted.
 
     .. code-block:: python
 
@@ -161,7 +363,27 @@ The goal of Alternator is to provide a fully compatible DynamoDB API, so that us
       table = dynamodb.Table('mutant_data')
       print("Finished writing to table ", table.table_name)
 
-    Read an item using Python.
+    **Step 5: Read Data**
+
+    Last step: let’s read what we just wrote.
+
+    Open read.py in the **Editor tab**, then run it from the **Terminal tab**:
+
+    .. code-block:: shell
+
+      python3 alternator-getting-started/read.py
+
+    The output will look something like this:
+
+    .. code-block:: shell
+      :class: hide-copy-button
+
+      Responses
+      mutant_data : [{'last_name': 'Jeffries', 'address': '1211 Hollywood Lane', 'first_name': 'Jim'}, {'last_name': 'Loblaw', 'address': '1313 Mockingbird Lane', 'first_name': 'Bob'}]
+      ...
+      HTTPStatusCode : 200
+
+    This confirms that the app queried the table correctly and got the data back from Alternator.
 
     .. code-block:: python
 
@@ -179,3 +401,9 @@ The goal of Alternator is to provide a fully compatible DynamoDB API, so that us
           print (x)
           for y in response[x]:
               print (y,':',response[x][y])
+
+    **Bonus: Read Consistency**
+
+    DynamoDB supports **strong** and **eventual consistency**. ScyllaDB does too — under the hood, it uses ``LOCAL_QUORUM`` for strong reads, and ``LOCAL_ONE`` for eventual.
+
+    If you want a deeper dive on Scylla’s consistency models, check out the `ScyllaDB University courses <https://university.scylladb.com/courses/scylla-essentials-overview/>`_ or the :doc:`Multiple Data Center guide <../guides/multiple-data-centers>`.
