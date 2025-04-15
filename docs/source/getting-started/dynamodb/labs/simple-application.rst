@@ -37,15 +37,11 @@ The goal of Alternator is to provide a fully compatible DynamoDB API, so that us
 
   .. group-tab:: ASCII Cast
 
-    Welcome to this interactive lab on ScyllaDB Alternator, ScyllaDB’s DynamoDB-compatible API.
-
-    In this lab, we’ll deploy a ScyllaDB container with Alternator enabled, use the AWS CLI to interact with it, and run a simple Python app using the AWS SDK — specifically, boto3.
+    Welcome to this interactive lab on ScyllaDB Alternator, ScyllaDB’s DynamoDB-compatible API. In this lab, we’ll deploy a ScyllaDB container with Alternator enabled, use the AWS CLI to interact with it, and run a simple Python app using the AWS SDK — specifically, boto3.
 
     Let’s jump in.
 
-    ScyllaDB Alternator is a drop-in replacement for DynamoDB, providing API compatibility.
-
-    If you already have apps written against DynamoDB, you can point them at Alternator without changing the client code.
+    ScyllaDB Alternator is a drop-in replacement for DynamoDB, providing API compatibility. If you already have apps written against DynamoDB, you can point them at Alternator without changing the client code.
 
     Why does this matter?
 
@@ -55,9 +51,7 @@ The goal of Alternator is to provide a fully compatible DynamoDB API, so that us
     * Performance: ScyllaDB is written in modern C++. It runs shard-per-core, uses async I/O, and gives you low-latency, high-throughput access.
     * Flexibility: Run it anywhere — AWS, GCP, Azure, or on-prem.
 
-    Alternator is built into ScyllaDB, no separate component needed.
-
-    More info is in the docs and on the developers site — links are in the lab instructions.
+    Alternator is built into ScyllaDB, no separate component needed. More info is in the docs and on the developers site — links are in the lab instructions.
 
     Let’s kick things off by launching a ScyllaDB container with Alternator enabled.
 
