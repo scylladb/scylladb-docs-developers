@@ -28,7 +28,15 @@ Getting Started with ScyllaDB
     :class: large-4
     :anchor: Learn more
 
-    Learn how to get started with ScyllaDB, the NoSQL database for data-intensive applications. This guide covers everything from installation to running your first query.
+    Learn how to get started with ScyllaDB, the NoSQL database for data-intensive applications. This guide gets you up and running with ScyllaDB.
+
+.. topic-box::
+    :title: Guide to ScyllaDB Cloud
+    :link: https://cloud.docs.scylladb.com/stable/scylladb-quickstart/index.html
+    :class: large-4
+    :anchor: Learn more
+
+    ScyllaDB Cloud is a fully managed database-as-a-service (DBaaS). This guide covers everything from creating your first cluster to running your first query.
 
 .. topic-box::
     :title: Switching from DynamoDB
@@ -38,13 +46,6 @@ Getting Started with ScyllaDB
 
     Make the switch from DynamoDB to ScyllaDB. This guide covers the differences between the two databases and how to migrate your data.
 
-.. topic-box::
-    :title: Switching from Cassandra
-    :link: dynamodb
-    :class: large-4
-    :anchor: Learn more
-
-    ScyllaDB is compatible with Cassandra, but there are some differences. This guide covers the differences and how to migrate your data.
 
 .. raw:: html
 
