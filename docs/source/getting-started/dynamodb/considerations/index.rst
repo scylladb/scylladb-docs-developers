@@ -1,6 +1,7 @@
 :hide-secondary-sidebar:
 .. meta::
    :description: Explore key considerations when comparing ScyllaDB to DynamoDB, including cost, latency, cloud portability, and architectural efficiency.
+
 Considerations
 --------------
 
