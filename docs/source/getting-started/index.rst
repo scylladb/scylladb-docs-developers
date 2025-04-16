@@ -14,9 +14,6 @@ Getting Started with ScyllaDB
 
 .. title:: Getting Started with ScyllaDB
 
-.. meta::
-  :description: Getting Started with ScyllaDB, the NoSQL database for data-intensive applications. Learn how to get started with ScyllaDB, from installation to running your first query.
-
 .. raw:: html
 
     <div class="topics-grid topics-grid--scrollable grid-container full">
