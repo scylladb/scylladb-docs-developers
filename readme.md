@@ -29,3 +29,4 @@ To build the site, you need to have Sphinx installed.
 To run the site locally, you need to have Sphinx installed.
 
     make -C docs preview
+
