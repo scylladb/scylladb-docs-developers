@@ -11,12 +11,12 @@ The True Cost of DynamoDB
     :hidden:
 
     calculator
+    scenarios
     pricing
     units
     billing
     global-tables
     dax
-    scenarios
 
 If you’re building on DynamoDB, understanding its cost model is critical, especially as workloads scale. But AWS’s pricing complexity often makes that easier said than done. That’s why we built the :doc:`DynamoDB Cost Calculator <calculator>`: a tool that gives you a clear, fast estimate of what your workloads will really cost.
 
