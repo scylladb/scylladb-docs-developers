@@ -29,10 +29,10 @@
       <div class="grid-x grid-margin-x">
 
 .. topic-box::
-  :title: Cloud
+  :title: ScyllaDB Cloud
   :link: https://cloud.scylladb.com/
   :link_target: _self
-  :icon: scylla-icon scylla-icon--cloud
+  :icon: icon-docs-cloud
   :class: large-6
   :anchor: Learn more
 
@@ -42,7 +42,7 @@
   :title: Getting Started
   :link: https://docs.scylladb.com/stable/get-started/
   :link_target: _self
-  :icon: scylla-icon scylla-icon--getting-started
+  :icon: icon-docs-getting-started
   :class: large-6
   :anchor: Learn more
 
@@ -52,7 +52,7 @@
   :title: Labs
   :link: https://scylladb.instruqt.com/pages/virtual-labs
   :link_target: _self
-  :icon: scylla-icon scylla-icon--apps
+  :icon: icon-docs-commands
   :class: large-6
   :anchor: Learn more
 
@@ -62,7 +62,7 @@
   :title: University
   :link: https://university.scylladb.com/
   :link_target: _self
-  :icon: scylla-icon scylla-icon--university
+  :icon: icon-university
   :class: large-6
   :anchor: Learn more
 
