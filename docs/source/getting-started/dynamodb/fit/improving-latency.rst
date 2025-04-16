@@ -1,3 +1,6 @@
+.. meta::
+   :description: Learn how ScyllaDB achieves sub-millisecond latency through shard-per-core architecture, optimized caching, and minimal resource contention..
+
 :hide-secondary-sidebar:
 
 Improving Latency
