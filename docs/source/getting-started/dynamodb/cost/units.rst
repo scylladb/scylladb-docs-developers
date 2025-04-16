@@ -59,8 +59,8 @@ DynamoDB automatically scales storage for your tables based on the size of your 
     For example:
 
     * If you store 1 GB of data in your table, you will be charged for 1 GB of storage.
-    * If you store 1 GB of data in your table and 1 GB of data in an index, you will be charged for 2 GB of storage.
-    * If you store 1 GB of data in your table and 1 GB of data in a backup, you will be charged for 2 GB of storage.
+    * If you store 1 GB of data in your table and 1 GB of data in a (global secondary) index [#r1]_, you will be charged for 2 GB of storage.
+    * If you store 1 GB of data in your table and 1 GB of data in a backup [#r2]_, you will be charged for 2 GB of storage.
 
 Item Size Explained
 ===================
@@ -130,3 +130,8 @@ DynamoDB Accelerator (DAX) is a fully managed, in-memory caching service for Dyn
 .. note::
 
     ScyllaDB implements a similar caching mechanism called `ScyllaDB Cache <https://docs.scylladb.com/architecture/scylla-cache/>`_ that is designed to improve the performance of read-heavy workloads. However, ScyllaDB does not charge for caching, as it is included in the overall cost of running ScyllaDB. Refer to our guide on :doc:`DAX Caching <dax>` for more information.
+
+.. rubric:: **References**
+
+.. [#r1] `Global Secondary Index Projections <https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/GSI.html#GSI.Projections>`_: Storage costs based on attributes.
+.. [#r2] `Backup and Restore Billing <https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/backup-restore-billing.html>`_: GB-hour storage costs associated with backups.
