@@ -1,6 +1,5 @@
 .. meta::
-   :description: 
-Explore the differences between ScyllaDB’s native CQL support and its DynamoDB-compatible Alternator API, including schema, load balancing, and protocols.
+   :description: Explore the differences between ScyllaDB’s native CQL support and its DynamoDB-compatible Alternator API, including schema, load balancing, and protocols.
 
 Alternator or CQL
 -----------------
