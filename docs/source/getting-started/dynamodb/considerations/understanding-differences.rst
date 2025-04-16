@@ -1,3 +1,6 @@
+.. meta::
+   :description: Explore technical differences between ScyllaDB and DynamoDB, including query language, transport protocol, consistency model, and monitoring tools.
+
 Understanding Differences
 -------------------------
 
