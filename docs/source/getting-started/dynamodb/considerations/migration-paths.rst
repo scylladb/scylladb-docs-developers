@@ -1,3 +1,6 @@
+.. meta::
+   :description: Explore migration paths from DynamoDB to ScyllaDB via Alternator or CQL. Understand compatibility, required changes, and performance considerations.
+
 Migration Paths
 ---------------
 
