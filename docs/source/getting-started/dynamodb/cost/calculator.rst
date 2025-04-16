@@ -30,5 +30,4 @@ Short answer: Because teams comparing DynamoDB costs with ScyllaDB costs report 
 
 To enable simpler, more accurate comparisons, we designed something a bit different. 
 
-Long answer: See `the intro page <index.html>`. 
-
+Long answer: See :doc:`the intro page <index>`.
