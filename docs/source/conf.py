@@ -34,7 +34,8 @@ extensions = [
     "sphinx_sitemap",
     "sphinx_scylladb_theme",
     "sphinx_multiversion",
-    'ext.card_box'
+    'ext.card_box',
+    'ext.signup',
 ]
 
 # The suffix(es) of source filenames.

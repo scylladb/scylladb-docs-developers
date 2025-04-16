@@ -152,77 +152,16 @@ For more detailed information, see our `installation instructions. <https://open
 
 For more detailed information, see our `full list of drivers. <https://opensource.docs.scylladb.com/master/using-scylla/drivers/cql-drivers/index.html>`_
 
+.. signup::
+   :action: https://lp.scylladb.com/l/934963/2024-09-04/bv9ry
+   :title: Sign up for our product updates
+   :body: Stay ahead with the latest tutorials, guides, news and events from ScyllaDB.
+   :placeholder: Enter your email
+   :button_text: Subscribe Now
+   :privacy_policy_url: https://www.scylladb.com/privacy/
+
 .. raw:: html
 
-            <div class="topic-box__head" id="signup">
-              <h1 class="topic-box__title">Sign up for our product updates</h1>
-            </div>
-            <div class="topic-box__body" id="signup_body">
-              <p>Stay ahead with the latest tutorials, guides, news and events from ScyllaDB.</p>
-              <div class="docutils container">
-                <form accept-charset="UTF-8" method="post" action="https://lp.scylladb.com/l/934963/2024-09-04/bv9ry" class="form" id="pardot-form" autocomplete="off">
-                  <p class="form-field email pd-text required">
-                    <input type="text" name="email" id="email" value="" class="text" size="30" maxlength="255" placeholder="Company Email *" autocomplete="off">
-                  </p>
-                  <p class="form-field utm_campaign pd-hidden hidden">
-                    <input type="hidden" name="utm_campaign" id="utm_campaign" value="">
-                  </p>
-                  <p class="form-field utm_medium pd-hidden hidden">
-                    <input type="hidden" name="utm_medium" id="utm_medium" value="">
-                  </p>
-                  <p class="form-field utm_source pd-hidden hidden">
-                    <input type="hidden" name="utm_source" id="utm_source" value="">
-                  </p>
-                  <p class="form-field source_type pd-hidden hidden">
-                    <input type="hidden" name="source_type" id="source_type" value="">
-                  </p>
-                  <p class="form-latest_sfdc_campaign utm_term pd-hidden hidden">
-                    <input type="hidden" name="latest_sfdc_campaign" id="latest_sfdc_campaign" value="">
-                  </p>
-                  <p class="form-field campaign_status pd-hidden hidden">
-                    <input type="hidden" name="campaign_status" id="campaign_status" value="">
-                  </p>
-                  <input name="_utf8" type="hidden" value="☃">
-                  <p class="submit">
-                    <input type="submit" accesskey="s" value="Subscribe">
-                  </p>
-                  <div class="onboard-form__field onboard-form__field--checkbox">
-                    <input name="opt_in_consent" id="opt_in_consent" type="checkbox" class="form-input" value="Yes">
-                    <label for="opt_in_consent">Yes, I wish to receive future informational and marketing communications from ScyllaDB, and I understand and agree to the <a href="https://www.scylladb.com/privacy/"><b>privacy policy</b></a>.</label>
-                  </div>
-                </form>
-                <script>
-                  document.getElementById('pardot-form').addEventListener('submit', function(event) {
-                    document.getElementById('pardot-form').style.display = 'none';
-                    document.getElementById('signup').style.display = 'none';
-                    document.getElementById('signup_body').style.display = 'none';
-                    document.cookie = "formSubmitted=true; path=/; max-age=" + (60 * 60 * 24 * 365); // Cookie expires in 365 days
-                  });
-
-                  window.addEventListener('load', function() {
-                    if (document.cookie.split(';').some((item) => item.trim().startsWith('formSubmitted='))) {
-                      document.getElementById('pardot-form').style.display = 'none';
-                      document.getElementById('signup').style.display = 'none';
-                      document.getElementById('signup_body').style.display = 'none';
-                    }
-                  });
-                </script>
-                <script>
-                  function getParameterByName(name) {
-                    name = name.replace(/[\[]/, "\\[").replace(/[\]]/, "\\]");
-                    var regex = new RegExp("[\\?&]" + name + "=([^&#]*)"),
-                    results = regex.exec(location.search);
-                    return results === null ? "" : decodeURIComponent(results[1].replace(/\+/g, " "));
-                  }
-                  var source = getParameterByName('utm_source');
-                  var medium = getParameterByName('utm_medium');
-                  var campaign = getParameterByName('utm_campaign');
-                  document.querySelector("p.utm_source input").value = source;
-                  document.querySelector("p.utm_medium input").value = medium;
-                  document.querySelector("p.utm_campaign input").value = campaign;
-                </script>
-              </div>
-            </div>
           </div>
         </div>
       </div>
