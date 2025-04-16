@@ -20,4 +20,4 @@ ScyllaDB is purpose-built to deliver predictable low latency for data-intensive 
 
 By tuning the system and optimizing how data is accessed and processed, ScyllaDB excels in scenarios like time-series data retrieval, real-time analytics, and high-frequency updates, where low latency is a fundamental requirement.
 
-ScyllaDB leverages a specialized cache implementation, which reduces reliance on external caching systems. This simplifies infrastructure and improves latency by maximizing the use of memory per core.
+ScyllaDB leverages a built in cache, which reduces reliance on external caching systems. This simplifies infrastructure and improves latency by maximizing the use of memory per core.
