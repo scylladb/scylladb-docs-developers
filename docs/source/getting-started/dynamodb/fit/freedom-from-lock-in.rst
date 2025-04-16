@@ -1,3 +1,6 @@
+.. meta::
+   :description: Migrate off AWS without refactoring. ScyllaDB supports DynamoDB and Cassandra APIs, enabling freedom across clouds and bare-metal deployments.
+
 :hide-secondary-sidebar:
 
 Freedom from Cloud Vendor Lock-in
