@@ -1,3 +1,6 @@
+.. meta::
+   :description: How ScyllaDB reduces costs for data-intensive applications, particularly with write-heavy workloads and moderate to high throughput. 
+
 :hide-secondary-sidebar:
 
 Reducing Costs
