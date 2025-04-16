@@ -1,4 +1,7 @@
-Is It Right for My Project?
+.. meta::
+   :description: Is ScyllaDB right for you? Assess based on workload patterns, throughput, latency needs, and schema flexibility to see if your use case falls into its "sweet spot."
+
+Is ScyllaDB Right for My Project?
 ---------------------------
 
 .. toctree::
