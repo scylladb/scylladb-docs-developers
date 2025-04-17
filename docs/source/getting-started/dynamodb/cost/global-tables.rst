@@ -42,7 +42,7 @@ When to Avoid Global Tables
 Global Tables come with architectural constraints and hidden complexity. Avoid them when:
 
 #. You need precise conflict resolution.
-    LWW is lossy. If two clients write to the same item in different regions within the same second, one will be silently dropped. ScyllaDB gives you full control with tunable consistency and conflict resolution. DynamoDB does not.
+    LWW is lossy [#r1]_. If two clients write to the same item in different regions within the same second, one will be silently dropped. ScyllaDB gives you full control with tunable consistency and conflict resolution. DynamoDB does not.
 
 #. You require strong consistency guarantees.
     Global Tables offer only eventual consistency across regions. If you need guarantees like quorum reads/writes (as in ScyllaDB’s tunable consistency), you won’t get them from DynamoDB.
@@ -123,3 +123,7 @@ ScyllaDB offers a more flexible and cost-effective solution for multi region app
 
 #. No vendor lock-in.
     ScyllaDB runs anywhere, from any public cloud to on-premise. You’re not tied to AWS infrastructure or pricing models.
+
+.. rubric:: **References**
+
+.. [#r1] `Global Table Prescriptive Guidance <https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/bp-global-table-design.html#bp-global-table-design.prescriptive-guidance.facts`_: Key facts about DynamoDB global table design
