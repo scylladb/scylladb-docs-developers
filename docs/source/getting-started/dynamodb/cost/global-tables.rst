@@ -126,4 +126,4 @@ ScyllaDB offers a more flexible and cost-effective solution for multi region app
 
 .. rubric:: **References**
 
-.. [#r1] `Global Table Prescriptive Guidance <https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/bp-global-table-design.html#bp-global-table-design.prescriptive-guidance.facts`_: Key facts about DynamoDB global table design
+.. [#r1] `Global Table Prescriptive Guidance <https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/bp-global-table-design.html#bp-global-table-design.prescriptive-guidance.facts>`_: Key facts about DynamoDB global table design
