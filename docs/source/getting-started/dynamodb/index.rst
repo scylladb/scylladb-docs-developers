@@ -27,7 +27,7 @@ Ditch the DynamoDB Tax
 
 ScyllaDB is a cost-effective and flexible alternative to DynamoDB – at least 50% lower cost and lower latency under most workloads. This exceptional price-performance results from a close-to-the-metal architecture and numerous engineering optimizations for performance, elasticity, and efficiency. Another advantage: with ScyllaDB, you can take your DynamoDB workloads beyond AWS and run on any cloud, bare metal, or hybrid.
 
-To simplify migration, we offer ScyllaDB Alternator, an open-source DynamoDB-compatible API. You redirect your application to ScyllaDB and it “just works” (actually, it listens on a specific port that understands the DynamoDB API). In most cases, minimal code changes are required.
+To simplify migration, we offer ScyllaDB Alternator, a DynamoDB-compatible API. You redirect your application to ScyllaDB and it “just works” (actually, it listens on a specific port that understands the DynamoDB API). In most cases, minimal code changes are required.
 
 .. raw:: html
 
