@@ -8,46 +8,43 @@ On Demand Scenario
 
 When optimizing for cost, AWS advises [#r1]_ that the On Demand mode is ideal for workloads with the following characteristics:
 
-* Evolving traffic patterns over time
-* Fluctuating request volumes (e.g., due to batch processing)
-* Unpredictable request timing, leading to traffic spikes
-* Utilization that drops to zero or below 30% of peak within a given hour
+* Traffic volumes that shift significantly throughout the day or week
+* Large swings in request load, such as those triggered by batch jobs or user behavior
+* Irregular or bursty access patterns that make it hard to predict usage
+* Periods of extremely low usage, often dipping below 30% of the daily peak
 
-The example graphs below illustrate this type of workload.
+The example graph below illustrates this type of workload.
 
-.. image:: ../images/demand-wcu.png
-    :alt: Demand WCU
+.. image:: ../images/demand-request-units.png
+    :alt: Demand Request Units
 
-This graph shows Write Capacity Units (WCUs) over time. To convert this to ops/sec, we know that 1 WCU = 1 write per second, so assuming the writes are ≤ 1 KB:
+This graph shows the total number of read request units in blue and write request units in orange over a 24 hour period. To convert this to ops/sec, we know that 1 read request unit = 1 read per second for an item up to 4 KB in size. So assuming this is making strongly consistent reads and the reads are ≤ 4 KB:
 
-* At the peak we can observe ~12,000 writes/sec.
-* In quieter periods it’s ~1,000 writes/sec.
+* At the peak we can observe ~180,000 reads/sec.
+* During the daytime period we can observe ~100,000 reads/sec.
+* In quieter periods it drops to ~10,000 reads/sec.
 
-.. image:: ../images/demand-rcu.png
-    :alt: Demand RCU
+For the writes, we know that 1 write request unit = 1 write per second for an item up to 1 KB in size. So assuming the writes are ≤ 1 KB:
 
-This graph shows Read Capacity Units (RCUs) over time. To convert this to ops/sec, we know that 1 RCU = 1 strongly consistent read per second for an item up to 4 KB in size. So assuming you’re making strongly consistent reads and the reads are ≤ 4 KB:
-
-* At the peak we can observe ~5,000 reads/sec.
-* In quieter periods it’s ~1,000 reads/sec.
+* At the peak we can observe ~140,000 writes/sec which is a sustained peak and appears to be an overnight batch job.
+* During the daytime period we can observe ~80,000 writes/sec.
+* In quieter periods it drops to ~10,000 writes/sec.
 
 But what's the cost of this workload in On Demand mode?
 .......................................................
 
-The problem with estimating workloads is the lack of real usage data. The `AWS calculator <https://calculator.aws/#/>`_ only lets you input the average number of reads and writes per second, not the actual usage patterns. This means that if your workload has a lot of spikes or fluctuations, you may end up underestimating your costs.
+The problem with estimating workloads is the lack of real usage data. If you are already using DynamoDB then can use the `AWS Cost Explorer <https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/CostOptimization_TableLevelCostAnalysis.html>`_ to accurately determine costs. If you are not using DynamoDB then using the official `AWS calculator <https://calculator.aws/#/>`_ only lets you input the average number of reads and writes per second, not the actual usage patterns. This means that if your workload has a lot of spikes or fluctuations, you may end up underestimating your costs.
 
 Our `DynamoDB Cost Calculator <https://calculator.scylladb.com>`_ allows you to input a baseline plus a peak usage pattern, which is more accurate.
 
 As a rough estimate we will assume the following:
 
-* Baseline of 1,000 writes/sec for the nighttime period, plus a baseline of 3,000 writes/sec for the daytime period. Assuming a daytime period of 12 hours, the 24 hour period average averages to 2,000 writes/sec.
-* With at least 3 sustained peaks of 6,000 writes/sec for a total 3 hours, plus another short peak of 12,000 writes/sec for 30 minutes, the combined averages to 6,000 writes/sec for 4 hours.
-* Baseline of 1,000 reads/sec for the nighttime period, plus a baseline of 3,000 reads/sec for the daytime period. The 24 hour period average averages to 2,000 reads/sec.
-* A much more variable read pattern with peaks between 3,000 and 5,000 reads/sec for the daytime averages to 4,000 for at least 6 hours a day.
+* Baseline of 60,000 reads/sec average for the 24 hour period, plus a peak of 180,000 reads/sec for 1 hours.
+* Baseline of 60,000 writes/sec average for the 24 hour period, plus a peak of 140,000 writes/sec for 3 hours.
 
-The `estimate for this On Demand workload on DynamoDB <https://calculator.scylladb.com/?pricing=demand&storageGB=512&itemSizeB=1024&tableClass=standard&ratio=50&baselineReads=2000&baselineWrites=2000&peakReads=4000&peakWrites=6000&peakDurationReads=6&peakDurationWrites=4&reserved=0&readConst=100>`_ is around **$5,300/month** in On Demand mode.
+The `estimate for this On Demand workload on DynamoDB <https://calculator.scylladb.com/?pricing=demand&storageGB=512&itemSizeB=1024&tableClass=standard&baselineReads=60000&baselineWrites=60000&peakReads=180000&peakWrites=140000&peakDurationReads=1&peakDurationWrites=3&reserved=0&readConst=100>`_ is around **$136,208/month** in On Demand mode.
 
-ScyllaDB's `smallest cluster configuration would be 3 nodes of i3en.xlarge <https://www.scylladb.com/product/scylla-cloud/get-pricing?reads=10000&writes=10000&itemSize=1&storage=1&cloudProvider=AWS>`_, which would cost around **$3,196/month**. This cluster can easily sustain up to 58,000 ops/sec with peaks up to 90,000 ops/sec. This is more than enough for the 6,000 writes/sec and 4,000 reads/sec in this scenario.
+A ScyllaDB `cluster configuration with 9 nodes of i4i.large <https://www.scylladb.com/product/scylla-cloud/get-pricing/?reads=10000&writes=10000&itemSize=1&storage=1&cloudProvider=AWS>`_, would cost around **$3,025/month**. This cluster could sustain up 175,500 ops/sec with peaks up to 270,000 ops/sec with a significant cost reduction.
 
 Provisioned Scenario
 ====================
