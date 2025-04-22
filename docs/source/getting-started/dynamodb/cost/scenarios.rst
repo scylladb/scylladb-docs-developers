@@ -5,7 +5,7 @@
 Real World Scenarios
 --------------------
 
-This section describes different scenarios that can be used to evaluate the cost of using DynamoDB. Each scenario is designed to describe a different use case and provides a detailed breakdown of the costs associated with each scenario.
+This page uses different scenarios to show the real costs of using DynamoDB. Each scenario is designed to describe a real-world use case and provides a detailed breakdown of the associated costs.
 
 On Demand Scenario
 ==================
@@ -22,28 +22,28 @@ The example graph below illustrates this type of workload.
 .. image:: ../images/demand-request-units.png
     :alt: Demand Request Units
 
-This graph shows the total number of read request units in blue and write request units in orange over a 24 hour period. To convert this to ops/sec, we know that 1 read request unit = 1 read per second for an item up to 4 KB in size. So assuming this is making strongly consistent reads and the reads are ≤ 4 KB:
+This graph shows the total number of read request units (in blue) and write request units (in orange) over a 24 hour period. To convert this to ops/sec, we know that 1 read request unit = 1 read per second for an item up to 4 KB in size. So assuming this is making strongly consistent reads and the reads are ≤ 4 KB:
 
-* At the peak we can observe ~180,000 reads/sec.
-* During the daytime period we can observe ~100,000 reads/sec.
-* In quieter periods it drops to ~10,000 reads/sec.
+* At the peak, we can observe ~180,000 reads/sec.
+* During the daytime period, we can observe ~100,000 reads/sec.
+* In quieter periods, it drops to ~10,000 reads/sec.
 
 For the writes, we know that 1 write request unit = 1 write per second for an item up to 1 KB in size. So assuming the writes are ≤ 1 KB:
 
-* At the peak we can observe ~140,000 writes/sec which is a sustained peak and appears to be an overnight batch job.
-* During the daytime period we can observe ~80,000 writes/sec.
-* In quieter periods it drops to ~10,000 writes/sec.
+* At the peak, we can observe ~140,000 writes/sec. This is a sustained peak and appears to be an overnight batch job.
+* During the daytime period, we can observe ~80,000 writes/sec.
+* In quieter periods, it drops to ~10,000 writes/sec.
 
 But what's the cost of this workload in On Demand mode?
 .......................................................
 
-The problem with estimating workloads is the lack of real usage data. If you are already using DynamoDB then can use the `AWS Cost Explorer <https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/CostOptimization_TableLevelCostAnalysis.html>`_ to accurately determine costs. If you are not using DynamoDB then using the official `AWS calculator <https://calculator.aws/#/>`_ only lets you input the average number of reads and writes per second, not the actual usage patterns. This means that if your workload has a lot of spikes or fluctuations, you may end up underestimating your costs.
+The problem with estimating workloads is the lack of real usage data. If you are already using DynamoDB, then you can use the `AWS Cost Explorer <https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/CostOptimization_TableLevelCostAnalysis.html>`_ to accurately determine costs. If you are not yet using DynamoDB, then you would use the official `AWS calculator <https://calculator.aws/#/>`_, which only lets you input the average number of reads and writes per second, not the actual usage patterns. This means that if your workload has a lot of spikes or fluctuations, you may end up underestimating your costs.
 
-Our `DynamoDB Cost Calculator <https://calculator.scylladb.com>`_ allows you to input a baseline plus a peak usage pattern, which is more accurate.
+Our `DynamoDB Cost Calculator <https://calculator.scylladb.com>`_ allows you to input a baseline plus a peak usage pattern for increased accuracy.
 
-Using raw chart data we can determine the following:
+Using raw chart data, we can determine the following:
 
-* Baseline of 60,000 reads/sec average for the 24 hour period, plus a peak of 180,000 reads/sec for 1 hours.
+* Baseline of 60,000 reads/sec average for the 24 hour period, plus a peak of 180,000 reads/sec for 1 hour.
 * Baseline of 60,000 writes/sec average for the 24 hour period, plus a peak of 140,000 writes/sec for 3 hours.
 
 The `estimate for this On Demand workload on DynamoDB <https://calculator.scylladb.com/?pricing=demand&storageGB=512&itemSizeB=1024&tableClass=standard&baselineReads=60000&baselineWrites=60000&peakReads=180000&peakWrites=140000&peakDurationReads=1&peakDurationWrites=3&reserved=0&readConst=100>`_ is around **$136,208/month** in On Demand mode.
@@ -53,14 +53,14 @@ A ScyllaDB `cluster configuration with 9 nodes of i4i.large <https://www.scyllad
 .. raw:: html
 
     <p class="mark">
-      Estimating costs are hard. The flexibility of On Demand mode is great, but you pay a premium for this. This is because On Demand mode charges per request and if you're not careful, you will pay excessive costs for your workload.</p>
+      Estimating costs is hard. The flexibility of On Demand mode is great, but you pay a premium for this. This is because On Demand mode charges per request... and if you're not careful, you will pay excessive costs for your workload.</p>
 
 Provisioned Scenario
 ====================
 
 When optimizing for cost, AWS advises [#r2]_ that the Provisioned mode is ideal for workloads with the following characteristics:
 
-* Steady, predictable and cyclical traffic for a given hour or day
+* Steady, predictable, and cyclical traffic for a given hour or day
 * Limited short-term bursts of traffic
 
 The following graph illustrates this type of workload.
