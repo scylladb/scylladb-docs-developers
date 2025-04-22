@@ -1,3 +1,7 @@
+:hide-pre-content:
+:hide-post-content:
+:hide-sidebar:
+
 Real World Scenarios
 --------------------
 

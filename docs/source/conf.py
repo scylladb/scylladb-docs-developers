@@ -114,12 +114,11 @@ html_theme_options = {
     "default_branch": "main",
     "hide_edit_this_page_button": "true",
     "hide_feedback_buttons": "true",
-    "github_issues_repository": "scylladb/developers-scylladb-com",
-    "github_repository": "scylladb/developers-scylladb-com",
     "site_description": "ScyllaDB Developers",
     "hide_version_dropdown": ["main"],
     "versions_unstable": UNSTABLE_VERSIONS,
     "versions_deprecated": DEPRECATED_VERSIONS,
+    "hide_versions_dropdown": "true"
 }
 
 # Last updated format
