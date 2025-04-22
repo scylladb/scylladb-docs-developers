@@ -8,10 +8,10 @@ On Demand Scenario
 
 When optimizing for cost, AWS advises [#r1]_ that the On Demand mode is ideal for workloads with the following characteristics:
 
-* Traffic volumes that shift significantly throughout the day or week
-* Large swings in request load, such as those triggered by batch jobs or user behavior
-* Irregular or bursty access patterns that make it hard to predict usage
-* Periods of extremely low usage, often dipping below 30% of the daily peak
+* Traffic volumes that shift significantly throughout the day or week.
+* Large swings in request load, such as those triggered by batch jobs or user behavior.
+* Irregular or bursty access patterns that make it hard to predict usage.
+* Periods of extremely low usage, often dipping below 30% of the daily peak.
 
 The example graph below illustrates this type of workload.
 
@@ -37,14 +37,19 @@ The problem with estimating workloads is the lack of real usage data. If you are
 
 Our `DynamoDB Cost Calculator <https://calculator.scylladb.com>`_ allows you to input a baseline plus a peak usage pattern, which is more accurate.
 
-As a rough estimate we will assume the following:
+Using raw chart data we can determine the following:
 
 * Baseline of 60,000 reads/sec average for the 24 hour period, plus a peak of 180,000 reads/sec for 1 hours.
 * Baseline of 60,000 writes/sec average for the 24 hour period, plus a peak of 140,000 writes/sec for 3 hours.
 
 The `estimate for this On Demand workload on DynamoDB <https://calculator.scylladb.com/?pricing=demand&storageGB=512&itemSizeB=1024&tableClass=standard&baselineReads=60000&baselineWrites=60000&peakReads=180000&peakWrites=140000&peakDurationReads=1&peakDurationWrites=3&reserved=0&readConst=100>`_ is around **$136,208/month** in On Demand mode.
 
-A ScyllaDB `cluster configuration with 9 nodes of i4i.large <https://www.scylladb.com/product/scylla-cloud/get-pricing/?reads=10000&writes=10000&itemSize=1&storage=1&cloudProvider=AWS>`_, would cost around **$3,025/month**. This cluster could sustain up 175,500 ops/sec with peaks up to 270,000 ops/sec with a significant cost reduction.
+A ScyllaDB `cluster configuration with 9 nodes of i4i.large <https://www.scylladb.com/product/scylla-cloud/get-pricing/?reads=60000&writes=60000&itemSize=1&storage=1&cloudProvider=AWS>`_, would cost around **$3,025/month**. This cluster could sustain up 175,500 ops/sec with peaks up to 270,000 ops/sec with a significant cost reduction.
+
+.. raw:: html
+
+    <p class="mark">
+      Estimating costs are hard. The flexibility of On Demand mode is great, but you pay a premium for this. This is because On Demand mode charges per request and if you're not careful, you will pay excessive costs for your workload.</p>
 
 Provisioned Scenario
 ====================
@@ -54,42 +59,43 @@ When optimizing for cost, AWS advises [#r2]_ that the Provisioned mode is ideal 
 * Steady, predictable and cyclical traffic for a given hour or day
 * Limited short-term bursts of traffic
 
-The following example graphs illustrate this type of workload.
+The following graph illustrates this type of workload.
 
-.. image:: ../images/provisioned-wcu.png
-    :alt: Provisioned WCU
+.. image:: ../images/provisioned-capacity-units.png
+    :alt: Provisioned Capacity Units
 
 Because traffic patterns are typically more predictable within an hour or day, you can provision table capacity closer to actual usage. Cost optimization in provisioned capacity mode is about minimizing the gap between provisioned capacity (blue line) and consumed capacity (orange line) without increasing ThrottledRequests. The difference between the two represents both wasted resources and a buffer to prevent throttling. If your application’s throughput is predictable and you value cost control, provisioned tables remain a viable option.
 
-Assuming the Y-Axis was measured in thousands ('000s), in a simplistic provisioned scenario, you might provision 125,000 ops/sec for the baseline, plus 250,000 ops/sec to cover 2 peaks of roughly 6 hours total duration. This chart only shows writes, so we'll set near zero for reads.
+In this provisioned scenario, you might provision 350,000 ops/sec for the baseline, plus 550,000 ops/sec for the peaks lasting at least 12 hours combined.
 
-The `estimate for this Provisioned workload on DynamoDB <https://calculator.scylladb.com/?pricing=provisioned&storageGB=512&itemSizeB=1024&tableClass=standard&ratio=50&baselineReads=1000&baselineWrites=125000&peakReads=1000&peakWrites=306000&peakDurationReads=0&peakDurationWrites=6&reserved=0&readConst=100>`_ is around **$80,000/month** in Provisioned mode.
+Assuming a 50/50 read/write ratio, the `estimate for this Provisioned workload on DynamoDB <https://calculator.scylladb.com/?pricing=provisioned&storageGB=512&itemSizeB=1024&tableClass=standard&baselineReads=175000&baselineWrites=175000&peakReads=275000&peakWrites=275000&peakDurationReads=12&peakDurationWrites=12&reserved=0&readConst=100>`_ is around **$127,853/month** in Provisioned mode.
 
-In comparison, `a cluster of 9 nodes of i4i.large <https://www.scylladb.com/product/scylla-cloud/get-pricing?reads=10000&writes=110000&itemSize=1&storage=1&cloudProvider=AWS>`_ would cost around **$3,025/month**. This cluster could sustain up to 175,000 ops/sec with peaks up to 270,000 ops/sec.
+A ScyllaDB `cluster configuration with 3 nodes of i4i.4xlarge <https://www.scylladb.com/product/scylla-cloud/get-pricing/?reads=175000&writes=175000&itemSize=1&storage=1&cloudProvider=AWS>`_, would cost around **$9,711/month**. This cluster could sustain up 468,000 ops/sec with peaks up to 720,000 ops/sec. More than enough to cover the workload at a fraction of the monthly cost.
 
 .. raw:: html
 
-    <p class="mark">
-      This underscores just how expensive DynamoDB can be, especially for write-heavy workloads.
-    </p>
+    <p class="mark">DynamoDB still charges per request - provisioned capacity just gives you a volume discount. You’re still renting throughput. ScyllaDB charges per core, not per operation. You get predictable performance, linear scale-out, and full control over cost as your workload grows.</p>
 
 Reserved Capacity Scenario
 ==========================
 
-Provisioned with reserved capacity is a good option for workloads that are steady and predictable. It allows you to reserve capacity for a specific period of time, which can help reduce costs. However, it requires careful planning and forecasting to ensure that you reserve the right amount of capacity.
+Provisioned with reserved capacity is a good option for workloads that are steady and predictable. It allows you to reserve capacity for a specific period of time, which can help reduce costs by paying an upfront fee. However, it requires careful planning and forecasting to ensure that you reserve the right amount of capacity.
 
-.. image:: ../images/reserved-wcu.png
-    :alt: Reserved WCU
+.. image:: ../images/reserved-capacity-units.png
+    :alt: Reserved Capacity
 
-This graph shows the difference between reserved capacity (dotted line) and consumed capacity (orange line). The difference between the two represents both wasted resources and a buffer to prevent throttling. If your application’s throughput is predictable and you value cost control, reserved capacity remains a viable option. However, this leads to over-provisioning, which can be costly.
+This graph shows the difference between reserved capacity (dotted line) and consumed capacity (orange line). The difference between the two represents both wasted resources and a buffer to prevent throttling. If your application’s throughput is predictable and you value cost control, reserved capacity remains a viable option. However, this leads to over-provisioning, which can be costly, as you are still paying for the reserved capacity (at the unit level) even if you are not using it.
 
-Assuming a baseline of 300,000 writes/sec and a peak of 600,000 writes/sec for 3 hours a day, the `estimate for this workload on DynamoDB <https://calculator.scylladb.com/?pricing=provisioned&storageGB=512&itemSizeB=1024&tableClass=standard&ratio=50&baselineReads=1000&baselineWrites=300000&peakReads=1000&peakWrites=600000&peakDurationReads=0&peakDurationWrites=3&reserved=100&readConst=100>`_ is around **$450,000 upfront plus $45,000/month** in Provisioned + Reserved capacity mode.
+Assuming a baseline of 300,000 writes/sec and a peak of 450,000 writes/sec for 3 hours a day, the `estimate for this workload on DynamoDB <https://calculator.scylladb.com/?pricing=provisioned&storageGB=512&itemSizeB=1024&tableClass=standard&ratio=50&baselineReads=0&baselineWrites=300000&peakReads=0&peakWrites=450000&peakDurationReads=0&peakDurationWrites=3&reserved=100&readConst=100>`_ is around **$450,000 upfront plus $36,935/month** in Provisioned + Reserved capacity mode.
+
+.. raw:: html
+
+    <p class="mark">
+      This underscores just how expensive DynamoDB can be, especially for write-heavy workloads, even with reserved capacity. The upfront cost is significant, and the monthly cost is still high. This is a common scenario for many DynamoDB users, and it’s important to carefully consider your options before committing to a specific capacity mode.</p>
+    </p>
 
 A Note on Auto Scaling
 ......................
-
-.. image:: ../images/autoscale-wcu.png
-    :alt: Autoscale WCU
 
 DynamoDB’s auto scaling for provisioned tables adjusts capacity automatically based on usage patterns and configured parameters. It allows you to scale capacity throughout the day without manual intervention. This can be seen in the graph above, where the blue line represents the provisioned capacity and the orange line represents the consumed capacity. The difference between the two represents both wasted resources and a buffer to prevent throttling.
 
@@ -97,11 +103,11 @@ Even with auto scaling, some level of over-provisioning is inevitable. Tuning th
 
 DynamoDB’s pricing models are intricate and require deliberate planning. Without careful sizing, you risk either paying for idle capacity or facing throttling that degrades performance. Use our `DynamoDB Cost Calculator <https://calculator.scylladb.com>`_ to simulate your workloads and avoid surprises.
 
-ScyllaDB follows a fundamentally different pricing model. Instead of charging per request or provisioned capacity, you pay for the infrastructure—specifically, the number and size of nodes in your cluster. While this is technically a form of over-provisioning, it's far more predictable and manageable. You can start with a small cluster and scale out as your workload grows, without worrying about request-level provisioning limits or unexpected costs.
+ScyllaDB follows a fundamentally different pricing model. Instead of charging per request or provisioned capacity, you pay for the infrastructure - specifically, the number and size of nodes in your cluster. While this is technically a form of over-provisioning, it's far more predictable and manageable. You can start with a small cluster and scale out as your workload grows, without worrying about request-level provisioning limits or unexpected costs.
 
 .. raw:: html
 
-    <p class="mark">This is why ScyllaDB is a strong alternative to DynamoDB—we offer a 50% cost guarantee against your existing workload.</p>
+    <p class="mark">This is why ScyllaDB is a strong alternative to DynamoDB - we offer a 50% cost guarantee against your existing workload.</p>
 
 Global Tables Scenario
 ======================
