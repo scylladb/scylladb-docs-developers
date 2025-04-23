@@ -69,12 +69,12 @@ Practical Guides
     <div class="card-grid">
 
 .. card-box::
-    :link: guides/cost/caclulator
+    :link: guides/costs/caclulator
     :title: DynamoDB Cost Calculator
     :description: Estimate costs for DynamoDB with our handy calculator.
 
 .. card-box::
-    :link: guides/cost/scenarios
+    :link: guides/costs/scenarios
     :title: Real World Costs
     :description: Understand the true cost of DynamoDB and how ScyllaDB compares.
 
