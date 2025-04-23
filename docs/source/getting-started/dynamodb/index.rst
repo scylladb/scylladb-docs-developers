@@ -75,7 +75,7 @@ Practical Guides
 
 .. card-box::
     :link: guides/costs/scenarios
-    :title: Real World Costs
+    :title: Real World Scenarios
     :description: Understand the true cost of DynamoDB and how ScyllaDB compares.
 
 .. card-box::
