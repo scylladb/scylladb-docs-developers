@@ -90,7 +90,7 @@ These can silently eat your budget:
 #. CloudWatch metrics/logs.
     Detailed metrics, logs, and alarms all incur extra charges. These can add up quickly, especially if you’re using a lot of metrics or logs over long retention periods.
 
-#. Streams,
+#. Streams.
     Streams and their consumers add to your overall DynamoDB bill. These can be costly if you’re using streams heavily.
 
 .. raw:: html
