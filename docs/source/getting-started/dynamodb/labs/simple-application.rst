@@ -403,4 +403,4 @@ The goal of Alternator is to provide a fully compatible DynamoDB API, so that us
 
     DynamoDB supports **strong** and **eventual consistency**. ScyllaDB does too — under the hood, it uses ``LOCAL_QUORUM`` for strong reads, and ``LOCAL_ONE`` for eventual.
 
-    If you want a deeper dive on Scylla’s consistency models, check out the `ScyllaDB University courses <https://university.scylladb.com/courses/scylla-essentials-overview/>`_ or the :doc:`Multiple Data Center guide <../guides/multiple-data-centers>`.
+    If you want a deeper dive on Scylla’s consistency models, check out the `ScyllaDB University courses <https://university.scylladb.com/courses/scylla-essentials-overview/>`_ or the :doc:`Multiple Data Center guide <../guides/migration/multiple-data-centers>`.

@@ -1,7 +1,7 @@
 :hide-secondary-sidebar:
 
 Migrating from DynamoDB
-----------------------
+-----------------------
 
 .. toctree::
     :hidden:
