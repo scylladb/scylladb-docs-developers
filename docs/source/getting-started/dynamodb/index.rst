@@ -73,34 +73,6 @@ Follow a code-complete, hands-on tutorial to learn about switching to ScyllaDB f
 
 `See more labs <#>`_
 
-Important Considerations
-------------------------
-
-.. raw:: html
-
-    <div class="card-grid">
-
-.. card-box::
-    :link: considerations/understanding-differences
-    :title: Understanding Differences
-    :description: How the databases compare: data model, query language, and more.
-
-.. card-box::
-    :link: considerations/alternator-or-cql
-    :title: Alternator or CQL
-    :description: How Alternator and CQL differ – and tips on which to choose.
-
-.. card-box::
-    :link: considerations/migration-paths
-    :title: Migration Paths
-    :description: What’s required to migrate to ScyllaDB with Alternator and CQL.
-
-.. raw:: html
-
-    </div>&nbsp;
-
-:doc:`See more considerations <considerations/index>`
-
 Practical Guides
 ----------------
 
