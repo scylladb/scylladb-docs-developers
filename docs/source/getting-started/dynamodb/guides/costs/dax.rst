@@ -4,12 +4,12 @@
 DAX Caching
 -----------
 
-.. image:: ../images/dax-light.png
+.. image:: ../../images/dax-light.png
     :alt: DAX
     :width: 90%
     :class: light-mode
 
-.. image:: ../images/dax-dark.png
+.. image:: ../../images/dax-dark.png
     :alt: DAX
     :width: 90%
     :class: dark-mode

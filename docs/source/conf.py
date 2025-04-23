@@ -118,7 +118,9 @@ html_theme_options = {
     "hide_version_dropdown": ["main"],
     "versions_unstable": UNSTABLE_VERSIONS,
     "versions_deprecated": DEPRECATED_VERSIONS,
-    "hide_versions_dropdown": "true"
+    "hide_versions_dropdown": "true",
+    "navigation_depth": 4,
+    "collapse_navigation": "false",
 }
 
 # Last updated format

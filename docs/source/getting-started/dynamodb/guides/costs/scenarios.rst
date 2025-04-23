@@ -1,11 +1,7 @@
-:hide-pre-content:
-:hide-post-content:
-:hide-sidebar:
-
 Real World Scenarios
 --------------------
 
-This page uses different scenarios to show the real costs of using DynamoDB. Each scenario is designed to describe a real-world use case and provides a detailed breakdown of the associated costs.
+These scenarios help demonstrate the real costs of using DynamoDB. Each scenario is designed to describe a real-world use case based on ScyllaDB customers, and provides a detailed breakdown of the associated costs when running the same workload on DynamoDB.
 
 On Demand Scenario
 ==================
@@ -19,7 +15,7 @@ When optimizing for cost, AWS advises [#r1]_ that the On Demand mode is ideal fo
 
 The example graph below illustrates this type of workload.
 
-.. image:: ../images/demand-request-units.png
+.. image:: ../../images/demand-request-units.png
     :alt: Demand Request Units
 
 This graph shows the total number of read request units (in blue) and write request units (in orange) over a 24 hour period. To convert this to ops/sec, we know that 1 read request unit = 1 read per second for an item up to 4 KB in size. So assuming this is making strongly consistent reads and the reads are ≤ 4 KB:
@@ -65,7 +61,7 @@ When optimizing for cost, AWS advises [#r2]_ that the Provisioned mode is ideal 
 
 The following graph illustrates this type of workload.
 
-.. image:: ../images/provisioned-capacity-units.png
+.. image:: ../../images/provisioned-capacity-units.png
     :alt: Provisioned Capacity Units
 
 Because traffic patterns are typically more predictable within an hour or day, you can provision table capacity closer to actual usage. Cost optimization in provisioned capacity mode is about minimizing the gap between provisioned capacity (blue line) and consumed capacity (orange line) without increasing ThrottledRequests. The difference between the two represents both wasted resources and a buffer to prevent throttling. If your application’s throughput is predictable and you value cost control, provisioned tables remain a viable option.
@@ -85,7 +81,7 @@ Reserved Capacity Scenario
 
 Provisioned with reserved capacity is a good option for workloads that are steady and predictable. It allows you to reserve capacity for a specific period of time, which can help reduce costs by paying an upfront fee. However, it requires careful planning and forecasting to ensure that you reserve the right amount of capacity.
 
-.. image:: ../images/reserved-capacity-units.png
+.. image:: ../../images/reserved-capacity-units.png
     :alt: Reserved Capacity
 
 This graph shows the difference between reserved capacity (dotted line) and consumed capacity (orange line). The difference between the two represents both wasted resources and a buffer to prevent throttling. If your application’s throughput is predictable and you value cost control, reserved capacity remains a viable option. However, this leads to over-provisioning, which can be costly. You are still paying for the reserved capacity even if you are not using it.

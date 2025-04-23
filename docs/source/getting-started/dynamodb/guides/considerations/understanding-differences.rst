@@ -4,12 +4,12 @@
 Understanding Differences
 -------------------------
 
-.. image:: ../images/understanding-differences-light.png
+.. image:: ../../images/understanding-differences-light.png
     :alt: Understanding Differences
     :width: 90%
     :class: light-mode
 
-.. image:: ../images/understanding-differences-dark.png
+.. image:: ../../images/understanding-differences-dark.png
     :alt: Understanding Differences
     :width: 90%
     :class: dark-mode
@@ -80,6 +80,6 @@ Here are the key differences in monitoring and metrics between DynamoDB and Scyl
 #. **DynamoDB**: Provides basic user-oriented metrics over CloudWatch.
 #. **ScyllaDB**: Through the powerful `ScyllaDB Monitoring stack <https://monitoring.docs.scylladb.com/stable/>`_, provides in-depth metrics on user operations as well as database internals.
 
-.. image:: ../images/monitor.png
+.. image:: ../../images/monitor.png
     :alt: Understanding Differences
     :width: 90%

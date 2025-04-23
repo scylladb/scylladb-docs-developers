@@ -4,12 +4,12 @@
 How Request Patterns Lead to DynamoDB Billing Surprises
 -------------------------------------------------------
 
-.. image:: ../images/billing-light.png
+.. image:: ../../images/billing-light.png
     :alt: Billing
     :width: 90%
     :class: light-mode
 
-.. image:: ../images/billing-dark.png
+.. image:: ../../images/billing-dark.png
     :alt: Billing
     :width: 90%
     :class: dark-mode

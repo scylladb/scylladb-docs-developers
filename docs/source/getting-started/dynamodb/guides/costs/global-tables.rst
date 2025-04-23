@@ -4,12 +4,12 @@
 Global Tables
 -------------
 
-.. image:: ../images/global-tables-light.png
+.. image:: ../../images/global-tables-light.png
     :alt: Global Tables
     :width: 90%
     :class: light-mode
 
-.. image:: ../images/global-tables-dark.png
+.. image:: ../../images/global-tables-dark.png
     :alt: Global Tables
     :width: 90%
     :class: dark-mode

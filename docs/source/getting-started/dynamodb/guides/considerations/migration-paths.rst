@@ -4,12 +4,12 @@
 Migration Paths
 ---------------
 
-.. image:: ../images/migration-paths-light.png
+.. image:: ../../images/migration-paths-light.png
     :alt: Migration Paths
     :width: 90%
     :class: light-mode
 
-.. image:: ../images/migration-paths-dark.png
+.. image:: ../../images/migration-paths-dark.png
     :alt: Migration Paths
     :width: 90%
     :class: dark-mode

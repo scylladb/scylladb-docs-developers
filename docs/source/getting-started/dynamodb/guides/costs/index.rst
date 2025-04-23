@@ -10,11 +10,10 @@ Understanding DynamoDB Costs
     :maxdepth: 3
     :hidden:
 
-    calculator
+    Cost Calculator <calculator>
     scenarios
     pricing
     units
-    billing
     global-tables
     dax
 

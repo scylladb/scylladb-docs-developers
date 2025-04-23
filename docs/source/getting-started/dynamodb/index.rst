@@ -11,8 +11,6 @@ Switching from DynamoDB
     :hidden:
 
     labs/index
-    cost/index
-    considerations/index
     guides/index
     users/index
 

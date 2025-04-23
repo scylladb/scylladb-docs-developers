@@ -1,15 +1,15 @@
 .. meta::
    :description: Make sense of DynamoDB's On Demand, Provisioned, and Reserved Capacity pricing models. Compare costs for different workloads (read-heavy, write-heavy...) and see how ScyllaDB's pricing model provides a more predictable and cost-effective option.
 
-Understanding Pricing Models
-----------------------------
+Pricing Models
+--------------
 
-.. image:: ../images/pricing-model-light.png
+.. image:: ../../images/pricing-model-light.png
     :alt: Pricing Models
     :width: 90%
     :class: light-mode
 
-.. image:: ../images/pricing-model-dark.png
+.. image:: ../../images/pricing-model-dark.png
     :alt: Pricing Models
     :width: 90%
     :class: dark-mode
