@@ -36,6 +36,7 @@ extensions = [
     "sphinx_multiversion",
     'ext.card_box',
     'ext.signup',
+    'sphinx_reredirects',
 ]
 
 # The suffix(es) of source filenames.
@@ -139,6 +140,10 @@ html_baseurl = "developers.scylladb.com"
 html_context = {"html_baseurl": html_baseurl}
 
 # -- Initialize Sphinx
+
+redirects = {
+    "getting-started/dynamodb/cost/calculator": "/getting-started/dynamodb/guides/costs/calculator/",
+}
 
 def setup(sphinx):
     warnings.filterwarnings(
