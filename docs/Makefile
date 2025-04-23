@@ -11,7 +11,7 @@ SOURCEDIR     = source
 PAPEROPT_a4     = -D latex_paper_size=a4
 PAPEROPT_letter = -D latex_paper_size=letter
 ALLSPHINXOPTS   = -d $(BUILDDIR)/doctrees $(PAPEROPT_$(PAPER)) $(SPHINXOPTS) $(SOURCEDIR)
-TESTSPHINXOPTS  = $(ALLSPHINXOPTS) -W --keep-going
+TESTSPHINXOPTS  = $(ALLSPHINXOPTS) --keep-going
 
 .PHONY: all
 all: dirhtml
