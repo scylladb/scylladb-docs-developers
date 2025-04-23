@@ -60,8 +60,8 @@ Provisioned Scenario
 
 When optimizing for cost, AWS advises [#r2]_ that the Provisioned mode is ideal for workloads with the following characteristics:
 
-* Steady, predictable, and cyclical traffic for a given hour or day
-* Limited short-term bursts of traffic
+* Steady, predictable, and cyclical traffic for a given hour or day.
+* Limited short-term bursts of traffic.
 
 The following graph illustrates this type of workload.
 
@@ -74,7 +74,7 @@ In this provisioned scenario, you might provision 350,000 ops/sec for the baseli
 
 Assuming a 50:50 read:write ratio, the `estimate for this Provisioned workload on DynamoDB <https://calculator.scylladb.com/?pricing=provisioned&storageGB=512&itemSizeB=1024&tableClass=standard&baselineReads=175000&baselineWrites=175000&peakReads=275000&peakWrites=275000&peakDurationReads=12&peakDurationWrites=12&reserved=0&readConst=100>`_ is around **$127,853/month** in Provisioned mode.
 
-A ScyllaDB `cluster configuration with 3 nodes of i4i.4xlarge <https://www.scylladb.com/product/scylla-cloud/get-pricing/?reads=175000&writes=175000&itemSize=1&storage=1&cloudProvider=AWS>`_, would cost around **$9,711/month**. This cluster could sustain up 468,000 ops/sec with peaks up to 720,000 ops/sec. More than enough to cover the workload at a fraction of the monthly cost.
+A ScyllaDB `cluster configuration with 3 nodes of i4i.4xlarge <https://www.scylladb.com/product/scylla-cloud/get-pricing/?reads=175000&writes=175000&itemSize=1&storage=1&cloudProvider=AWS>`_ would cost around **$9,711/month**. This cluster could sustain up to 468,000 ops/sec with peaks up to 720,000 ops/sec. That's more than enough to cover the workload at a fraction of the monthly cost.
 
 .. raw:: html
 
@@ -88,7 +88,7 @@ Provisioned with reserved capacity is a good option for workloads that are stead
 .. image:: ../images/reserved-capacity-units.png
     :alt: Reserved Capacity
 
-This graph shows the difference between reserved capacity (dotted line) and consumed capacity (orange line). The difference between the two represents both wasted resources and a buffer to prevent throttling. If your application’s throughput is predictable and you value cost control, reserved capacity remains a viable option. However, this leads to over-provisioning, which can be costly, as you are still paying for the reserved capacity even if you are not using it.
+This graph shows the difference between reserved capacity (dotted line) and consumed capacity (orange line). The difference between the two represents both wasted resources and a buffer to prevent throttling. If your application’s throughput is predictable and you value cost control, reserved capacity remains a viable option. However, this leads to over-provisioning, which can be costly. You are still paying for the reserved capacity even if you are not using it.
 
 Assuming a baseline of 300,000 writes/sec and a peak of 450,000 writes/sec for 3 hours a day, the `estimate for this workload on DynamoDB <https://calculator.scylladb.com/?pricing=provisioned&storageGB=512&itemSizeB=1024&tableClass=standard&ratio=50&baselineReads=0&baselineWrites=300000&peakReads=0&peakWrites=450000&peakDurationReads=0&peakDurationWrites=3&reserved=100&readConst=100>`_ is around **$450,000 upfront plus $36,935/month** in Provisioned + Reserved capacity mode.
 
@@ -125,11 +125,11 @@ These costs can be broken down into two main components:
 * Network costs
     Data transfer between regions incurs additional costs. This can add up quickly, especially if you have a lot of data being replicated.
 
-For more understanding of when to choose and when to avoid Global Tables, please refer to our :doc:`Global Tables <global-tables>` guide and the Global Tables FAQ [#r4]_.
+For more understanding of when to choose (and when to avoid) Global Tables, please refer to our :doc:`Global Tables <global-tables>` guide and the Global Tables FAQ [#r4]_.
 
 To understand the cost of Global Tables, we will use one of our customers as an example. They had a workload with the following characteristics, backing a recommendation engine for a large streaming platform.
 
-Their average item size was 8 KB, which as we described in our :doc:`Units <units>` section, means that each read and write operation would consume 1 RCUs (for eventually consistent reads) and 8 WCUs respectively. They had a total of 224 TB of replicated data in their table, which was replicated across 5 regions. The table was using eventual consistency for reads.
+Their average item size was 8 KB, which (as we described in our :doc:`Units <units>` section)  means that each read and write operation would consume 1 RCUs (for eventually consistent reads) and 8 WCUs respectively. They had a total of 224 TB of replicated data in their table, which was replicated across 5 regions. The table was using eventual consistency for reads.
 
 The workload had the following characteristics:
 
@@ -138,13 +138,13 @@ The workload had the following characteristics:
 * Peak: 631,000 writes/sec with a duration of 8 hours
 * Replication: 5 regions
 
-Writes were mainly to a single availability zone in us-east-1. Other data centers (DCs) very rarely written to, so the majority of writes were simply replicated to the other regions.
+Writes were mainly to a single availability zone in us-east-1. Other data centers (DCs) were very rarely written to, so the majority of writes were simply replicated to the other regions.
 
 TTL in DynamoDB still counts as a write operation, so it can add up quickly if you have a lot of data being deleted. In this case, the customer was using TTL to delete data that was no longer needed, but it was not actually used in practice. The data was usually overwritten within a few hours, so the TTL was not actually used.
 
 The customer was comfortable with eventually consistent reads, especially in remote DCs. If they returned today’s or yesterday’s recommendations, it was still fine.
 
-We were able to `simulate this workload <https://calculator.scylladb.com/?pricing=provisioned&storageGB=229376&itemSizeB=8192&tableClass=standard&ratio=50&baseline=45000&peak=631000&peakWidth=0&reserved=100&readConst=0&baselineReads=45000&baselineWrites=12000&peakReads=45000&peakWrites=631000&peakDurationReads=0&peakDurationWrites=8>`_ and for a single DC, i.e. with no Global Tables, the provisioned + reserved capacity cost alone was **$157,500 upfront with ongoing $839,647/month**.
+We were able to `simulate this workload <https://calculator.scylladb.com/?pricing=provisioned&storageGB=229376&itemSizeB=8192&tableClass=standard&ratio=50&baseline=45000&peak=631000&peakWidth=0&reserved=100&readConst=0&baselineReads=45000&baselineWrites=12000&peakReads=45000&peakWrites=631000&peakDurationReads=0&peakDurationWrites=8>`_ and for a single DC, (i.e. with no Global Tables), the provisioned + reserved capacity cost alone was **$157,500 upfront with ongoing $839,647/month**.
 
 This was a huge cost for a single DC, but with Global Tables `the cost amplified to <https://calculator.scylladb.com/?pricing=provisioned&storageGB=229376&itemSizeB=8192&tableClass=standard&ratio=50&baseline=45000&peak=631000&peakWidth=0&reserved=100&readConst=0&baselineReads=45000&baselineWrites=12000&peakReads=45000&peakWrites=631000&peakDurationReads=0&peakDurationWrites=8&regions=5>`_ **157,500 upfront with ongoing $4,111,903/month**. This is a staggering increase in cost for the sake of regional high availability and lower latency.
 
@@ -155,7 +155,7 @@ This was a huge cost for a single DC, but with Global Tables `the cost amplified
 DAX Scenario
 ============
 
-Another cost amplifier of DynamoDB is DAX. This is a caching layer that sits in front of your DynamoDB tables and can help reduce the number of read requests to DynamoDB. However, it also comes with its own costs.
+Another cost amplifier of DynamoDB is DAX (Amazon DynamoDB Accelerator). This is a caching layer that sits in front of your DynamoDB tables and can help reduce the number of read requests to DynamoDB. However, it also comes with its own costs.
 
 DAX costs scale with the number of provisioned nodes and cached data volume. To illustrate this, we will use a customer example. They had a workload with the following characteristics:
 
@@ -169,7 +169,7 @@ DAX costs scale with the number of provisioned nodes and cached data volume. To 
 
 At first glance, this workload would seem to be cost efficient. The `cost using provisioned + reserved capacity <https://calculator.scylladb.com/?pricing=provisioned&storageGB=1152&itemSizeB=1024&tableClass=standard&ratio=50&baseline=45000&peak=631000&peakWidth=0&reserved=100&readConst=100&baselineReads=4000&baselineWrites=6000&peakReads=105000&peakWrites=30000&peakDurationReads=4&peakDurationWrites=4&regions=4>`_ would be around **$10,200 upfront with ongoing $9,686/month**, or around 126k per year.
 
-However this customer was reporting much higher costs with DynamoDB, and they were servicing around 20B daily requests. The cost amplification in this case was due to the fact that they were using DAX to cache their reads. The cost of DAX can add up quickly, especially if you have a lot of data being cached.
+However, this customer was reporting much higher costs with DynamoDB, and they were servicing around 20B daily requests. In this case, the cost amplification was due to the fact that they were using DAX to cache their reads. The cost of DAX can add up quickly, especially if you have a lot of data being cached.
 
 Their use of DAX can be characterized as follows:
 
@@ -186,9 +186,9 @@ Their use of DAX can be characterized as follows:
 
 So in total, the customer was running 48 DAX nodes of varying size across 4 regions.
 
-The cost of DAX is based on the number of nodes you provision, however, this cost cannot be reserved in a similar way to EC2. The cost of DAX works out to be the node's hourly rate multiplied by the number of hours in a month (730).
+The cost of DAX is based on the number of nodes you provision; however, this cost cannot be reserved in a similar way to EC2. The cost of DAX works out to be the node's hourly rate multiplied by the number of hours in a month (730).
 
-For this use case the cost was approximately:
+For this use case, the cost was approximately:
 
 * 12 x 2.148 x 730 = $18,816/month for the r4.4xlarge
 * 18 x 1.074 x 730 = $14,112/month for the r4.2xlarge
@@ -196,9 +196,9 @@ For this use case the cost was approximately:
 
 The total cost of DAX was **$39,984/month or $480,000/year**. This is a staggering cost for a caching layer, especially when you consider that the customer was already paying for the provisioned + reserved capacity of **$126,000/year**.
 
-Estimating the cost of DAX upfront is difficult, as it depends on the number of nodes you provision and the amount of data stored in the cache. You also need to know your target utilization and hit/miss rate of your caching layer to get closer to a real estimate. In many cases such as this real world scenario, you will need to overprovision your DAX nodes to ensure that you have enough regional capacity to handle your workload and meet your latency requirements.
+Estimating the cost of DAX upfront is difficult, as it depends on the number of nodes you provision and the amount of data stored in the cache. You also need to know your target utilization and hit/miss rate of your caching layer to get closer to a real estimate. In many cases (such as this real world scenario), you will need to overprovision your DAX nodes to ensure that you have enough regional capacity to handle your workload and meet your latency requirements.
 
-You can use our `DynamoDB Cost Calculator <https://calculator.scylladb.com>`_ to simulate your workloads and get a better understanding of your costs, including DAX. Our calculator uses DAX cluster sizing to approximate the cost of DAX based on the number of nodes you provision and the amount of data stored in the cache [#r5]_. This can help you get a better understanding of your costs.
+You can use our `DynamoDB Cost Calculator <https://calculator.scylladb.com>`_ to simulate your workloads and get a better understanding of your costs, including DAX. Our calculator uses DAX cluster sizing to approximate the cost of DAX based on the number of nodes you provision and the amount of data stored in the cache [#r5]_. 
 
 By using ScyllaDB, you can avoid the costs associated with DAX and still get the cache performance you need. ScyllaDB has a built-in caching layer that is automatically managed and does not require any additional provisioning or configuration. This reduces both operational complexity and cost. Read our :doc:`DAX Caching <dax>` guide to see how DAX compares to ScyllaDB.
 
