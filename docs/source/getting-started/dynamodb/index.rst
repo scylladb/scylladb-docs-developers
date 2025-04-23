@@ -69,7 +69,7 @@ Practical Guides
     <div class="card-grid">
 
 .. card-box::
-    :link: guides/costs/caclulator
+    :link: guides/costs/calculator
     :title: DynamoDB Cost Calculator
     :description: Estimate costs for DynamoDB with our handy calculator.
 
