@@ -3,7 +3,7 @@
 Simple Application
 ------------------
 
-Alternator is an API <https://github.com/scylladb/scylla/blob/master/docs/alternator/alternator.md>`_ that gives ScyllaDB compatibility with Amazon DynamoDB.
+`Alternator is an API <https://github.com/scylladb/scylla/blob/master/docs/alternator/alternator.md>`_ that gives ScyllaDB compatibility with Amazon DynamoDB.
 
 This lab starts with an introduction to the project. Afterward, you’ll create a one-node ScyllaDB cluster with Alternator enabled, and performing some basic operations on it, using Python.
 
