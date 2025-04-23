@@ -142,7 +142,7 @@ html_context = {"html_baseurl": html_baseurl}
 # -- Initialize Sphinx
 
 redirects = {
-    "getting-started/dynamodb/cost/calculator": "/getting-started/dynamodb/guides/costs/calculator/",
+    "getting-started/dynamodb/cost/calculator": "/stable/getting-started/dynamodb/guides/costs/calculator/",
 }
 
 def setup(sphinx):
