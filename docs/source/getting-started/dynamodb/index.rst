@@ -41,8 +41,8 @@ To simplify migration, we offer ScyllaDB Alternator, a DynamoDB-compatible API. 
       </div>
     </div>
 
-Featured Labs
--------------
+Featured Lab
+------------
 
 Follow a code-complete, hands-on tutorial to learn about switching to ScyllaDB from DynamoDB.
 
@@ -54,16 +54,6 @@ Follow a code-complete, hands-on tutorial to learn about switching to ScyllaDB f
     :link: labs/simple-application
     :image: ../../_static/icons/alternator.svg" style="width:24px
     :title: ScyllaDB Alternator
-
-.. card-box::
-    :link: #
-    :image: ../../_static/icons/table_chart.svg
-    :title: Single table design
-
-.. card-box::
-    :link: #
-    :image: ../../_static/icons/table_rows.svg
-    :title: Multi-table design
 
 .. raw:: html
 
@@ -79,19 +69,19 @@ Practical Guides
     <div class="card-grid">
 
 .. card-box::
-    :link: guides/multiple-data-centers
-    :title: Multiple Data Centers
-    :description: Tips for setting up tables in multiple regions.
+    :link: guides/cost/caclulator
+    :title: DynamoDB Cost Calculator
+    :description: Estimate costs for DynamoDB with our handy calculator.
 
 .. card-box::
-    :link: guides/migrating-from-dynamodb
+    :link: guides/cost/scenarios
+    :title: Real World Costs
+    :description: Understand the true cost of DynamoDB and how ScyllaDB compares.
+
+.. card-box::
+    :link: guides/migration/index
     :title: Migrating from DynamoDB
-    :description: A step-by-step look at what a migration involves.
-
-.. card-box::
-    :link: guides/avoiding-pitfalls
-    :title: Avoiding Migration Pitfalls
-    :description: What mistakes commonly arise and how to avoid them.
+    :description: A step-by-step look at what a migration involves and how to avoid pitfalls.
 
 .. raw:: html
 
@@ -125,7 +115,7 @@ Popular Use Cases
 
     </div>&nbsp;
 
-:doc:`View more guides <guides/index>`
+:doc:`View more user stories <users/index>`
 
 Featured Documentation
 ----------------------

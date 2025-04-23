@@ -1,7 +1,7 @@
 :hide-secondary-sidebar:
 
-User Examples
--------------
+User Stories
+------------
 
 .. toctree::
     :hidden:
