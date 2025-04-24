@@ -23,17 +23,17 @@ Switching from DynamoDB
 Ditch the DynamoDB Tax
 ----------------------
 
-ScyllaDB is a cost-effective and flexible alternative to DynamoDB – at least 50% lower cost and lower latency under most workloads. This exceptional price-performance results from a close-to-the-metal architecture and numerous engineering optimizations for performance, elasticity, and efficiency. Another advantage: with ScyllaDB, you can take your DynamoDB workloads beyond AWS and run on any cloud, bare metal, or hybrid.
+ScyllaDB is a cost-effective and flexible alternative to `DynamoDB <https://aws.amazon.com/dynamodb/>`_ – at least 50% lower cost and lower latency under most workloads. This exceptional price-performance results from a close-to-the-metal architecture and numerous engineering optimizations for performance, elasticity, and efficiency. Another advantage: with ScyllaDB, you can take your DynamoDB workloads beyond AWS and run on any cloud, bare metal, or hybrid.
 
-To simplify migration, we offer ScyllaDB Alternator, a DynamoDB-compatible API. You redirect your application to ScyllaDB and it “just works” (actually, it listens on a specific port that understands the DynamoDB API). In most cases, minimal code changes are required.
+To simplify migration, we offer `ScyllaDB Alternator <https://docs.scylladb.com/manual/stable/alternator/alternator.html>`_, a DynamoDB-compatible API. You redirect your application to ScyllaDB and it “just works” (actually, it listens on a specific port that understands the DynamoDB API). In most cases, minimal code changes are required.
 
 .. raw:: html
 
         </div>
     <div class="cell large-4 small-4">
 
-.. figure:: images/ditch-the-tax.png
-   :width: 300px
+.. figure:: images/monster-dynamo.png
+   :width: 200px
    :alt: Ditch the DynamoDB Tax
 
 .. raw:: html
@@ -59,7 +59,7 @@ Follow a code-complete, hands-on tutorial to learn about switching to ScyllaDB f
 
     </div>&nbsp;
 
-`See more labs <#>`_
+`Try more labs <#>`_
 
 Practical Guides
 ----------------
@@ -79,7 +79,7 @@ Practical Guides
     :description: Understand the true cost of DynamoDB and how ScyllaDB compares.
 
 .. card-box::
-    :link: guides/migration/index
+    :link: guides/migration
     :title: Migrating from DynamoDB
     :description: A step-by-step look at what a migration involves and how to avoid pitfalls.
 
@@ -87,7 +87,7 @@ Practical Guides
 
     </div>&nbsp;
 
-:doc:`View more guides <guides/index>`
+:doc:`See more guides <guides/index>`
 
 Popular Use Cases
 -----------------
@@ -115,7 +115,7 @@ Popular Use Cases
 
     </div>&nbsp;
 
-:doc:`View more user stories <users/index>`
+:doc:`Hear more user stories <users/index>`
 
 Featured Documentation
 ----------------------
@@ -143,4 +143,4 @@ Featured Documentation
 
     </div>&nbsp;
 
-`See more documentation <https://docs.scylladb.com/stable/index.html>`_
+`Read more documentation <https://docs.scylladb.com/stable/index.html>`_
