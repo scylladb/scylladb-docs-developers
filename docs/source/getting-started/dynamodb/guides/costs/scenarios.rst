@@ -20,15 +20,15 @@ The example graph below illustrates this type of workload.
 
 This graph shows the total number of read request units (in blue) and write request units (in orange) over a 24 hour period. To convert this to ops/sec, we know that 1 read request unit = 1 read per second for an item up to 4 KB in size. So assuming this is making strongly consistent reads and the reads are ≤ 4 KB:
 
-* At the peak, we can observe ~180,000 reads/sec.
-* During the daytime period, we can observe ~100,000 reads/sec.
-* In quieter periods, it drops to ~10,000 reads/sec.
+* At the peak, we can observe ~1,000,000 reads/sec.
+* During the daytime period, we can observe ~600,000 reads/sec.
+* In quieter periods, it drops to ~50,000 reads/sec.
 
 For the writes, we know that 1 write request unit = 1 write per second for an item up to 1 KB in size. So assuming the writes are ≤ 1 KB:
 
-* At the peak, we can observe ~140,000 writes/sec. This is a sustained peak and appears to be an overnight batch job.
-* During the daytime period, we can observe ~80,000 writes/sec.
-* In quieter periods, it drops to ~10,000 writes/sec.
+* At the peak, we can observe ~840,000 writes/sec. This is a sustained peak and appears to be an overnight batch job.
+* During the daytime period, we can observe ~500,000 writes/sec.
+* In quieter periods, it drops to ~50,000 writes/sec.
 
 But what's the cost of this workload in On Demand mode?
 .......................................................
@@ -39,12 +39,12 @@ Our `DynamoDB Cost Calculator <https://calculator.scylladb.com>`_ allows you to 
 
 Using raw chart data, we can determine the following:
 
-* Baseline of 60,000 reads/sec average for the 24 hour period, plus a peak of 180,000 reads/sec for 1 hour.
-* Baseline of 60,000 writes/sec average for the 24 hour period, plus a peak of 140,000 writes/sec for 3 hours.
+* Baseline of 410,000 reads/sec average for the 24 hour period, plus a peak of 1,000,000 reads/sec for 1 hour.
+* Baseline of 380,000 writes/sec average for the 24 hour period, plus a peak of 800,000 writes/sec for 3 hours.
 
-The `estimate for this On Demand workload on DynamoDB <https://calculator.scylladb.com/?pricing=demand&storageGB=512&itemSizeB=1024&tableClass=standard&baselineReads=60000&baselineWrites=60000&peakReads=180000&peakWrites=140000&peakDurationReads=1&peakDurationWrites=3&reserved=0&readConst=100>`_ is around **$136,208/month** in On Demand mode.
+The `estimate for this On Demand workload on DynamoDB <https://calculator.scylladb.com/?pricing=demand&storageGB=512&itemSizeB=1024&tableClass=standard&baselineReads=410000&baselineWrites=380000&peakReads=1000000&peakWrites=800000&peakDurationReads=1&peakDurationWrites=3&reserved=0&readConst=100>`_ is around **$851,978/month** in On Demand mode.
 
-A ScyllaDB `cluster configuration with 9 nodes of i4i.large <https://www.scylladb.com/product/scylla-cloud/get-pricing/?reads=60000&writes=60000&itemSize=1&storage=1&cloudProvider=AWS>`_, would cost around **$3,025/month**. This cluster could sustain up 175,500 ops/sec with peaks up to 270,000 ops/sec with a significant cost reduction.
+A ScyllaDB `cluster configuration with 3 nodes of i4i.8xlarge <https://www.scylladb.com/product/scylla-cloud/get-pricing/?reads=400000&writes=400000&itemSize=1&storage=1&cloudProvider=AWS>`_, would cost around **$19,422/month**. This cluster could sustain up 936,000 ops/sec with peaks up to 1,440,000 ops/sec with a significant cost reduction.
 
 .. raw:: html
 
