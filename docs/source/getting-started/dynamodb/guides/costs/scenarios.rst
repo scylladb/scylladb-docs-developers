@@ -86,7 +86,7 @@ Provisioned with reserved capacity is a good option for workloads that are stead
 
 This graph shows the difference between reserved capacity (dotted line) and consumed capacity (orange line). The difference between the two represents both wasted resources and a buffer to prevent throttling. If your application’s throughput is predictable and you value cost control, reserved capacity remains a viable option. However, this leads to over-provisioning, which can be costly. You are still paying for the reserved capacity even if you are not using it.
 
-Assuming a baseline of 300,000 writes/sec and a peak of 450,000 writes/sec for 3 hours a day, the `estimate for this workload on DynamoDB <https://calculator.scylladb.com/?pricing=provisioned&storageGB=512&itemSizeB=1024&tableClass=standard&ratio=50&baselineReads=0&baselineWrites=300000&peakReads=0&peakWrites=450000&peakDurationReads=0&peakDurationWrites=3&reserved=100&readConst=100>`_ is around **$450,000 upfront plus $36,935/month** in Provisioned + Reserved capacity mode.
+Assuming a baseline of 400,000 writes/sec and a peak of 550,000 writes/sec for 2 hours a day, the `estimate for this workload on DynamoDB <https://calculator.scylladb.com/?pricing=provisioned&storageGB=512&itemSizeB=1024&tableClass=standard&ratio=50&baselineReads=0&baselineWrites=400000&peakReads=0&peakWrites=550000&peakDurationReads=0&peakDurationWrites=3&reserved=100&readConst=100>`_ is around **$600,000 upfront plus $46,279/month** in Provisioned + Reserved capacity mode.
 
 .. raw:: html
 
