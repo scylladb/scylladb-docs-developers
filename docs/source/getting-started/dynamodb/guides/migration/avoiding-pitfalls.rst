@@ -1,3 +1,5 @@
+:hide-secondary-sidebar:
+
 .. meta::
    :description: Avoid common pitfalls when migrating from DynamoDB to ScyllaDB. Learn how to prevent throttling, validate JSON compatibility, and handle schema differences.
    :keywords: migrating from DynamoDB, ScyllaDB, migration pitfalls, throttling, JSON compatibility, schema differences
