@@ -76,6 +76,22 @@ A ScyllaDB `cluster configuration with 3 nodes of i4i.4xlarge <https://www.scyll
 
     <p class="mark">DynamoDB still charges per request - provisioned capacity just gives you a volume discount. You’re still renting throughput. ScyllaDB charges per core, not per operation. You get predictable performance, linear scale-out, and full control over cost as your workload grows.</p>
 
+
+A Note on Auto Scaling
+......................
+
+DynamoDB’s auto scaling for provisioned tables adjusts capacity automatically based on usage patterns and configured parameters. It allows you to scale capacity throughout the day without manual intervention. This can be seen in the graph above, where the blue line represents the provisioned capacity and the orange line represents the consumed capacity. The difference between the two represents both wasted resources and a buffer to prevent throttling.
+
+Even with auto scaling, some level of over-provisioning is inevitable. Tuning the balance between extra capacity and acceptable throttling takes effort and experimentation. While you can technically autoscale around smooth traffic patterns, it’s not a plug-and-play solution—you’ll need to test and adjust over time.
+
+DynamoDB’s pricing models are intricate and require deliberate planning. Without careful sizing, you risk either paying for idle capacity or facing throttling that degrades performance. Use our `DynamoDB Cost Calculator <https://calculator.scylladb.com>`_ to simulate your workloads and avoid surprises.
+
+ScyllaDB follows a fundamentally different pricing model. Instead of charging per request or provisioned capacity, you pay for the infrastructure - specifically, the number and size of nodes in your cluster. While this is technically a form of over-provisioning, it's far more predictable and manageable. You can start with a small cluster and scale out as your workload grows, without worrying about request-level provisioning limits or unexpected costs.
+
+.. raw:: html
+
+    <p class="mark">This is why ScyllaDB is a strong alternative to DynamoDB - we offer a 50% cost guarantee against your existing workload.</p>
+
 Reserved Capacity Scenario
 ==========================
 
@@ -94,20 +110,6 @@ Assuming a baseline of 400,000 writes/sec and a peak of 550,000 writes/sec for 2
       This underscores just how expensive DynamoDB can be, especially for write-heavy workloads, even with reserved capacity. The upfront cost is significant, and the monthly cost is still high. This is a common scenario for many DynamoDB users, and it’s important to carefully consider your options before committing to a specific capacity mode.</p>
     </p>
 
-A Note on Auto Scaling
-......................
-
-DynamoDB’s auto scaling for provisioned tables adjusts capacity automatically based on usage patterns and configured parameters. It allows you to scale capacity throughout the day without manual intervention. This can be seen in the graph above, where the blue line represents the provisioned capacity and the orange line represents the consumed capacity. The difference between the two represents both wasted resources and a buffer to prevent throttling.
-
-Even with auto scaling, some level of over-provisioning is inevitable. Tuning the balance between extra capacity and acceptable throttling takes effort and experimentation. While you can technically autoscale around smooth traffic patterns, it’s not a plug-and-play solution—you’ll need to test and adjust over time.
-
-DynamoDB’s pricing models are intricate and require deliberate planning. Without careful sizing, you risk either paying for idle capacity or facing throttling that degrades performance. Use our `DynamoDB Cost Calculator <https://calculator.scylladb.com>`_ to simulate your workloads and avoid surprises.
-
-ScyllaDB follows a fundamentally different pricing model. Instead of charging per request or provisioned capacity, you pay for the infrastructure - specifically, the number and size of nodes in your cluster. While this is technically a form of over-provisioning, it's far more predictable and manageable. You can start with a small cluster and scale out as your workload grows, without worrying about request-level provisioning limits or unexpected costs.
-
-.. raw:: html
-
-    <p class="mark">This is why ScyllaDB is a strong alternative to DynamoDB - we offer a 50% cost guarantee against your existing workload.</p>
 
 Global Tables Scenario
 ======================
@@ -156,14 +158,14 @@ Another cost amplifier of DynamoDB is DAX (Amazon DynamoDB Accelerator). This is
 DAX costs scale with the number of provisioned nodes and cached data volume. To illustrate this, we will use a customer example. They had a workload with the following characteristics:
 
 * Reads: 4,000 reads/sec
-* Peak: 105,000 reads/sec with a duration of 4 hours
+* Reads Peak: 105,000 reads/sec with a duration of 4 hours
 * Writes: 6,000 writes/sec
-* Writes: 30,000 writes/sec
+* Writes Peak: 30,000 writes/sec
 * Item size: 246B
 * Storage: 1.1 TB
 * Replication: 4 regions
 
-At first glance, this workload would seem to be cost efficient. The `cost using provisioned + reserved capacity <https://calculator.scylladb.com/?pricing=provisioned&storageGB=1152&itemSizeB=1024&tableClass=standard&ratio=50&baseline=45000&peak=631000&peakWidth=0&reserved=100&readConst=100&baselineReads=4000&baselineWrites=6000&peakReads=105000&peakWrites=30000&peakDurationReads=4&peakDurationWrites=4&regions=4>`_ would be around **$10,200 upfront with ongoing $9,686/month**, or around 126k per year.
+At first glance, this workload would seem to be cost efficient. The `cost using provisioned + reserved capacity <https://calculator.scylladb.com/?pricing=provisioned&storageGB=1152&itemSizeB=1024&tableClass=standard&ratio=50&baseline=45000&peak=631000&peakWidth=0&reserved=100&readConst=100&baselineReads=4000&baselineWrites=6000&peakReads=105000&peakWrites=30000&peakDurationReads=4&peakDurationWrites=4&regions=4>`_ including replication to 4 regions would be around **$10,200 upfront with ongoing $9,686/month**, or around **$126,000/year**.
 
 However, this customer was reporting much higher costs with DynamoDB, and they were servicing around 20B daily requests. In this case, the cost amplification was due to the fact that they were using DAX to cache their reads. The cost of DAX can add up quickly, especially if you have a lot of data being cached.
 
@@ -194,7 +196,7 @@ The total cost of DAX was **$39,984/month or $480,000/year**. This is a staggeri
 
 Estimating the cost of DAX upfront is difficult, as it depends on the number of nodes you provision and the amount of data stored in the cache. You also need to know your target utilization and hit/miss rate of your caching layer to get closer to a real estimate. In many cases (such as this real world scenario), you will need to overprovision your DAX nodes to ensure that you have enough regional capacity to handle your workload and meet your latency requirements.
 
-You can use our `DynamoDB Cost Calculator <https://calculator.scylladb.com>`_ to simulate your workloads and get a better understanding of your costs, including DAX. Our calculator uses DAX cluster sizing to approximate the cost of DAX based on the number of nodes you provision and the amount of data stored in the cache [#r5]_. 
+You can use our `DynamoDB Cost Calculator <https://calculator.scylladb.com>`_ to simulate your workloads and get a better understanding of your costs, including DAX. Our calculator uses DAX cluster sizing to approximate the cost of DAX based on the number of nodes you provision and the amount of data stored in the cache [#r5]_.
 
 By using ScyllaDB, you can avoid the costs associated with DAX and still get the cache performance you need. ScyllaDB has a built-in caching layer that is automatically managed and does not require any additional provisioning or configuration. This reduces both operational complexity and cost. Read our :doc:`DAX Caching <dax>` guide to see how DAX compares to ScyllaDB.
 
