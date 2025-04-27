@@ -26,6 +26,10 @@ setup:
 	$(POETRY) install
 	$(POETRY) update
 
+.PHONY: update
+update:
+	$(POETRY) update
+
 # Clean commands
 .PHONY: pristine
 pristine: clean
