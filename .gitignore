@@ -3,5 +3,4 @@
 .DS_Store
 __pycache__
 /env
-poetry.lock
 _build
