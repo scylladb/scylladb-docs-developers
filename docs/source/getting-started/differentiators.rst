@@ -70,7 +70,7 @@ Internal Caching
 
 ScyllaDB completely bypasses the Linux cache during reads and uses its own highly efficient row-based integrated internal cache instead. This unified cache can dynamically tune itself to any workload.
 
-This provides ScyllaDB the control needed to deliver ultra-low latency without an external cache It enables each ScyllaDB node to serve more data, which in turn lets users run smaller clusters of more powerful nodes with larger disks.
+This provides ScyllaDB the control needed to deliver ultra-low latency without an external cache. It enables each ScyllaDB node to serve more data, which in turn lets users run smaller clusters of more powerful nodes with larger disks.
 
 `Learn more about our internal cache <https://www.scylladb.com/2024/01/08/inside-scylladbs-internal-cache/>`_
 
@@ -126,7 +126,7 @@ Schedulers
 
 ScyllaDB uses its own built-in CPU and IO schedulers. It can automatically prioritize its own activities due to real-time, real-world conditions.
 
-Even under the most intense workloads ScyllaDB runs smoothly without requiring frequent administrator supervision and intervention.
+Even under the most intense workloads, ScyllaDB runs smoothly without requiring frequent administrator supervision and intervention.
 
 `Learn more about schedulers <https://www.scylladb.com/2022/08/03/implementing-a-new-io-scheduler-algorithm-for-mixed-read-write-workloads/>`_
 
@@ -152,7 +152,7 @@ Workload Prioritization
     <div class="grid-x grid-margin-x">
         <div class="cell large-8 small-8">
 
-Workload Prioritization controls how different workloads compete for system resources. It's used to prioritize urgent application requests that require immediate response times versus others that can tolerate slighter delays (e.g., large scans).
+Workload Prioritization controls how different workloads compete for system resources. It's used to prioritize urgent application requests that require immediate response times versus others that can tolerate slight delays (e.g., large scans).
 
 Common use cases include balancing real-time vs batch processing, splitting writes from reads, and workload/infrastructure consolidation.
 
