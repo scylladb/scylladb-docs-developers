@@ -45,7 +45,7 @@ Relative cost can vary significantly depending on your application's usage patte
 
 .. raw:: html
 
-    <p class="mark">What you need to know is that the On Demand pricing model is the most expensive option. You will be paying up to a +700% premium for the flexibility of not having to provision capacity.</p>
+    <p class="mark">What you need to know is that the On Demand pricing model is the most expensive option. You will be paying up to +1200% premium for the flexibility of not having to provision capacity.</p>
 
 Provisioned with Reserved Capacity pricing is the cheapest option, but it requires you to pay for the reserved capacity, even if you don't use it.
 
