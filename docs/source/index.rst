@@ -40,13 +40,13 @@
 
 .. topic-box::
   :title: Getting Started
-  :link: https://docs.scylladb.com/stable/get-started/
+  :link: getting-started/index
   :link_target: _self
   :icon: icon-docs-getting-started
   :class: large-6
   :anchor: Learn more
 
-  This guide will help you get started with ScyllaDB, from installation to running your first query.
+  These guides will help you get started with ScyllaDB, from installation to running your first query.
 
 .. topic-box::
   :title: Labs
