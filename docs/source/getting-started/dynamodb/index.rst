@@ -59,7 +59,7 @@ Follow a code-complete, hands-on tutorial to learn about switching to ScyllaDB f
 
     </div>&nbsp;
 
-`Try more labs <#>`_
+:doc:`Try more labs <labs/index>`
 
 Practical Guides
 ----------------
