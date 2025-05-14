@@ -37,27 +37,9 @@ The goal of Alternator is to provide a fully compatible DynamoDB API, so that us
 
   .. group-tab:: ASCII Cast
 
-    Welcome to this interactive lab on ScyllaDB Alternator, ScyllaDB’s DynamoDB-compatible API. In this lab, we’ll deploy a ScyllaDB container with Alternator enabled, use the AWS CLI to interact with it, and run a simple Python app using the AWS SDK — specifically, boto3.
-
-    Let’s jump in.
-
-    ScyllaDB Alternator is a drop-in replacement for DynamoDB, providing API compatibility. If you already have apps written against DynamoDB, you can point them at Alternator without changing the client code.
-
-    Why does this matter?
-
-    Three key reasons:
-
-    * Cost: DynamoDB bills you per operation — read and write units. ScyllaDB doesn’t.
-    * Performance: ScyllaDB is written in modern C++. It runs shard-per-core, uses async I/O, and gives you low-latency, high-throughput access.
-    * Flexibility: Run it anywhere — AWS, GCP, Azure, or on-prem.
-
-    Alternator is built into ScyllaDB, no separate component needed. More info is in the docs and on the developers site — links are in the lab instructions.
-
     Let’s kick things off by launching a ScyllaDB container with Alternator enabled.
 
     We’re using Docker here to spin up a one-node ScyllaDB instance. This is strictly for learning — don’t use this setup in production.
-
-    For production-grade deployments, check ScyllaDB’s `requirements <https://docs.scylladb.com/manual/stable/getting-started/requirements.html>`_ and `best practices <https://docs.scylladb.com/manual/stable/operating-scylla/procedures/tips/index.html>`_. Links are there for you in the lab.
 
     **Step 1: Run the Container**
 
@@ -108,7 +90,7 @@ The goal of Alternator is to provide a fully compatible DynamoDB API, so that us
 
     * ``--name scylla-node1``: Gives the container a fixed name. Useful for repeated interactions.
     * ``-p 8000:8000``: Maps port ``8000`` from the container to your host — so we can interact with Alternator from the outside.
-    * ``-d scylladb/scylla:2025.1.0``: Specifies the image to run.
+    * ``scylladb/scylla:2025.1.0``: Specifies the image to run.
     * ``--alternator-port=8000``: Enables the Alternator API on port 8000.
     * ``--alternator-write-isolation=only_rmw_uses_lwt``: Only use LWT for read-modify-write or conditional updates.
     * ``--overprovisioned 1``: Reduces ScyllaDB’s resource footprint. No core pinning or aggressive polling.
@@ -116,12 +98,6 @@ The goal of Alternator is to provide a fully compatible DynamoDB API, so that us
     * ``--memory 1G``: Cap RAM usage at 1 GB — enough for this lab.
 
     You can read more about these and other ScyllaDB options in the `config reference <https://docs.scylladb.com/manual/stable/reference/configuration-parameters.html>`_.
-
-    **Wrap-up for this Challenge**
-
-    At this point, you’ve got a one-node ScyllaDB instance running locally with Alternator exposed on port 8000. Next up, we’ll use the AWS CLI to interact with this instance like it’s DynamoDB.
-
-    Let’s move on to the next challenge.
 
     Now that we have our ScyllaDB container with Alternator running, let’s see how we can interact with it using the AWS CLI.
 
@@ -215,19 +191,9 @@ The goal of Alternator is to provide a fully compatible DynamoDB API, so that us
 
     This deletes the table from our local Alternator instance — just like you would with a real DynamoDB endpoint.
 
-    **Wrap-up for this Challenge**
-
-    And that’s it.
-
     You just created, queried, and deleted a table in ScyllaDB Alternator — using nothing but the AWS CLI.
 
-    In the next challenge, we’ll do the same thing from code, using Python and boto3.
-
-    Let’s go.
-
-    We’ve already interacted with ScyllaDB Alternator using the AWS CLI.
-
-    Now, let’s do the same from code — using Python and the boto3 SDK, which is AWS’s official SDK for Python.
+    Up next, we’ll do the same thing from code, using Python and boto3.
 
     **Step 1: Install boto3 (Optional)**
 
