@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" enable-background="new 0 0 50 50" viewBox="0 0 50 50" id="load-balancing">
+  <path fill="none" stroke="#000" stroke-linecap="round" stroke-linejoin="round" stroke-miterlimit="10" stroke-width="1.5" d="M19.8 34.2c.5 0 .8.4.8.8v9.8H3.4V35c0-.5.4-.8.8-.8H19.8zM21.1 48H3c-.2 0-.3-.1-.4-.3L2 45.4c-.1-.3.1-.6.4-.6h19.2c.3 0 .5.3.4.6l-.5 2.4C21.5 47.9 21.3 48 21.1 48zM45.8 34.2c.5 0 .8.4.8.8v9.8H29.3V35c0-.5.4-.8.8-.8H45.8zM47 48H28.9c-.2 0-.3-.1-.4-.3L28 45.4c-.1-.3.1-.6.4-.6h19.2c.3 0 .5.3.4.6l-.5 2.4C47.4 47.9 47.2 48 47 48zM48 4v7.9c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h42C47.1 2 48 2.9 48 4z"></path>
+  <line x1="6" x2="7.3" y1="6" y2="6" fill="none" stroke="#000" stroke-linecap="round" stroke-linejoin="round" stroke-miterlimit="10" stroke-width="1.5"></line>
+  <line x1="6" x2="7.3" y1="10" y2="10" fill="none" stroke="#000" stroke-linecap="round" stroke-linejoin="round" stroke-miterlimit="10" stroke-width="1.5"></line>
+  <line x1="11" x2="12.3" y1="6" y2="6" fill="none" stroke="#000" stroke-linecap="round" stroke-linejoin="round" stroke-miterlimit="10" stroke-width="1.5"></line>
+  <line x1="11" x2="12.3" y1="10" y2="10" fill="none" stroke="#000" stroke-linecap="round" stroke-linejoin="round" stroke-miterlimit="10" stroke-width="1.5"></line>
+  <line x1="16" x2="17.3" y1="6" y2="6" fill="none" stroke="#000" stroke-linecap="round" stroke-linejoin="round" stroke-miterlimit="10" stroke-width="1.5"></line>
+  <line x1="16" x2="17.3" y1="10" y2="10" fill="none" stroke="#000" stroke-linecap="round" stroke-linejoin="round" stroke-miterlimit="10" stroke-width="1.5"></line>
+  <line x1="21" x2="22.3" y1="6" y2="6" fill="none" stroke="#000" stroke-linecap="round" stroke-linejoin="round" stroke-miterlimit="10" stroke-width="1.5"></line>
+  <line x1="21" x2="22.3" y1="10" y2="10" fill="none" stroke="#000" stroke-linecap="round" stroke-linejoin="round" stroke-miterlimit="10" stroke-width="1.5"></line>
+  <line x1="26" x2="27.3" y1="6" y2="6" fill="none" stroke="#000" stroke-linecap="round" stroke-linejoin="round" stroke-miterlimit="10" stroke-width="1.5"></line>
+  <line x1="26" x2="27.3" y1="10" y2="10" fill="none" stroke="#000" stroke-linecap="round" stroke-linejoin="round" stroke-miterlimit="10" stroke-width="1.5"></line>
+  <circle cx="41.8" cy="8" r="2.2" fill="none" stroke="#000" stroke-linecap="round" stroke-linejoin="round" stroke-miterlimit="10" stroke-width="1.5"></circle>
+  <circle cx="33.8" cy="8" r="2.2" fill="none" stroke="#000" stroke-linecap="round" stroke-linejoin="round" stroke-miterlimit="10" stroke-width="1.5"></circle>
+  <path fill="none" stroke="#000" stroke-linecap="round" stroke-linejoin="round" stroke-miterlimit="10" stroke-width="1.5" d="M27.9,25c0,1.6-1.3,2.9-2.9,2.9c-1.6,0-2.9-1.3-2.9-2.9c0-1.6,1.3-2.9,2.9-2.9C26.6,22.1,27.9,23.4,27.9,25z"></path>
+  <polyline fill="none" stroke="#000" stroke-linecap="round" stroke-linejoin="round" stroke-miterlimit="10" stroke-width="1.5" points="27.9 25 38 25 38 34.2"></polyline>
+  <polyline fill="none" stroke="#000" stroke-linecap="round" stroke-linejoin="round" stroke-miterlimit="10" stroke-width="1.5" points="12 34.2 12 25 22.1 25"></polyline>
+  <line x1="25" x2="25" y1="22.1" y2="13.9" fill="none" stroke="#000" stroke-linecap="round" stroke-linejoin="round" stroke-miterlimit="10" stroke-width="1.5"></line>
+</svg>

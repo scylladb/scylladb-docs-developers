@@ -41,8 +41,8 @@ To simplify migration, we offer `ScyllaDB Alternator <https://docs.scylladb.com/
       </div>
     </div>
 
-Featured Lab
-------------
+Featured Labs
+-------------
 
 Follow a code-complete, hands-on tutorial to learn about switching to ScyllaDB from DynamoDB.
 
@@ -54,6 +54,11 @@ Follow a code-complete, hands-on tutorial to learn about switching to ScyllaDB f
     :link: labs/simple-application
     :image: ../../_static/icons/alternator.svg" style="width:24px
     :title: ScyllaDB Alternator
+
+.. card-box::
+    :link: labs/load-balancing
+    :image: ../../_static/icons/load_balancing.svg" style="width:24px
+    :title: Load Balancing
 
 .. raw:: html
 
