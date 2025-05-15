@@ -181,7 +181,7 @@ This lab will walk you through a simple application that runs without Load Balan
         def write():
             start_time = time.time()
             with concurrent.futures.ThreadPoolExecutor(max_workers=32) as executor:
-                executor.map(put_item, range(1, 1000))  # 1 million items
+                executor.map(put_item, range(1, 1000))
 
             end_time = time.time()
             print(
