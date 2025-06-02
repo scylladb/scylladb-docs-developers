@@ -28,7 +28,7 @@ The goal of Alternator is to provide a fully compatible DynamoDB API, so that us
 
        <div style="position: relative; width: 100%; padding-bottom: 56.25%; height: 0; overflow: hidden;">
            <iframe style="position: absolute; top: 0; left: 0; width: 100%; height: 100%;"
-               src="https://www.youtube.com/embed/4aEk1g30kAw?si=c1tHIBaH_PVvIXl1"
+               src="https://www.youtube.com/embed/ONv-yrGOIlg?si=W1cynu3j4m9aqQOa"
                title="YouTube video player" frameborder="0"
                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
                referrerpolicy="strict-origin-when-cross-origin" allowfullscreen>
