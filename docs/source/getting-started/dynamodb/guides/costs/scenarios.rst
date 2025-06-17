@@ -42,7 +42,7 @@ Using raw chart data, we can determine the following:
 * Baseline of 410,000 reads/sec average for the 24 hour period, plus a peak of 1,000,000 reads/sec for 1 hour.
 * Baseline of 380,000 writes/sec average for the 24 hour period, plus a peak of 800,000 writes/sec for 3 hours.
 
-The `estimate for this On Demand workload on DynamoDB <https://calculator.scylladb.com/?pricing=demand&storageGB=512&itemSizeB=1024&tableClass=standard&baselineReads=410000&baselineWrites=380000&peakReads=1000000&peakWrites=800000&peakDurationReads=1&peakDurationWrites=3&reserved=0&readConst=100>`_ is around **$851,978/month** in On Demand mode.
+The `estimate for this On Demand workload on DynamoDB <https://calculator.scylladb.com/?pricing=demand&storageGB=512&itemSizeB=1024&tableClass=standard&baselineReads=410000&baselineWrites=380000&peakReads=1000000&peakWrites=800000&peakDurationReads=1&peakDurationWrites=3&reserved=0&readConst=100>`_ is around **$853,312/month** in On Demand mode.
 
 A ScyllaDB `cluster configuration with 3 nodes of i4i.8xlarge <https://www.scylladb.com/product/scylla-cloud/get-pricing/?reads=400000&writes=400000&itemSize=1&storage=1&cloudProvider=AWS>`_, would cost around **$19,422/month**. This cluster could sustain up 936,000 ops/sec with peaks up to 1,440,000 ops/sec with a significant cost reduction.
 
@@ -68,7 +68,7 @@ Because traffic patterns are typically more predictable within an hour or day, y
 
 In this provisioned scenario, you might provision 350,000 ops/sec for the baseline, plus 550,000 ops/sec for the peaks lasting at least 12 hours combined.
 
-Assuming a 50:50 read:write ratio, the `estimate for this Provisioned workload on DynamoDB <https://calculator.scylladb.com/?pricing=provisioned&storageGB=512&itemSizeB=1024&tableClass=standard&baselineReads=175000&baselineWrites=175000&peakReads=275000&peakWrites=275000&peakDurationReads=12&peakDurationWrites=12&reserved=0&readConst=100>`_ is around **$127,853/month** in Provisioned mode.
+Assuming a 50:50 read:write ratio, the `estimate for this Provisioned workload on DynamoDB <https://calculator.scylladb.com/?pricing=provisioned&storageGB=512&itemSizeB=1024&tableClass=standard&baselineReads=175000&baselineWrites=175000&peakReads=275000&peakWrites=275000&peakDurationReads=12&peakDurationWrites=12&reserved=0&readConst=100>`_ is around **$128,242/month** in Provisioned mode.
 
 A ScyllaDB `cluster configuration with 3 nodes of i4i.4xlarge <https://www.scylladb.com/product/scylla-cloud/get-pricing/?reads=175000&writes=175000&itemSize=1&storage=1&cloudProvider=AWS>`_ would cost around **$9,711/month**. This cluster could sustain up to 468,000 ops/sec with peaks up to 720,000 ops/sec. That's more than enough to cover the workload at a fraction of the monthly cost.
 
@@ -102,7 +102,7 @@ Provisioned with reserved capacity is a good option for workloads that are stead
 
 This graph shows the difference between reserved capacity (dotted line) and consumed capacity (orange line). The difference between the two represents both wasted resources and a buffer to prevent throttling. If your application’s throughput is predictable and you value cost control, reserved capacity remains a viable option. However, this leads to over-provisioning, which can be costly. You are still paying for the reserved capacity even if you are not using it.
 
-Assuming a baseline of 400,000 writes/sec and a peak of 550,000 writes/sec for 2 hours a day, the `estimate for this workload on DynamoDB <https://calculator.scylladb.com/?pricing=provisioned&storageGB=512&itemSizeB=1024&tableClass=standard&ratio=50&baselineReads=0&baselineWrites=400000&peakReads=0&peakWrites=550000&peakDurationReads=0&peakDurationWrites=3&reserved=100&readConst=100>`_ is around **$600,000 upfront plus $46,279/month** in Provisioned + Reserved capacity mode.
+Assuming a baseline of 400,000 writes/sec and a peak of 550,000 writes/sec for 2 hours a day, the `estimate for this workload on DynamoDB <https://calculator.scylladb.com/?pricing=provisioned&storageGB=512&itemSizeB=1024&tableClass=standard&ratio=50&baselineReads=0&baselineWrites=400000&peakReads=0&peakWrites=550000&peakDurationReads=0&peakDurationWrites=3&reserved=100&readConst=100>`_ is around **$600,000 upfront plus $46,405/month** in Provisioned + Reserved capacity mode.
 
 .. raw:: html
 
@@ -142,9 +142,9 @@ TTL in DynamoDB still counts as a write operation, so it can add up quickly if y
 
 The customer was comfortable with eventually consistent reads, especially in remote DCs. If they returned today’s or yesterday’s recommendations, it was still fine.
 
-We were able to `simulate this workload <https://calculator.scylladb.com/?pricing=provisioned&storageGB=229376&itemSizeB=8192&tableClass=standard&ratio=50&baseline=45000&peak=631000&peakWidth=0&reserved=100&readConst=0&baselineReads=45000&baselineWrites=12000&peakReads=45000&peakWrites=631000&peakDurationReads=0&peakDurationWrites=8>`_ and for a single DC, (i.e. with no Global Tables), the provisioned + reserved capacity cost alone was **$157,500 upfront with ongoing $839,647/month**.
+We were able to `simulate this workload <https://calculator.scylladb.com/?pricing=provisioned&storageGB=229376&itemSizeB=8192&tableClass=standard&ratio=50&baseline=45000&peak=631000&peakWidth=0&reserved=100&readConst=0&baselineReads=45000&baselineWrites=12000&peakReads=45000&peakWrites=631000&peakDurationReads=0&peakDurationWrites=8>`_ and for a single DC, (i.e. with no Global Tables), the provisioned + reserved capacity cost alone was **$157,500 upfront with ongoing $850,269/month**.
 
-This was a huge cost for a single DC, but with Global Tables `the cost amplified to <https://calculator.scylladb.com/?pricing=provisioned&storageGB=229376&itemSizeB=8192&tableClass=standard&ratio=50&baseline=45000&peak=631000&peakWidth=0&reserved=100&readConst=0&baselineReads=45000&baselineWrites=12000&peakReads=45000&peakWrites=631000&peakDurationReads=0&peakDurationWrites=8&regions=5>`_ **157,500 upfront with ongoing $4,111,903/month**. This is a staggering increase in cost for the sake of regional high availability and lower latency.
+This was a huge cost for a single DC, but with Global Tables `the cost amplified to <https://calculator.scylladb.com/?pricing=provisioned&storageGB=229376&itemSizeB=8192&tableClass=standard&ratio=50&baseline=45000&peak=631000&peakWidth=0&reserved=100&readConst=0&baselineReads=45000&baselineWrites=12000&peakReads=45000&peakWrites=631000&peakDurationReads=0&peakDurationWrites=8&regions=5>`_ **157,500 upfront with ongoing $4,184,261/month**. This is a staggering increase in cost for the sake of regional high availability and lower latency.
 
 .. raw:: html
 
@@ -165,7 +165,7 @@ DAX costs scale with the number of provisioned nodes and cached data volume. To 
 * Storage: 1.1 TB
 * Replication: 4 regions
 
-At first glance, this workload would seem to be cost efficient. The `cost using provisioned + reserved capacity <https://calculator.scylladb.com/?pricing=provisioned&storageGB=1152&itemSizeB=1024&tableClass=standard&ratio=50&baseline=45000&peak=631000&peakWidth=0&reserved=100&readConst=100&baselineReads=4000&baselineWrites=6000&peakReads=105000&peakWrites=30000&peakDurationReads=4&peakDurationWrites=4&regions=4>`_ including replication to 4 regions would be around **$10,200 upfront with ongoing $9,686/month**, or around **$126,000/year**.
+At first glance, this workload would seem to be cost efficient. The `cost using provisioned + reserved capacity <https://calculator.scylladb.com/?pricing=provisioned&storageGB=1152&itemSizeB=1024&tableClass=standard&ratio=50&baseline=45000&peak=631000&peakWidth=0&reserved=100&readConst=100&baselineReads=4000&baselineWrites=6000&peakReads=105000&peakWrites=30000&peakDurationReads=4&peakDurationWrites=4&regions=4>`_ including replication to 4 regions would be around **$10,200 upfront with ongoing $19,556/month**, or around **$244,882/year**.
 
 However, this customer was reporting much higher costs with DynamoDB, and they were servicing around 20B daily requests. In this case, the cost amplification was due to the fact that they were using DAX to cache their reads. The cost of DAX can add up quickly, especially if you have a lot of data being cached.
 
