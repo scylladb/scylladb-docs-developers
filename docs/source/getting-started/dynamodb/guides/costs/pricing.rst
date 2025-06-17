@@ -45,7 +45,7 @@ Relative cost can vary significantly depending on your application's usage patte
 
 .. raw:: html
 
-    <p class="mark">What you need to know is that the On Demand pricing model is the most expensive option. You will be paying up to +1200% premium for the flexibility of not having to provision capacity.</p>
+    <p class="mark">What you need to know is that the On Demand pricing model is the most expensive option. You will be paying up to +700% premium for the flexibility of not having to provision capacity.</p>
 
 Provisioned with Reserved Capacity pricing is the cheapest option, but it requires you to pay for the reserved capacity, even if you don't use it.
 
@@ -63,15 +63,15 @@ Write heavy workloads are those that have a high number of write requests compar
     * - On Demand
       - Provisioned
       - Reserved
-    * - `$837k <https://calculator.scylladb.com/?pricing=demand&storageGB=512&itemSizeB=1024&tableClass=standard&baselineReads=50000&baselineWrites=500000&peakReads=50000&peakWrites=500000&peakDurationReads=0&peakDurationWrites=0&reserved=0&readConst=100>`_ per month
+    * - `$10M <https://calculator.scylladb.com/?pricing=demand&storageGB=512&itemSizeB=1024&tableClass=standard&baselineReads=50000&baselineWrites=500000&peakReads=50000&peakWrites=500000&peakDurationReads=0&peakDurationWrites=0&reserved=0&readConst=100>`_ per year
 
         most expensive
-      - `$242k <https://calculator.scylladb.com/?pricing=provisioned&storageGB=512&itemSizeB=1024&tableClass=standard&baselineReads=50000&baselineWrites=500000&peakReads=50000&peakWrites=500000&peakDurationReads=0&peakDurationWrites=0&reserved=0&readConst=100>`_ per month
+      - `$2.9M <https://calculator.scylladb.com/?pricing=provisioned&storageGB=512&itemSizeB=1024&tableClass=standard&baselineReads=50000&baselineWrites=500000&peakReads=50000&peakWrites=500000&peakDurationReads=0&peakDurationWrites=0&reserved=0&readConst=100>`_ per year
 
         3x cheaper
-      - `$67k <https://calculator.scylladb.com/?pricing=provisioned&storageGB=512&itemSizeB=1024&tableClass=standard&baselineReads=50000&baselineWrites=500000&peakReads=50000&peakWrites=500000&peakDurationReads=0&peakDurationWrites=0&reserved=100&readConst=100>`_ per month
+      - `$1.3M <https://calculator.scylladb.com/?pricing=provisioned&storageGB=512&itemSizeB=1024&tableClass=standard&baselineReads=50000&baselineWrites=500000&peakReads=50000&peakWrites=500000&peakDurationReads=0&peakDurationWrites=0&reserved=100&readConst=100>`_ per year
 
-        12x cheaper
+        7x cheaper
 
 .. list-table:: Peak Write Heavy @ 50k reads/sec + 500k writes/sec + 1M writes/sec for 3 hours/day
     :widths: 33 33 33
@@ -80,15 +80,15 @@ Write heavy workloads are those that have a high number of write requests compar
     * - On Demand
       - Provisioned
       - Reserved
-    * - `$939k <https://calculator.scylladb.com/?pricing=demand&storageGB=512&itemSizeB=1024&tableClass=standard&baselineReads=50000&baselineWrites=500000&peakReads=50000&peakWrites=1000000&peakDurationReads=0&peakDurationWrites=3&reserved=0&readConst=100>`_ per month
+    * - `$11.3M <https://calculator.scylladb.com/?pricing=demand&storageGB=512&itemSizeB=1024&tableClass=standard&baselineReads=50000&baselineWrites=500000&peakReads=50000&peakWrites=1000000&peakDurationReads=0&peakDurationWrites=3&reserved=0&readConst=100>`_ per year
 
         most expensive
-      - `$271k <https://calculator.scylladb.com/?pricing=provisioned&storageGB=512&itemSizeB=1024&tableClass=standard&baselineReads=50000&baselineWrites=500000&peakReads=50000&peakWrites=1000000&peakDurationReads=0&peakDurationWrites=3&reserved=0&readConst=100>`_ per month
+      - `$3.3M <https://calculator.scylladb.com/?pricing=provisioned&storageGB=512&itemSizeB=1024&tableClass=standard&baselineReads=50000&baselineWrites=500000&peakReads=50000&peakWrites=1000000&peakDurationReads=0&peakDurationWrites=3&reserved=0&readConst=100>`_ per year
 
         3x cheaper
-      - `$70k <https://calculator.scylladb.com/?pricing=provisioned&storageGB=512&itemSizeB=1024&tableClass=standard&baselineReads=50000&baselineWrites=500000&peakReads=50000&peakWrites=1000000&peakDurationReads=0&peakDurationWrites=3&reserved=100&readConst=100>`_ per month
+      - `$1.7M <https://calculator.scylladb.com/?pricing=provisioned&storageGB=512&itemSizeB=1024&tableClass=standard&baselineReads=50000&baselineWrites=500000&peakReads=50000&peakWrites=1000000&peakDurationReads=0&peakDurationWrites=3&reserved=100&readConst=100>`_ per year
 
-        13x cheaper
+        7x cheaper
 
 Read Heavy Workloads
 ....................
@@ -102,15 +102,15 @@ Read heavy workloads are those that have a high number of read requests compared
     * - On Demand
       - Provisioned
       - Reserved
-    * - `$246k <https://calculator.scylladb.com/?pricing=demand&storageGB=512&itemSizeB=1024&tableClass=standard&baselineReads=500000&baselineWrites=50000&peakReads=500000&peakWrites=50000&peakDurationReads=0&peakDurationWrites=0&reserved=0&readConst=100>`_ per month
+    * - `$2.9M <https://calculator.scylladb.com/?pricing=demand&storageGB=512&itemSizeB=1024&tableClass=standard&baselineReads=500000&baselineWrites=50000&peakReads=500000&peakWrites=50000&peakDurationReads=0&peakDurationWrites=0&reserved=0&readConst=100>`_ per year
 
         most expensive
-      - `$71k <https://calculator.scylladb.com/?pricing=provisioned&storageGB=512&itemSizeB=1024&tableClass=standard&baselineReads=500000&baselineWrites=50000&peakReads=500000&peakWrites=50000&peakDurationReads=0&peakDurationWrites=0&reserved=0&readConst=100>`_ per month
+      - `$855k <https://calculator.scylladb.com/?pricing=provisioned&storageGB=512&itemSizeB=1024&tableClass=standard&baselineReads=500000&baselineWrites=50000&peakReads=500000&peakWrites=50000&peakDurationReads=0&peakDurationWrites=0&reserved=0&readConst=100>`_ per year
 
-        3.4x cheaper
-      - `$20k <https://calculator.scylladb.com/?pricing=provisioned&storageGB=512&itemSizeB=1024&tableClass=standard&baselineReads=500000&baselineWrites=50000&peakReads=500000&peakWrites=50000&peakDurationReads=0&peakDurationWrites=0&reserved=100&readConst=100>`_ per month
+        3x cheaper
+      - `$392k <https://calculator.scylladb.com/?pricing=provisioned&storageGB=512&itemSizeB=1024&tableClass=standard&baselineReads=500000&baselineWrites=50000&peakReads=500000&peakWrites=50000&peakDurationReads=0&peakDurationWrites=0&reserved=100&readConst=100>`_ per year
 
-        12x cheaper
+        7x cheaper
 
 .. list-table:: Peak Read Heavy @ 500k reads/sec + 50k writes/sec + 1M reads/sec for 3 hours/day
     :widths: 33 33 33
@@ -119,15 +119,15 @@ Read heavy workloads are those that have a high number of read requests compared
     * - On Demand
       - Provisioned
       - Reserved
-    * - `$266k <https://calculator.scylladb.com/?pricing=demand&storageGB=512&itemSizeB=1024&tableClass=standard&baselineReads=500000&baselineWrites=50000&peakReads=1000000&peakWrites=50000&peakDurationReads=3&peakDurationWrites=0&reserved=0&readConst=100>`_ per month
+    * - `$3.2M <https://calculator.scylladb.com/?pricing=demand&storageGB=512&itemSizeB=1024&tableClass=standard&baselineReads=500000&baselineWrites=50000&peakReads=1000000&peakWrites=50000&peakDurationReads=3&peakDurationWrites=0&reserved=0&readConst=100>`_ per year
 
         most expensive
-      - `$77k <https://calculator.scylladb.com/?pricing=provisioned&storageGB=512&itemSizeB=1024&tableClass=standard&baselineReads=500000&baselineWrites=50000&peakReads=1000000&peakWrites=50000&peakDurationReads=3&peakDurationWrites=0&reserved=0&readConst=100>`_ per month
+      - `$926k <https://calculator.scylladb.com/?pricing=provisioned&storageGB=512&itemSizeB=1024&tableClass=standard&baselineReads=500000&baselineWrites=50000&peakReads=1000000&peakWrites=50000&peakDurationReads=3&peakDurationWrites=0&reserved=0&readConst=100>`_ per year
 
-        3.5x cheaper
-      - `$20k <https://calculator.scylladb.com/?pricing=provisioned&storageGB=512&itemSizeB=1024&tableClass=standard&baselineReads=500000&baselineWrites=50000&peakReads=1000000&peakWrites=50000&peakDurationReads=3&peakDurationWrites=0&reserved=100&readConst=100>`_ per month
+        3x cheaper
+      - `$463k <https://calculator.scylladb.com/?pricing=provisioned&storageGB=512&itemSizeB=1024&tableClass=standard&baselineReads=500000&baselineWrites=50000&peakReads=1000000&peakWrites=50000&peakDurationReads=3&peakDurationWrites=0&reserved=100&readConst=100>`_ per year
 
-        13x cheaper
+        7x cheaper
 
 .. note::
     The above scenarios are based on the following assumptions:
