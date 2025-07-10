@@ -20,6 +20,14 @@
     box-shadow: 0 4px 25px rgba(0,0,0,.15);
 }
 
+.uberflip .uf-tile-content-label {
+    background-color: transparent
+}
+
+.uberflip .uf-tile .uf-tile-content-label-text {
+    margin-bottom: 0;
+}
+
 .uberflip .uf-tile-wrapper {
     border-radius: 8px;
     box-shadow: 0 4px 25px rgba(0,0,0,.15);
@@ -160,6 +168,30 @@ html.dark .light-mode {
 
 html.dark .dark-mode {
     display: flex;
+}
+
+html.dark .form input[type="text"]{
+    background-color: var(--well-bg);
+}
+
+html.dark .uberflip.uf-tile-large .uf-tile-wrapper .uf-tile,
+html.dark  .uberflip .uf-tile-copy,
+html.dark  .uberflip .uf-tile-copy h3,
+html.dark  .uberflip .uf-tile-content-label {
+    background-color: transparent;
+    color: var(--text-color);
+}
+
+html.dark .uberflip.uf-tile-large .uf-tile-wrapper .uf-tile {
+    background-color: var(--card-bg);
+}
+
+html.dark .uberflip .uf-tile-wrapper .uf-tile:after{
+    display: none;
+}
+
+html.dark .uberflip .uf-tile-content-label-text span{
+    color: var(--link-color);
 }
 
 .mark {
