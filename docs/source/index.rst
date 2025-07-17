@@ -150,7 +150,7 @@ For more detailed information, see our `installation instructions. <https://docs
       yarn install cassandra-driver
 
 
-For more detailed information, see our `full list of drivers. <https://opensource.docs.scylladb.com/master/using-scylla/drivers/cql-drivers/index.html>`_
+For more detailed information, see our `full list of drivers. <https://docs.scylladb.com/manual/stable/using-scylla/drivers/cql-drivers/>`_
 
 .. signup::
    :action: https://lp.scylladb.com/l/934963/2024-09-04/bv9ry
