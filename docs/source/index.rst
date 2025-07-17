@@ -95,7 +95,7 @@
 
          curl -sSf get.scylladb.com/server | sudo bash
 
-For more detailed information, see our `installation instructions. <https://opensource.docs.scylladb.com/stable/getting-started/install-scylla/index.html>`_
+For more detailed information, see our `installation instructions. <https://docs.scylladb.com/manual/stable/getting-started/install-scylla/index.html>`_
 
 **Connect via drivers**
 
