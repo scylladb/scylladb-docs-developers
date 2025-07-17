@@ -85,7 +85,7 @@
 
       .. code-block:: shell
 
-         docker run --name scylladb -d  scylladb/scylla:2025.1
+         docker run --name scylladb -d  scylladb/scylla
 
    .. group-tab:: Linux
 
