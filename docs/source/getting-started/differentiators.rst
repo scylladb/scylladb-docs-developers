@@ -50,10 +50,8 @@ By eliminating resource contention, this design enables consistent low latencies
 
         </div>
     <div class="cell large-4 small-4">
-
-.. figure:: images/shard-per-core.png
-   :width: 300px
-   :alt: Shard per core
+      <script src="https://unpkg.com/@lottiefiles/dotlottie-wc@0.6.2/dist/dotlottie-wc.js" type="module"></script>
+      <dotlottie-wc src="https://developers.scylladb.com/stable/_static/img/shard-per-core-no-bg.lottie" speed="1" style="width: 300px; height: 300px" mode="forward" loop autoplay></dotlottie-wc>
 
 .. raw:: html
 
