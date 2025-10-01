@@ -99,4 +99,3 @@ test: setup
 .PHONY: linkcheck
 linkcheck: setup
 	$(SPHINXBUILD) -b linkcheck $(SOURCEDIR) $(BUILDDIR)/linkcheck
-
