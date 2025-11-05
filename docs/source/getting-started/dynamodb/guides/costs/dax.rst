@@ -64,9 +64,8 @@ Despite the speed boost, DAX is not universally beneficial. Avoid it when:
 
 Cost Considerations
 ===================
-.. raw:: html
-
-    <p class="mark">DAX is fast - but not cheap.</p>
+.. caution::
+    DAX is fast - but not cheap.
 
 #. You pay per node-hour.
     Unlike DynamoDB’s usage based billing, DAX is provisioned like EC2. Each node has a fixed cost based on instance type.
@@ -86,9 +85,8 @@ Cost Considerations
 How DAX Compares to ScyllaDB
 ============================
 
-.. raw:: html
-
-    <p class="mark">If you want control, visibility, tunable consistency, and extensibility, ScyllaDB’s internal caching + optional external caches are far more flexible. And if you’re building something that needs correctness and predictability, DAX isn’t even in the running.</p>
+.. note::
+    If you want control, visibility, tunable consistency, and extensibility, ScyllaDB’s internal caching + optional external caches are far more flexible. And if you’re building something that needs correctness and predictability, DAX isn’t even in the running.
 
 At first glance, DAX and ScyllaDB’s caching seem similar: both aim to improve read performance by reducing trips to disk. But they’re fundamentally different in architecture, flexibility, and performance guarantees.
 

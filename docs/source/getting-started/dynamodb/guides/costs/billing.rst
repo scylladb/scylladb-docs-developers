@@ -45,9 +45,9 @@ We've spoken to many DynamoDB users and experts about workarounds for managing c
 #. Run cost simulations.
     Our calculator can help you model expected workloads and costs. It’s available at `calculator.scylladb.com <https://calculator.scylladb.com>`_.
 
-.. raw:: html
+.. caution::
 
-    <p class="mark">DynamoDB is a powerful tool, but it can be expensive if you’re not careful. If you’re hitting scale or budget limits, or don't have time to manage these complexities, ScyllaDB will give you predictable performance and cost control at any scale.</p>
+        DynamoDB is a powerful tool, but it can be expensive if you’re not careful. If you’re hitting scale or budget limits, or don't have time to manage these complexities, ScyllaDB will give you predictable performance and cost control at any scale.
 
 Hidden DynamoDB Costs You Shouldn’t Ignore
 ==========================================
@@ -93,6 +93,6 @@ These can silently eat your budget:
 #. Streams.
     Streams and their consumers add to your overall DynamoDB bill. These can be costly if you’re using streams heavily.
 
-.. raw:: html
+.. note::
 
-    <p class="mark">DynamoDB makes it easy to scale, but easy to overspend too. Monitor usage, model costs, and revisit your data access patterns regularly. Small inefficiencies compound fast, especially at scale. That's why so many DynamoDB customers switch to ScyllaDB.</p>
+    DynamoDB makes it easy to scale, but easy to overspend too. Monitor usage, model costs, and revisit your data access patterns regularly. Small inefficiencies compound fast, especially at scale. That's why so many DynamoDB customers switch to ScyllaDB.

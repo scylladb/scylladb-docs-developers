@@ -62,9 +62,9 @@ Global Tables come with architectural constraints and hidden complexity. Avoid t
 Cost Considerations
 ===================
 
-.. raw:: html
+.. warning::
 
-    <p class="mark">Global Tables are expensive, especially for write-heavy, multi-region apps!</p>
+    Global Tables are expensive, especially for write-heavy, multi-region apps!
 
 #. Write costs are multiplied.
     Every replicated write counts as a write in every region. So a single write to a 3-region Global Table is charged as 3 writes. One for the primary region and and two more rWCU (or rWRU for On Demand) for the replicated regions.
@@ -97,9 +97,9 @@ Cost Considerations
 How Global Tables Compare to ScyllaDB
 =====================================
 
-.. raw:: html
+.. note::
 
-    <p class="mark">ScyllaDB gives you the power to build global applications without the complexity and cost of Global Tables.</p>
+    ScyllaDB gives you the power to build global applications without the complexity and cost of Global Tables.
 
 ScyllaDB offers a more flexible and cost-effective solution for multi region applications. Here’s how it stacks up against DynamoDB Global Tables:
 
