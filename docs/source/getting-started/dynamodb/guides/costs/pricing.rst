@@ -43,9 +43,8 @@ When comparing the pricing models, it's important to consider your application's
 
 Relative cost can vary significantly depending on your application's usage patterns. In general, On Demand pricing is the most expensive option, while Provisioned with Reserved Capacity pricing is the cheapest option. Provisioned pricing falls in between the two.
 
-.. raw:: html
-
-    <p class="mark">What you need to know is that the On Demand pricing model is the most expensive option. You will be paying up to +700% premium for the flexibility of not having to provision capacity.</p>
+.. note::
+    What you need to know is that the On Demand pricing model is the most expensive option. You will be paying up to +700% premium for the flexibility of not having to provision capacity.
 
 Provisioned with Reserved Capacity pricing is the cheapest option, but it requires you to pay for the reserved capacity, even if you don't use it.
 
@@ -144,9 +143,8 @@ How these Models Compare to ScyllaDB
 
 ScyllaDB offers a different pricing model than DynamoDB. ScyllaDB charges based on the number of cores/storage you use, rather than the number of read and write requests. This makes it much more cost-effective for applications with high-volume traffic, as you don't have to worry about exceeding your provisioned capacity and being throttled.
 
-.. raw:: html
-
-    <p class="mark">In fact, we're so confident in our pricing model that we guarantee 50% off your existing DynamoDB workload costs.</p>
+.. note::
+    In fact, we're so confident in our pricing model that we guarantee 50% off your existing DynamoDB workload costs.
 
 When comparing DynamoDB and ScyllaDB, it's important to consider your application's requirements and usage patterns. If you have relatively low volume workloads, DynamoDB's On Demand pricing may still be the best option for you. If you have a relatively static workload, DynamoDB's Provisioned with Reserved Capacity pricing may be the best option for you.
 
