@@ -44,8 +44,6 @@ Using raw chart data, we can determine the following:
 
 The `estimate for this On Demand workload on DynamoDB <https://calculator.scylladb.com/?pricing=demand&storageGB=512&itemSizeB=1024&tableClass=standard&baselineReads=410000&baselineWrites=380000&peakReads=1000000&peakWrites=800000&peakDurationReads=1&peakDurationWrites=3&reserved=0&readConst=100&overprovisioned=0>`_ is around **$853,312/month** in On Demand mode.
 
-A ScyllaDB `cluster configuration with 3 nodes of i4i.8xlarge <https://www.scylladb.com/product/scylla-cloud/get-pricing/?reads=400000&writes=400000&itemSize=1&storage=1&cloudProvider=AWS>`_, would cost around **$19,422/month**. This cluster could sustain up 936,000 ops/sec with peaks up to 1,440,000 ops/sec with a significant cost reduction.
-
 .. note::
     Estimating costs is hard. The flexibility of On Demand mode is great, but you pay a premium for this. This is because On Demand mode charges per request... and if you're not careful, you will pay excessive costs for your workload.
 
@@ -67,8 +65,6 @@ Because traffic patterns are typically more predictable within an hour or day, y
 In this provisioned scenario, you might provision 350,000 ops/sec for the baseline, plus 550,000 ops/sec for the peaks lasting at least 12 hours combined.
 
 Assuming a 50:50 read:write ratio, the `estimate for this Provisioned workload on DynamoDB <https://calculator.scylladb.com/?pricing=provisioned&storageGB=512&itemSizeB=1024&tableClass=standard&baselineReads=175000&baselineWrites=175000&peakReads=275000&peakWrites=275000&peakDurationReads=12&peakDurationWrites=12&reserved=0&readConst=100&overprovisioned=0>`_ is around **$128,242/month** in Provisioned mode.
-
-A ScyllaDB `cluster configuration with 3 nodes of i4i.4xlarge <https://www.scylladb.com/product/scylla-cloud/get-pricing/?reads=175000&writes=175000&itemSize=1&storage=1&cloudProvider=AWS>`_ would cost around **$9,711/month**. This cluster could sustain up to 468,000 ops/sec with peaks up to 720,000 ops/sec. That's more than enough to cover the workload at a fraction of the monthly cost.
 
 .. note::
     DynamoDB still charges per request - provisioned capacity just gives you a volume discount. You’re still renting throughput. ScyllaDB charges per core, not per operation. You get predictable performance, linear scale-out, and full control over cost as your workload grows.
