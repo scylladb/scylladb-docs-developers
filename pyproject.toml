@@ -10,7 +10,7 @@ dependencies = [
     "sphinx-autobuild>=2025.08.25",
     "sphinx-reredirects>=0.1.6",
     "sphinx>=9.0",
-    "sphinx-multiversion-scylla>=0.3.7",
+    "sphinx-multiversion-scylla>=0.3.8",
     "redirects_cli>=0.1.3",
 ]
 
