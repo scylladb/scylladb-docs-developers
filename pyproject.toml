@@ -5,7 +5,7 @@ version = "0.3.0"
 requires-python = ">=3.12"
 dependencies = [
     "pygments>=2.18.0",
-    "sphinx-scylladb-theme>=1.9.1",
+    "sphinx-scylladb-theme>=1.9.2",
     "sphinx-sitemap>=2.9.0",
     "sphinx-autobuild>=2025.08.25",
     "sphinx-reredirects>=0.1.6",
