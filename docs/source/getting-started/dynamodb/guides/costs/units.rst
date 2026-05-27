@@ -129,7 +129,7 @@ DynamoDB Accelerator (DAX) is a fully managed, in-memory caching service for Dyn
 
 .. note::
 
-    ScyllaDB implements a similar caching mechanism called `ScyllaDB Cache <https://docs.scylladb.com/architecture/scylla-cache/>`_ that is designed to improve the performance of read-heavy workloads. However, ScyllaDB does not charge for caching, as it is included in the overall cost of running ScyllaDB. Refer to our guide on :doc:`DAX Caching <dax>` for more information.
+    ScyllaDB implements a similar caching mechanism that is designed to improve the performance of read-heavy workloads. However, ScyllaDB does not charge for caching, as it is included in the overall cost of running ScyllaDB. Refer to our guide on :doc:`DAX Caching <dax>` for more information.
 
 .. rubric:: **References**
 
