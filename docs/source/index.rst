@@ -152,14 +152,6 @@ For more detailed information, see our `installation instructions. <https://docs
 
 For more detailed information, see our `full list of drivers. <https://docs.scylladb.com/manual/stable/using-scylla/drivers/cql-drivers/>`_
 
-.. signup::
-   :action: https://lp.scylladb.com/l/934963/2024-09-04/bv9ry
-   :title: Sign up for our product updates
-   :body: Stay ahead with the latest tutorials, guides, news and events from ScyllaDB.
-   :placeholder: Enter your email
-   :button_text: Subscribe Now
-   :privacy_policy_url: https://www.scylladb.com/privacy/
-
 .. raw:: html
 
           </div>
