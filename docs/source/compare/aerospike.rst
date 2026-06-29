@@ -833,7 +833,3 @@ to our engineering team.
 
 - `Book a strategy session <https://lp.scylladb.com/book-strategy-session-offer>`_
 - `Get started free <https://cloud.scylladb.com/>`_
-
-.. note::
-
-   RAM model based on `keys-vs-ram <https://fee-mendes.github.io/keys-vs-ram/>`_.

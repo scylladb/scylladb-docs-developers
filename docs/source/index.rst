@@ -14,7 +14,7 @@
 
    getting-started/index
    getting-started/dynamodb/index
-   Switching from Aerospike <compare/index>
+   Switching from Aerospike <compare/aerospike>
 
 .. hero-box::
   :title: Developing Monster Scale
@@ -71,7 +71,7 @@
 
 .. topic-box::
   :title: ScyllaDB vs Aerospike
-  :link: compare/index
+  :link: compare/aerospike
   :link_target: _self
   :icon: icon-docs-commands
   :class: large-6
