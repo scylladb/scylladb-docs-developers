@@ -4,8 +4,8 @@
    :description: How ScyllaDB beats Aerospike for key-value — and brings wide-column flexibility, elasticity, and dramatically lower RAM costs at scale.
    :keywords: ScyllaDB, Aerospike, comparison, key-value, wide-column, NoSQL, benchmark, RAM, performance
 
-ScyllaDB vs Aerospike: A Technical Comparison
-=============================================
+Switching from Aerospike: A Technical Comparison
+================================================
 
 This page covers the main differences between ScyllaDB and Aerospike. The
 motivation was to answer a paid promotional benchmark that Aerospike distributed.

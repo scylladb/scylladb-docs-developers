@@ -14,7 +14,7 @@
 
    getting-started/index
    getting-started/dynamodb/index
-   compare/index
+   Switching from Aerospike <compare/index>
 
 .. hero-box::
   :title: Developing Monster Scale
