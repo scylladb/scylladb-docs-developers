@@ -14,6 +14,7 @@
 
    getting-started/index
    getting-started/dynamodb/index
+   compare/index
 
 .. hero-box::
   :title: Developing Monster Scale
@@ -67,6 +68,16 @@
   :anchor: Learn more
 
   Level up your skills at your own pace, with our NoSQL database courses.
+
+.. topic-box::
+  :title: ScyllaDB vs Aerospike
+  :link: compare/index
+  :link_target: _self
+  :icon: icon-docs-commands
+  :class: large-6
+  :anchor: Read the comparison
+
+  How ScyllaDB beats Aerospike at key-value — and brings wide-column flexibility, elasticity, and dramatically lower RAM costs at scale.
 
 .. raw:: html
 
