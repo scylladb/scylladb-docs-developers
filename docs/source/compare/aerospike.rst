@@ -80,8 +80,6 @@ impact.
      border-radius:var(--radius); padding:24px; border:1px solid var(--border);
      background:var(--surface); color:var(--text);
    }
-   .aero-rmw .model-panel.aero { border-top:4px solid var(--aero); }
-   .aero-rmw .model-panel.scylla { border-top:4px solid var(--scylla-deep); }
    .aero-rmw .model-panel h3 { font-size:19px; margin:0 0 4px; color:var(--text); }
    .aero-rmw .sub { font-family:var(--mono); font-size:12px; color:var(--text-muted); margin-bottom:18px; }
    .aero-rmw .row-visual { display:flex; align-items:center; gap:6px; flex-wrap:wrap; margin:16px 0; min-height:48px; }
