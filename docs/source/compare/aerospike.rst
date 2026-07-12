@@ -604,7 +604,7 @@ and the `presentation
 used incorrect configs: RF3 vs RF2, an old YCSB client. When ScyllaDB reran it with
 a corrected configuration, our wide-column KKV model matched throughput and the P99
 was only 1–2ms higher at multi-terabyte scale. See the `Aerospike whitepaper
-<https://aerospike.com/lp/running-operational-workloads/>`_ or `prove it on your
+<https://aerospike.com/blog/aerospike-vs-scylladb-production-stress>`_ or `prove it on your
 workload <https://lp.scylladb.com/book-strategy-session-offer>`_.
 
 .. note::
