@@ -1,0 +1,1600 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>ScyllaDB Materialized Views &amp; Secondary Indexes</title>
+<script>
+// ScyllaDB DS theme boot snippet: runs before the stylesheet so there is no flash of the
+// wrong palette. Follows the OS by default; the header button cycles the override.
+(function () {
+  var KEY = "scylladb-ds-theme";
+  var root = document.documentElement;
+  var sysDark = window.matchMedia("(prefers-color-scheme: dark)");
+  function resolve(pref) { return pref === "system" ? (sysDark.matches ? "dark" : "light") : pref; }
+  function setTheme(pref) { root.setAttribute("data-theme", resolve(pref)); }
+  setTheme(localStorage.getItem(KEY) || "system");
+  sysDark.addEventListener("change", function () {
+    if ((localStorage.getItem(KEY) || "system") === "system") setTheme("system");
+  });
+})();
+</script>
+<link rel="icon" href="favicon.svg" type="image/svg+xml" />
+<link rel="icon" href="favicon.ico" sizes="32x32" />
+<link rel="apple-touch-icon" href="apple-touch-icon.png" />
+<link rel="stylesheet" href="scylladb-ds.css" />
+<style>
+  /* ---------- bridge: local aliases -> ScyllaDB DS tokens ----------
+     Short local names keep the rest of this sheet readable, and every one of them still
+     resolves through whichever DS token is live for the current data-theme. */
+  :root {
+    --bg: var(--bg-page);
+    --surface: var(--bg-surface);
+    --surface-2: var(--bg-surface-alt);
+    --border: var(--border-color);
+    --text: var(--text-color);
+    --text-dim: var(--text-muted);
+    --text-faint: var(--text-disabled);
+
+    --accent: var(--btn-primary-bg);
+    --ok: var(--status-success);
+    --ok-bg: var(--status-success-bg);
+    --warn: var(--status-warning);
+    --warn-bg: var(--status-warning-bg);
+    --danger: var(--status-error);
+    --danger-bg: var(--status-error-bg);
+
+    /* the two protagonists: the base table and the thing derived from it */
+    --base: var(--color-primary-500);
+    --base-bg: var(--color-primary-50);
+    --view: var(--color-secondary-500);
+    --view-bg: var(--color-secondary-50);
+
+    --font-ui: var(--font-family);
+    /* --font-mono ships with the DS bundle (Roboto Mono). */
+  }
+
+  * { box-sizing: border-box; }
+
+  html, body { height: 100%; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--font-ui);
+    /* Built for a projector / big screen: the whole UI scales with the viewport width so a
+       1080p or 4K room gets proportionally larger type instead of a postage stamp in the
+       middle, while a laptop still lands on a sane 14px. */
+    font-size: clamp(13px, 0.78vw, 19px);
+    line-height: 1.45;
+    overflow: hidden;
+  }
+
+  .wrap {
+    height: 100vh;
+    max-width: 2400px;
+    margin: 0 auto;
+    padding: 0.9em 1.1em 0.7em;
+    display: flex;
+    flex-direction: column;
+    gap: 0.7em;
+  }
+
+  /* =============================== header =============================== */
+  header.top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1.2em;
+    flex-wrap: wrap;
+    flex: none;
+  }
+  header.top h1 {
+    font-size: 1.55em;
+    font-weight: 700;
+    margin: 0;
+    letter-spacing: -0.015em;
+    font-family: var(--font-family);
+    white-space: nowrap;
+  }
+  header.top h1 .accent { color: var(--accent); }
+
+  /* mode tabs — the four ways to answer "give me the rows for this non-key column" */
+  .modes { display: flex; gap: 0.35em; flex-wrap: wrap; }
+  .mode-btn {
+    font-family: var(--font-ui);
+    font-size: 0.95em;
+    font-weight: 600;
+    padding: 0.42em 0.95em;
+    border-radius: var(--radius-lg);
+    border: var(--border-w) solid var(--border);
+    background: var(--surface);
+    color: var(--text-dim);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 0.5em;
+    transition: background .15s, color .15s, border-color .15s;
+  }
+  .mode-btn:hover { border-color: var(--accent); color: var(--text); }
+  .mode-btn .kbd {
+    font-family: var(--font-mono);
+    font-size: 0.78em;
+    font-weight: 700;
+    color: var(--text-faint);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: 0 0.35em;
+  }
+  .mode-btn[aria-selected="true"] {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: var(--btn-primary-text);
+  }
+  .mode-btn[aria-selected="true"] .kbd { color: inherit; border-color: currentColor; opacity: .7; }
+
+  .head-actions { display: flex; align-items: center; gap: 0.5em; }
+  /* repo link: a DS button (.btn already gives it flex, gap, no underline) carrying the mark */
+  .repo-link svg { width: 1.05em; height: 1.05em; fill: currentColor; flex: none; }
+
+  /* =============================== main grid =============================== */
+  .grid3 {
+    flex: 1 1 auto;
+    min-height: 0;
+    display: grid;
+    grid-template-columns: minmax(0, 0.88fr) minmax(0, 1.15fr) minmax(0, 1.45fr);
+    gap: 0.7em;
+  }
+  .col { display: flex; flex-direction: column; gap: 0.7em; min-height: 0; }
+
+  .card {
+    background: var(--surface);
+    border: var(--border-w) solid var(--border);
+    border-radius: var(--radius-xl);
+    box-shadow: var(--shadow-1);
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+    overflow: hidden;
+  }
+  .card-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.6em;
+    padding: 0.55em 0.85em;
+    border-bottom: var(--border-w) solid var(--border);
+    flex: none;
+  }
+  .card-head h2 {
+    margin: 0;
+    font-size: 0.82em;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.07em;
+    color: var(--text-faint);
+    white-space: nowrap;
+  }
+  .card-head .name {
+    font-family: var(--font-mono);
+    font-size: 0.88em;
+    font-weight: 700;
+    color: var(--text-emphasis);
+  }
+  .card-body { flex: 1 1 auto; min-height: 0; overflow: auto; }
+
+  .card.base-card .card-head { background: var(--base-bg); border-bottom-color: color-mix(in srgb, var(--base) 30%, transparent); }
+  .card.base-card .card-head .name { color: var(--base); }
+  .card.view-card .card-head { background: var(--view-bg); border-bottom-color: color-mix(in srgb, var(--view) 30%, transparent); }
+  .card.view-card .card-head .name { color: var(--view); }
+
+  /* =============================== CQL =============================== */
+  .cql-body { padding: 0.5em 0; }
+  .cql-stmt {
+    font-family: var(--font-mono);
+    font-size: 0.86em;
+    line-height: 1.55;
+    white-space: pre;
+    padding: 0.5em 0.9em;
+    border-left: 3px solid transparent;
+    color: var(--text-dim);
+    transition: background .2s, border-color .2s, color .2s;
+  }
+  .cql-stmt + .cql-stmt { margin-top: 0.15em; }
+  .cql-stmt.active {
+    background: var(--bg-accent);
+    border-left-color: var(--accent);
+    color: var(--text-emphasis);
+  }
+  .cql-stmt .kw { color: var(--accent); font-weight: 700; }
+  .cql-stmt.active .kw { color: var(--btn-primary-hover); }
+  .cql-stmt .str { color: var(--ok); }
+  .cql-stmt .cmt { color: var(--text-faint); font-style: italic; }
+  .cql-stmt .id-base { color: var(--base); font-weight: 700; }
+  .cql-stmt .id-view { color: var(--view); font-weight: 700; }
+
+  /* =============================== data tables =============================== */
+  table.rows {
+    width: 100%;
+    border-collapse: collapse;
+    font-family: var(--font-mono);
+    font-size: 0.86em;
+    font-variant-numeric: tabular-nums;
+  }
+  table.rows th, table.rows td {
+    text-align: left;
+    padding: 0.3em 0.7em;
+    white-space: nowrap;
+    border-bottom: 1px solid var(--border);
+  }
+  table.rows thead th {
+    position: sticky;
+    top: 0;
+    z-index: 1;
+    background: var(--surface-2);
+    font-weight: 700;
+    color: var(--text-emphasis);
+    padding-top: 0.45em;
+    padding-bottom: 0.45em;
+    border-bottom: var(--border-w) solid var(--border);
+  }
+  table.rows thead th .keytag {
+    display: block;
+    font-size: 0.72em;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    line-height: 1.4;
+    margin-top: 0.1em;
+  }
+  .keytag.pk { color: var(--base); }
+  .keytag.ck { color: var(--warn); }
+  .keytag.tok { color: var(--text-faint); }
+  .keytag.blank { color: transparent; }
+  /* the view's own key columns are tinted with the view colour so the reordering reads at a glance */
+  .view-card .keytag.pk { color: var(--view); }
+
+  table.rows td { color: var(--text-dim); }
+  table.rows td.k { color: var(--text-emphasis); font-weight: 700; }
+  table.rows tbody tr { transition: background .25s; }
+  table.rows tbody tr.scan { background: var(--warn-bg); }
+  table.rows tbody tr.hit { background: var(--ok-bg); }
+  table.rows tbody tr.hit td { color: var(--ok); }
+  table.rows tbody tr.hit td.k { color: var(--ok); }
+  table.rows tbody tr.fresh { animation: rowIn .55s ease-out; }
+  @keyframes rowIn {
+    0%   { background: color-mix(in srgb, var(--accent) 45%, transparent); }
+    100% { background: transparent; }
+  }
+  .empty-note {
+    padding: 1.6em 1em;
+    text-align: center;
+    font-family: var(--font-mono);
+    font-size: 0.9em;
+    color: var(--text-faint);
+  }
+  .empty-note strong { display: block; font-size: 1.15em; color: var(--warn); margin-bottom: 0.35em; }
+
+  /* =============================== stage =============================== */
+  .stage-card .card-body { overflow: hidden; padding: 0.2em; }
+  #stage { width: 100%; height: 100%; display: block; }
+
+  /* A rack (availability zone) enclosure: a lightly tinted panel behind the nodes it holds,
+     grouping them by proximity and a shared border. Deliberately colorless — on this stage
+     color already means role (base / view / coordinator) and hop type, and the DS categorical
+     chart tokens collide with those outright: --chart-1 IS --base, --chart-2 IS --view and
+     --chart-3 IS --warn. A rack is a container, not a role, so it recedes and lets the node
+     borders carry the meaning. */
+  .rack-box { fill: var(--surface-2); stroke: var(--border); stroke-width: 1.5; }
+  .rack-box-label {
+    fill: var(--text-faint);
+    font-family: var(--font-mono);
+    font-size: 10.5px;
+    font-weight: 700;
+    letter-spacing: 0.05em;
+    text-anchor: start;
+    pointer-events: none;
+  }
+
+  .node-box {
+    fill: var(--surface);
+    stroke: var(--border);
+    stroke-width: 2;
+    transition: stroke .2s, stroke-width .2s, fill .2s;
+  }
+  .node-box.base { stroke: var(--base); stroke-width: 3; }
+  .node-box.view { stroke: var(--view); stroke-width: 3; stroke-dasharray: 7 4; }
+  .node-box.both { stroke: var(--base); stroke-width: 3.5; }
+  .node-box.coord { stroke: var(--accent); stroke-width: 4; }
+  .node-box.busy { fill: var(--bg-accent); }
+  .node-ring2 { fill: none; stroke: var(--view); stroke-width: 2.5; stroke-dasharray: 7 4; opacity: 0; }
+  .node-ring2.on { opacity: 1; }
+
+  .node-name {
+    fill: var(--text-emphasis);
+    font-family: var(--font-mono);
+    font-size: 13px;
+    font-weight: 700;
+    text-anchor: middle;
+    dominant-baseline: middle;
+    pointer-events: none;
+  }
+  .node-role {
+    font-family: var(--font-mono);
+    font-size: 9.5px;
+    font-weight: 700;
+    letter-spacing: 0.07em;
+    text-anchor: middle;
+    dominant-baseline: middle;
+    pointer-events: none;
+  }
+  .node-role.base { fill: var(--base); }
+  .node-role.view { fill: var(--view); }
+  .node-role.coord { fill: var(--accent); }
+  .node-role.idle { fill: var(--text-faint); }
+
+  .client-box { fill: var(--surface-2); stroke: var(--text-dim); stroke-width: 2; }
+  .client-label {
+    fill: var(--text-dim);
+    font-family: var(--font-mono);
+    font-size: 12px;
+    font-weight: 700;
+    text-anchor: middle;
+    dominant-baseline: middle;
+    pointer-events: none;
+  }
+
+  .msg-line { fill: none; stroke-width: 2; opacity: .5; }
+  .msg-line.w { stroke: var(--base); }
+  .msg-line.v { stroke: var(--view); }
+  .msg-line.r { stroke: var(--ok); }
+  .msg-line.f { stroke: var(--warn); }
+  .packet { stroke: none; }
+  .packet.w { fill: var(--base); }
+  .packet.v { fill: var(--view); }
+  .packet.r { fill: var(--ok); }
+  .packet.f { fill: var(--warn); }
+  .arrow-w { fill: var(--base); opacity: .85; }
+  .arrow-v { fill: var(--view); opacity: .85; }
+  .arrow-r { fill: var(--ok); opacity: .85; }
+  .arrow-f { fill: var(--warn); opacity: .85; }
+
+  .packet-label {
+    font-family: var(--font-mono);
+    font-size: 12px;
+    font-weight: 700;
+    text-anchor: middle;
+    paint-order: stroke;
+    stroke: var(--surface);
+    stroke-width: 4px;
+    stroke-linejoin: round;
+    pointer-events: none;
+  }
+  .packet-label.w { fill: var(--base); }
+  .packet-label.v { fill: var(--view); }
+  .packet-label.r { fill: var(--ok); }
+  .packet-label.f { fill: var(--warn); }
+
+  .local-badge {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    font-weight: 700;
+    text-anchor: middle;
+    paint-order: stroke;
+    stroke: var(--surface);
+    stroke-width: 4px;
+    stroke-linejoin: round;
+    fill: var(--view);
+  }
+
+  /* stage legend, bottom-left inside the SVG frame */
+  .legend {
+    display: flex;
+    gap: 1.1em;
+    flex-wrap: wrap;
+    align-items: center;
+    padding: 0.4em 0.85em;
+    border-top: var(--border-w) solid var(--border);
+    flex: none;
+    font-size: 0.8em;
+    color: var(--text-dim);
+  }
+  .legend .item { display: flex; align-items: center; gap: 0.4em; white-space: nowrap; }
+  .legend .sw { width: 1.5em; height: 0.85em; border-radius: 3px; border: 2px solid var(--border); }
+  .legend .sw.base { border-color: var(--base); }
+  .legend .sw.view { border-color: var(--view); border-style: dashed; }
+  .legend .sw.coord { border-color: var(--accent); }
+  .legend .hop { width: 1.7em; height: 0; border-top: 2px solid var(--border); }
+  .legend .hop.w { border-color: var(--base); }
+  .legend .hop.v { border-color: var(--view); }
+  .legend .hop.r { border-color: var(--ok); }
+
+  /* =============================== controls =============================== */
+  .controls {
+    flex: none;
+    display: flex;
+    align-items: center;
+    gap: 0.9em 1.4em;
+    flex-wrap: wrap;
+    background: var(--surface);
+    border: var(--border-w) solid var(--border);
+    border-radius: var(--radius-xl);
+    box-shadow: var(--shadow-1);
+    padding: 0.6em 0.9em;
+  }
+  .cgroup { display: flex; align-items: center; gap: 0.5em; }
+  .cgroup > .glabel {
+    font-size: 0.78em;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.07em;
+    color: var(--text-faint);
+    white-space: nowrap;
+  }
+  .where-bar > span { white-space: nowrap; }
+  .where-bar { display: flex; align-items: center; gap: 0.45em; font-family: var(--font-mono); font-size: 0.9em; color: var(--text-dim); }
+  .where-bar select {
+    font-family: var(--font-mono);
+    font-size: 1em;
+    flex: none;
+    width: auto;
+    min-width: 7.5em;
+    padding: 0.2em 1.6em 0.2em 0.6em;
+  }
+  .controls .divider { width: 1px; align-self: stretch; background: var(--border); }
+  .controls .btn { font-size: 0.95em; }
+  .btn-run { min-width: 8.5em; }
+  .controls .spacer { flex: 1 1 auto; }
+  /* the driver radios sit on the control row, so they follow its type scale */
+  #driverGroup .radio { font-size: 0.85em; white-space: nowrap; align-items: center; }
+  #driverGroup .radio-dot { margin-top: 0; }
+  .controls input[type="range"] { width: 8em; }
+  .speedval { font-family: var(--font-mono); font-size: 0.85em; color: var(--accent); font-weight: 700; min-width: 2.6em; }
+
+  .page-footer {
+    flex: none;
+    text-align: center;
+    font-size: 0.72em;
+    color: var(--text-faint);
+  }
+
+  ::-webkit-scrollbar { width: 9px; height: 9px; }
+  ::-webkit-scrollbar-thumb { background: var(--border); border-radius: var(--radius-sm); }
+
+  @media (prefers-reduced-motion: reduce) { * { transition-duration: 0.01ms !important; } }
+
+  @media (max-width: 1250px) {
+    body { overflow: auto; }
+    .wrap { height: auto; }
+    .grid3 { grid-template-columns: 1fr; }
+    .stage-card { height: 70vh; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header class="top">
+    <h1>ScyllaDB <span class="accent">Materialized Views</span> &amp; <span class="accent">Secondary Indexes</span></h1>
+
+    <div class="modes" id="modes" role="tablist" aria-label="Access method"></div>
+
+    <div class="head-actions">
+      <a class="btn btn--xs repo-link" href="https://github.com/tzach/scylladb-mv-viz"
+         target="_blank" rel="noopener" title="Source on GitHub: tzach/scylladb-mv-viz">
+        <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A7.995 7.995 0 0 0 16 8c0-4.42-3.58-8-8-8Z"/></svg>
+        GitHub
+      </a>
+      <button type="button" class="btn btn--xs" id="btnTheme" title="Cycle theme: system / light / dark">Theme</button>
+    </div>
+  </header>
+
+  <div class="grid3">
+
+    <!-- ---------------- column 1: the CQL that defines everything on screen ------------- -->
+    <div class="col">
+      <div class="card" style="flex:1 1 auto;">
+        <div class="card-head"><h2>CQL</h2><span class="name" id="cqlMode"></span></div>
+        <div class="card-body cql-body" id="cqlBody"></div>
+      </div>
+    </div>
+
+    <!-- ---------------- column 2: base table and the table derived from it -------------- -->
+    <div class="col">
+      <div class="card base-card" style="flex:1 1 50%;">
+        <div class="card-head">
+          <h2>Base table</h2>
+          <span class="name">heartrate</span>
+        </div>
+        <div class="card-body" id="baseBody"></div>
+      </div>
+      <div class="card view-card" style="flex:1 1 50%;">
+        <div class="card-head">
+          <h2 id="viewKind">View</h2>
+          <span class="name" id="viewName"></span>
+        </div>
+        <div class="card-body" id="viewBody"></div>
+      </div>
+    </div>
+
+    <!-- ---------------- column 3: where the requests actually travel -------------------- -->
+    <div class="col">
+      <div class="card stage-card" style="flex:1 1 auto;">
+        <div class="card-head">
+          <h2>Cluster</h2>
+          <span class="name">6 nodes &middot; 3 racks &middot; RF=3 &middot; CL=ONE</span>
+        </div>
+        <div class="card-body">
+          <!-- viewBox is recomputed from the rack geometry on render; this matches it. -->
+          <svg id="stage" viewBox="0 0 600 474" xmlns="http://www.w3.org/2000/svg">
+            <defs>
+              <marker id="arrowW" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+                <path class="arrow-w" d="M0,0 L10,5 L0,10 z"></path>
+              </marker>
+              <marker id="arrowV" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+                <path class="arrow-v" d="M0,0 L10,5 L0,10 z"></path>
+              </marker>
+              <marker id="arrowR" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+                <path class="arrow-r" d="M0,0 L10,5 L0,10 z"></path>
+              </marker>
+              <marker id="arrowF" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+                <path class="arrow-f" d="M0,0 L10,5 L0,10 z"></path>
+              </marker>
+            </defs>
+            <g id="racksLayer"></g>
+            <g id="nodesLayer"></g>
+            <g id="clientLayer"></g>
+            <g id="messagesLayer"></g>
+          </svg>
+        </div>
+        <div class="legend">
+          <span class="item"><span class="sw base"></span>base replica</span>
+          <span class="item"><span class="sw view"></span>view replica</span>
+          <span class="item"><span class="sw coord"></span>coordinator</span>
+          <span class="item"><span class="hop w"></span>base write</span>
+          <span class="item"><span class="hop v"></span>view update</span>
+          <span class="item"><span class="hop r"></span>read</span>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="controls">
+    <div class="cgroup">
+      <span class="glabel">Where</span>
+      <span class="where-bar" id="whereBar"></span>
+    </div>
+
+    <div class="divider"></div>
+
+    <button type="button" class="btn btn--sm btn--primary btn-run" id="btnInsert" title="Run the write path (I)">INSERT&nbsp;row</button>
+    <button type="button" class="btn btn--sm btn--primary btn-run" id="btnSelect" title="Run the read path (S)">SELECT</button>
+    <button type="button" class="btn btn--sm" id="btnReset" title="Reset the data (R)">Reset</button>
+
+    <div class="cgroup" id="driverGroup" role="radiogroup" aria-label="Client driver">
+      <span class="glabel">Driver</span>
+      <label class="radio">
+        <input type="radio" name="driver" value="basic" checked />
+        <span class="radio-dot"></span>
+        <span>Non-smart</span>
+      </label>
+      <label class="radio">
+        <input type="radio" name="driver" value="smart" />
+        <span class="radio-dot"></span>
+        <span>Smart</span>
+      </label>
+    </div>
+
+    <div class="spacer"></div>
+
+    <div class="cgroup">
+      <span class="glabel">Speed</span>
+      <input type="range" id="speed" min="0" max="4" step="1" value="2" />
+      <span class="speedval" id="speedVal">1.0&times;</span>
+    </div>
+  </div>
+
+  <footer class="page-footer">
+    Educational visualization of ScyllaDB view and index internals &mdash; simplified, not behaviorally exact.
+    Keys: <b>1</b>&ndash;<b>4</b> mode &middot; <b>I</b> insert &middot; <b>S</b> select &middot; <b>R</b> reset
+    <br />
+    Source and notes: <a href="https://github.com/tzach/scylladb-mv-viz" target="_blank" rel="noopener">github.com/tzach/scylladb-mv-viz</a>
+  </footer>
+
+</div>
+
+<script>
+"use strict";
+/* =====================================================================================
+   ScyllaDB Materialized Views & Secondary Indexes — visualization
+
+   Four ways to answer the same question ("give me the rows for a non-key column"), each
+   shown on three surfaces at once:
+
+     * the CQL that defines it,
+     * the base table and the table that gets derived from it,
+     * the hops a write and a read actually make across the cluster.
+
+   The view/index schemas follow ScyllaDB's own construction in
+   index/secondary_index_manager.cc::create_view_for_index() — a global index puts the
+   indexed column in the view's partition key and prepends a computed `idx_token`
+   clustering column; a local index keeps the base partition key and puts the indexed
+   column first in the clustering key. Write-path pairing (each base replica ships its
+   view update to one specific view replica) follows db/view/view.cc.
+   ===================================================================================== */
+
+const svgNS = "http://www.w3.org/2000/svg";
+const $ = (id) => document.getElementById(id);
+const esc = (s) => String(s).replace(/[&<>]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;" }[c]));
+
+/* ------------------------------------------------------------------ cluster geometry */
+// The cluster is drawn as racks, not as a ring: three enclosures side by side, each holding the
+// two nodes that share its failure domain, with the client to their left. A ring hides the only
+// thing that makes RF=3 worth anything — that the three replicas sit in three separate racks —
+// so the enclosure is the point of the picture.
+//
+// Side by side puts the nodes on a grid, and on a grid a third card often sits squarely on the
+// line between two others. Two channels of empty space keep every hop routable around that, and
+// both are sized for it rather than for looks:
+//
+//   NODE_V_GAP  a horizontal band between the upper and lower nodes, running the full width.
+//               The client sits in the middle of it, so every hop it sends starts out already
+//               inside a clear lane and only has to rise or fall at the far end. This is the
+//               binding constraint: sweeping it against every hop the four modes make, 60px
+//               leaves 26 arcs crossing a card and 76px is the first width that clears them
+//               all. It is set above that threshold rather than on it.
+//   RACK_GAP    a vertical lane between neighbouring enclosures, for hops that have to cross a
+//               rack rather than travel along the band.
+//
+// pickBow() steers each arc into one of the two, so shrinking either will start pushing arrows
+// across node cards. Three racks in a row plus a client column is simply a wide arrangement; the
+// stage is broader than it is tall and the panel letterboxes it, which is the cost of showing
+// the racks left to right.
+const NODE_COUNT = 6;
+const RF = 3;
+const RACK_COUNT = 3;
+
+const NW = 124, NH = 88;      // one node card
+const NODE_V_GAP = 96;        // band between the two nodes of a rack — an arc route
+const RACK_GAP = 44;          // lane between neighbouring enclosures — an arc route
+const RACK_PAD_X = 12;        // enclosure padding beside its nodes
+const RACK_PAD_TOP = 24;      // enclosure padding above them — carries the rack label
+const RACK_PAD_BOTTOM = 12;
+const STAGE_PAD = 22;
+
+const RACK_W = NW + RACK_PAD_X * 2;
+const CLIENT_HW = 58, CLIENT_HH = 25;
+const CLIENT_MARGIN = 44;     // between the client and the first enclosure
+const RACKS_X = STAGE_PAD + CLIENT_HW * 2 + CLIENT_MARGIN;
+
+// Nodes are numbered round-robin across the racks (node i is in rack i % RACK_COUNT), which is
+// how a cluster grown one node at a time across three availability zones ends up numbered — and
+// it is what makes the plain three-step ring walk in replicasFor() put one replica in each rack.
+// Numbering the racks in contiguous pairs instead looks tidier in a list and is far worse here:
+// the rack-aware walk then always prefers the first node of each pair, so half the cluster never
+// holds a replica at all.
+const NODES = Array.from({ length: NODE_COUNT }, (_, i) => {
+  const rack = i % RACK_COUNT;
+  const slot = Math.floor(i / RACK_COUNT);
+  return {
+    i, rack, name: "node " + (i + 1),
+    x: RACKS_X + rack * (RACK_W + RACK_GAP) + RACK_PAD_X + NW / 2,
+    y: STAGE_PAD + RACK_PAD_TOP + slot * (NH + NODE_V_GAP) + NH / 2,
+    hw: NW / 2, hh: NH / 2,
+  };
+});
+
+// Each enclosure is just the bounding box of the nodes it holds, padded — so changing a gap
+// above moves the racks with it and nothing has to be kept in sync by hand.
+const RACKS = Array.from({ length: RACK_COUNT }, (_, r) => {
+  const own = NODES.filter((n) => n.rack === r);
+  const x0 = Math.min(...own.map((n) => n.x - n.hw)) - RACK_PAD_X;
+  const x1 = Math.max(...own.map((n) => n.x + n.hw)) + RACK_PAD_X;
+  const y0 = Math.min(...own.map((n) => n.y - n.hh)) - RACK_PAD_TOP;
+  const y1 = Math.max(...own.map((n) => n.y + n.hh)) + RACK_PAD_BOTTOM;
+  return { r, label: "ZONE/RACK " + r, x: x0, y: y0, w: x1 - x0, h: y1 - y0 };
+});
+
+const STAGE_W = Math.max(...RACKS.map((k) => k.x + k.w)) + STAGE_PAD;
+const STAGE_H = Math.max(...RACKS.map((k) => k.y + k.h)) + STAGE_PAD;
+
+// Left of the racks, centred on the band between the two node rows.
+const CLIENT = {
+  x: STAGE_PAD + CLIENT_HW,
+  y: (NODES[0].y + NODES[RACK_COUNT].y) / 2,
+  hw: CLIENT_HW, hh: CLIENT_HH,
+};
+
+/* ------------------------------------------------------------------ tokens & replicas */
+// FNV-1a. Stands in for murmur3: all we need is a stable, well-spread key -> ring position.
+function h32(s) {
+  let h = 0x811c9dc5;
+  for (let i = 0; i < s.length; i++) { h ^= s.charCodeAt(i); h = Math.imul(h, 0x01000193); }
+  return h >>> 0;
+}
+// What a real `token(pk)` would show: a signed 64-bit-ish number. Only its order matters here.
+function tokenOf(s) { return h32(s) | 0; }
+function ownerNode(key) { return h32(key) % NODE_COUNT; }
+// Rack-aware ownership, the shape NetworkTopologyStrategy produces: walk the ring from the
+// token and take the next node whose rack has no replica yet, only doubling up on a rack once
+// every rack is represented (or RF is larger than the rack count). With the round-robin rack
+// numbering above a plain walk already spreads the three replicas over the three racks, so the
+// skip never has to fire at RF=3 — it is here so the guarantee is stated rather than left to
+// depend on how the nodes happen to be numbered.
+function replicasFor(key) {
+  const start = ownerNode(key);
+  const chosen = [], usedRacks = new Set(), spare = [];
+  for (let k = 0; k < NODE_COUNT && chosen.length < RF; k++) {
+    const i = (start + k) % NODE_COUNT;
+    if (usedRacks.has(NODES[i].rack)) spare.push(i);
+    else { chosen.push(i); usedRacks.add(NODES[i].rack); }
+  }
+  for (let k = 0; chosen.length < RF && k < spare.length; k++) chosen.push(spare[k]);
+  return chosen;
+}
+// Prefer a coordinator that owns none of the data, so every hop in the story is visible.
+// Where the client sends the request. A non-smart driver has no idea which node owns
+// what, so it picks one that happens to own nothing relevant and that node has to forward
+// everything — the extra hop this demo is mostly about. A smart (token-aware) driver
+// hashes the partition key itself and lands directly on a replica, which then coordinates
+// its own request. `smartTarget` is the node such a driver would compute.
+function pickCoordinator(base, view, smartTarget) {
+  if (state.smart && smartTarget != null) return smartTarget;
+  for (let i = 0; i < NODE_COUNT; i++) if (!base.includes(i) && !view.includes(i)) return i;
+  return (base[0] + RF) % NODE_COUNT;
+}
+
+// When the driver has already landed on the node that owns the data, the coordinator hop
+// and its reply are not network traffic at all — they happen inside the one node.
+function routeOut(from, to, opts) {
+  const o = opts || {};
+  return from === to ? selfLoop(to, o.label, o.dur, o.cls) : hop(from, to, o);
+}
+function routeBack(from, to, opts) {
+  return from === to ? Promise.resolve() : hop(from, to, opts || {});
+}
+
+/* ------------------------------------------------------------------ the data */
+const CHIPS = ["chip-a1", "chip-b2", "chip-c3", "chip-d4"];
+const CHIP_OWNER = { "chip-a1": "alice", "chip-b2": "bob", "chip-c3": "alice", "chip-d4": "carol" };
+const OWNERS = ["alice", "bob", "carol"];
+
+const SEED = [
+  { chip: "chip-a1", min: 0, hr: 120 },
+  { chip: "chip-a1", min: 1, hr: 121 },
+  { chip: "chip-b2", min: 0, hr: 96 },
+  { chip: "chip-b2", min: 1, hr: 99 },
+  { chip: "chip-c3", min: 0, hr: 88 },
+  { chip: "chip-d4", min: 0, hr: 134 },
+];
+
+const pad2 = (n) => String(n).padStart(2, "0");
+function fmtTime(min) { return pad2(1 + Math.floor(min / 60)) + ":" + pad2(min % 60); }
+function mkRow(chip, min, hr) {
+  return { chip, min, hr, owner: CHIP_OWNER[chip], time: fmtTime(min), id: chip + "|" + min };
+}
+
+const state = {
+  mode: "mv",
+  rows: SEED.map((r) => mkRow(r.chip, r.min, r.hr)),
+  seq: 0,
+  gen: 0,
+  busy: false,
+  speed: 1,
+  smart: false,       // token-aware driver? off by default: the extra hop is the point
+  where: {},
+  hits: new Set(),      // ids of base rows the last query returned
+  vhits: new Set(),     // keys of view rows the last query matched
+  scanned: false,       // ALLOW FILTERING touched every base row
+  fresh: null,          // id of the row just inserted, for the flash
+  freshView: null,
+  activeStmt: null,
+};
+
+/* ------------------------------------------------------------------ the four modes */
+const BASE_COLS = [
+  { n: "pet_chip_id", k: "pk" },
+  { n: "time", k: "ck" },
+  { n: "owner", k: "" },
+  { n: "heart_rate", k: "" },
+];
+
+const CREATE_TABLE =
+`CREATE TABLE heartrate (
+  pet_chip_id text,
+  time        timestamp,
+  owner       text,
+  heart_rate  int,
+  PRIMARY KEY (pet_chip_id, time)
+);`;
+
+const MODES = {
+  /* ---------------------------------------------------------------- materialized view */
+  mv: {
+    label: "Materialized View", kind: "Materialized view", viewName: "heartrate_by_owner",
+    // PK(owner) — a whole new partitioning of the same rows, every column carried along.
+    viewCols: [{ n: "owner", k: "pk" }, { n: "pet_chip_id", k: "ck" }, { n: "time", k: "ck" }, { n: "heart_rate", k: "" }],
+    viewKeyOf: (r) => r.owner,
+    viewRow: (r) => ({ key: r.id, cells: [r.owner, r.chip, r.time, r.hr], kcount: 3, owner: r.owner }),
+    viewSort: (a, b) => cmp(a.cells[0], b.cells[0]) || cmp(a.cells[1], b.cells[1]) || cmp(a.cells[2], b.cells[2]),
+    ddl: () =>
+`CREATE MATERIALIZED VIEW heartrate_by_owner AS
+  SELECT *
+  FROM heartrate
+  WHERE owner       IS NOT NULL
+    AND pet_chip_id IS NOT NULL
+    AND time        IS NOT NULL
+  PRIMARY KEY (owner, pet_chip_id, time);`,
+    where: [{ col: "owner", opts: () => OWNERS }],
+    select: (w) =>
+`SELECT * FROM heartrate_by_owner
+  WHERE owner = '${w.owner}';`,
+    matchBase: () => false,                       // the base table is never touched on read
+    matchView: (v, w) => v.owner === w.owner,
+  },
+
+  /* ---------------------------------------------------------------- global index */
+  gsi: {
+    label: "Global Index", kind: "Index table (global)", viewName: "pet_by_owner_index",
+    // create_view_for_index(): indexed column becomes the view PK, then a computed
+    // idx_token clustering column, then the base key columns. No payload columns.
+    viewCols: [{ n: "owner", k: "pk" }, { n: "idx_token", k: "tok" }, { n: "pet_chip_id", k: "ck" }, { n: "time", k: "ck" }],
+    viewKeyOf: (r) => r.owner,
+    viewRow: (r) => ({ key: r.id, cells: [r.owner, tokenOf(r.chip), r.chip, r.time], kcount: 4, owner: r.owner, chip: r.chip }),
+    viewSort: (a, b) => cmp(a.cells[0], b.cells[0]) || cmp(a.cells[1], b.cells[1]) || cmp(a.cells[3], b.cells[3]),
+    ddl: () => `CREATE INDEX pet_by_owner ON heartrate (owner);`,
+    ddl2: () =>
+`-- translates to
+CREATE MATERIALIZED VIEW pet_by_owner_index AS
+  SELECT owner, idx_token, pet_chip_id, time
+  FROM heartrate
+  WHERE owner IS NOT NULL
+  PRIMARY KEY (owner, idx_token, pet_chip_id, time)
+  WITH CLUSTERING ORDER BY
+    (idx_token ASC, pet_chip_id ASC, time ASC);`,
+    where: [{ col: "owner", opts: () => OWNERS }],
+    select: (w) =>
+`SELECT * FROM heartrate
+  WHERE owner = '${w.owner}';`,
+    matchBase: (r, w) => r.owner === w.owner,     // second round-trip, into the base table
+    matchView: (v, w) => v.owner === w.owner,
+  },
+
+  /* ---------------------------------------------------------------- local index */
+  lsi: {
+    label: "Local Index", kind: "Index table (local)", viewName: "hr_local_index",
+    // Local: base partition key stays the view partition key, so the index rows live on the
+    // very same replicas as the base rows they point at.
+    viewCols: [{ n: "pet_chip_id", k: "pk" }, { n: "heart_rate", k: "ck" }, { n: "time", k: "ck" }],
+    viewKeyOf: (r) => r.chip,
+    viewRow: (r) => ({ key: r.id, cells: [r.chip, r.hr, r.time], kcount: 3, chip: r.chip, hr: r.hr }),
+    viewSort: (a, b) => cmp(a.cells[0], b.cells[0]) || cmp(a.cells[1], b.cells[1]) || cmp(a.cells[2], b.cells[2]),
+    ddl: () => `CREATE INDEX hr_local ON heartrate ((pet_chip_id), heart_rate);`,
+    ddl2: () =>
+`-- translates to
+CREATE MATERIALIZED VIEW hr_local_index AS
+  SELECT pet_chip_id, heart_rate, time
+  FROM heartrate
+  WHERE heart_rate IS NOT NULL
+  PRIMARY KEY (pet_chip_id, heart_rate, time);`,
+    where: [
+      { col: "pet_chip_id", opts: () => CHIPS },
+      { col: "heart_rate", opts: (w) => uniq(state.rows.filter((r) => r.chip === w.pet_chip_id).map((r) => r.hr)).sort((a, b) => a - b) },
+    ],
+    select: (w) =>
+`SELECT * FROM heartrate
+  WHERE pet_chip_id = '${w.pet_chip_id}'
+    AND heart_rate  = ${w.heart_rate};`,
+    matchBase: (r, w) => r.chip === w.pet_chip_id && String(r.hr) === String(w.heart_rate),
+    matchView: (v, w) => v.chip === w.pet_chip_id && String(v.hr) === String(w.heart_rate),
+  },
+
+  /* ---------------------------------------------------------------- allow filtering */
+  filtering: {
+    label: "ALLOW FILTERING", kind: "No view", viewName: "—",
+    viewCols: null,
+    ddl: () => `-- nothing to create: no view, no index, no extra storage`,
+    where: [{ col: "owner", opts: () => OWNERS }],
+    select: (w) =>
+`SELECT * FROM heartrate
+  WHERE owner = '${w.owner}'
+  ALLOW FILTERING;`,
+    matchBase: (r, w) => r.owner === w.owner,
+    matchView: () => false,
+  },
+};
+const MODE_KEYS = ["mv", "gsi", "lsi", "filtering"];
+const VIEW_NAMES = new Set(MODE_KEYS.map((k) => MODES[k].viewName).concat(["pet_by_owner", "hr_local"]));
+
+function cmp(a, b) { return a < b ? -1 : a > b ? 1 : 0; }
+function uniq(a) { return Array.from(new Set(a)); }
+const mode = () => MODES[state.mode];
+
+/* ------------------------------------------------------------------ derived view rows */
+function viewRows() {
+  const m = mode();
+  if (!m.viewCols) return null;
+  const rows = state.rows.map(m.viewRow);
+  rows.sort(m.viewSort);
+  return rows;
+}
+
+/* =====================================================================================
+   Rendering
+   ===================================================================================== */
+
+/* ---------------------------------------------------------------- mode tabs */
+function renderModes() {
+  const host = $("modes");
+  host.innerHTML = "";
+  MODE_KEYS.forEach((k, i) => {
+    const b = document.createElement("button");
+    b.type = "button";
+    b.className = "mode-btn";
+    b.setAttribute("role", "tab");
+    b.setAttribute("aria-selected", String(k === state.mode));
+    b.innerHTML = `<span class="kbd">${i + 1}</span>${esc(MODES[k].label)}`;
+    b.addEventListener("click", () => setMode(k));
+    host.appendChild(b);
+  });
+}
+
+/* ---------------------------------------------------------------- CQL */
+const CQL_KW = /^(CREATE|TABLE|MATERIALIZED|VIEW|INDEX|AS|SELECT|FROM|WHERE|AND|PRIMARY|KEY|NOT|NULL|IS|INSERT|INTO|VALUES|WITH|CLUSTERING|ORDER|BY|ASC|DESC|ALLOW|FILTERING|IN|LIMIT|DROP|ALTER)$/;
+const CQL_TYPE = /^(text|int|uuid|timestamp|bigint|boolean)$/;
+
+function highlightCql(src) {
+  const re = /(--[^\n]*)|('(?:[^']|'')*')|([A-Za-z_][A-Za-z_0-9]*)|([\s\S])/g;
+  let out = "", m;
+  while ((m = re.exec(src)) !== null) {
+    if (m[1]) out += `<span class="cmt">${esc(m[1])}</span>`;
+    else if (m[2]) out += `<span class="str">${esc(m[2])}</span>`;
+    else if (m[3]) {
+      const w = m[3];
+      if (CQL_KW.test(w.toUpperCase()) && w === w.toUpperCase()) out += `<span class="kw">${esc(w)}</span>`;
+      else if (CQL_TYPE.test(w)) out += `<span class="kw">${esc(w)}</span>`;
+      else if (w === "heartrate") out += `<span class="id-base">${esc(w)}</span>`;
+      else if (VIEW_NAMES.has(w)) out += `<span class="id-view">${esc(w)}</span>`;
+      else out += esc(w);
+    } else out += esc(m[4]);
+  }
+  return out;
+}
+
+function cqlStatements() {
+  const m = mode();
+  const w = state.where;
+  const out = [{ id: "table", text: CREATE_TABLE }];
+  out.push({ id: "ddl", text: m.ddl() });
+  if (m.ddl2) out.push({ id: "ddl2", text: m.ddl2() });
+  out.push({
+    id: "insert",
+    text: `INSERT INTO heartrate\n  (pet_chip_id, time, owner, heart_rate)\n  VALUES (…);`,
+  });
+  out.push({ id: "select", text: m.select(w) });
+  return out;
+}
+
+function renderCql() {
+  $("cqlMode").textContent = mode().label;
+  const host = $("cqlBody");
+  host.innerHTML = "";
+  cqlStatements().forEach((s) => {
+    const d = document.createElement("div");
+    d.className = "cql-stmt" + (state.activeStmt === s.id ? " active" : "");
+    d.dataset.id = s.id;
+    d.innerHTML = highlightCql(s.text);
+    host.appendChild(d);
+  });
+}
+
+function setActiveStmt(id) {
+  state.activeStmt = id;
+  document.querySelectorAll(".cql-stmt").forEach((el) => el.classList.toggle("active", el.dataset.id === id));
+}
+
+/* ---------------------------------------------------------------- data tables */
+function tableHtml(cols, rows, rowClass) {
+  let h = '<table class="rows"><thead><tr>';
+  cols.forEach((c) => {
+    const tag = c.k === "pk" ? '<span class="keytag pk">PK</span>'
+      : c.k === "ck" ? '<span class="keytag ck">CK</span>'
+      : c.k === "tok" ? '<span class="keytag tok">CK · computed</span>'
+      : '<span class="keytag blank">·</span>';
+    h += `<th>${esc(c.n)}${tag}</th>`;
+  });
+  h += "</tr></thead><tbody>";
+  rows.forEach((r) => {
+    h += `<tr class="${rowClass(r)}">`;
+    r.cells.forEach((v, i) => { h += `<td class="${i < r.kcount ? "k" : ""}">${esc(v)}</td>`; });
+    h += "</tr>";
+  });
+  return h + "</tbody></table>";
+}
+
+function renderBase() {
+  const rows = state.rows.slice().sort((a, b) => cmp(a.chip, b.chip) || a.min - b.min)
+    .map((r) => ({ key: r.id, cells: [r.chip, r.time, r.owner, r.hr], kcount: 2, src: r }));
+  $("baseBody").innerHTML = tableHtml(BASE_COLS, rows, (r) => {
+    const c = [];
+    if (state.hits.has(r.key)) c.push("hit");
+    else if (state.scanned) c.push("scan");
+    if (state.fresh === r.key) c.push("fresh");
+    return c.join(" ");
+  });
+}
+
+function renderView() {
+  const m = mode();
+  $("viewKind").textContent = m.kind;
+  $("viewName").textContent = m.viewName;
+  const host = $("viewBody");
+  if (!m.viewCols) {
+    host.innerHTML =
+      '<div class="empty-note"><strong>ALLOW FILTERING</strong>' +
+      "no view table &middot; no extra storage &middot; nothing on the write path<br>" +
+      "every read scans every partition on every node</div>";
+    return;
+  }
+  const rows = viewRows();
+  host.innerHTML = tableHtml(m.viewCols, rows, (r) => {
+    const c = [];
+    if (state.vhits.has(r.key)) c.push("hit");
+    if (state.freshView === r.key) c.push("fresh");
+    return c.join(" ");
+  });
+}
+
+/* ---------------------------------------------------------------- WHERE controls */
+function renderWhere() {
+  const m = mode();
+  const host = $("whereBar");
+  host.innerHTML = "";
+  m.where.forEach((spec, idx) => {
+    const opts = spec.opts(state.where).map(String);
+    if (!opts.includes(String(state.where[spec.col]))) state.where[spec.col] = opts[0];
+    if (idx > 0) {
+      const and = document.createElement("span");
+      and.textContent = "AND";
+      and.style.color = "var(--text-faint)";
+      host.appendChild(and);
+    }
+    const lab = document.createElement("span");
+    lab.textContent = spec.col + " =";
+    host.appendChild(lab);
+    const sel = document.createElement("select");
+    sel.className = "form-input form-input--compact";
+    opts.forEach((o) => {
+      const op = document.createElement("option");
+      op.value = o; op.textContent = o;
+      if (String(state.where[spec.col]) === o) op.selected = true;
+      sel.appendChild(op);
+    });
+    sel.addEventListener("change", () => {
+      state.where[spec.col] = sel.value;
+      clearResults();
+      renderWhere();          // a later selector's options may depend on this one
+      renderCql();
+      renderBase(); renderView();
+    });
+    host.appendChild(sel);
+  });
+}
+
+/* ---------------------------------------------------------------- stage */
+const stageEl = $("stage");
+const racksLayer = $("racksLayer");
+const nodesLayer = $("nodesLayer");
+const clientLayer = $("clientLayer");
+const messagesLayer = $("messagesLayer");
+
+function el(tag, attrs, parent) {
+  const e = document.createElementNS(svgNS, tag);
+  for (const k in attrs) e.setAttribute(k, attrs[k]);
+  if (parent) parent.appendChild(e);
+  return e;
+}
+
+function renderStage() {
+  // The viewBox follows the computed rack geometry, so changing a padding or a gap above moves
+  // the frame with it instead of leaving the drawing floating in a stale canvas.
+  stageEl.setAttribute("viewBox", `0 0 ${STAGE_W} ${STAGE_H}`);
+
+  racksLayer.innerHTML = "";
+  nodesLayer.innerHTML = "";
+  clientLayer.innerHTML = "";
+  RACKS.forEach((rk) => {
+    const g = el("g", {}, racksLayer);
+    el("rect", {
+      class: "rack-box", x: rk.x, y: rk.y, width: rk.w, height: rk.h, rx: 12, ry: 12,
+    }, g);
+    el("text", {
+      class: "rack-box-label", x: rk.x + 13, y: rk.y + 17,
+    }, g).textContent = rk.label;
+  });
+  NODES.forEach((n) => {
+    const g = el("g", { "data-i": n.i }, nodesLayer);
+    el("rect", {
+      class: "node-box", x: n.x - n.hw, y: n.y - n.hh, width: NW, height: NH,
+      rx: 12, ry: 12,
+    }, g);
+    // Second, dashed outline drawn just inside — only shown when one node is BOTH a base
+    // and a view replica, which is exactly what a local index guarantees.
+    el("rect", {
+      class: "node-ring2", x: n.x - n.hw + 6, y: n.y - n.hh + 6, width: NW - 12, height: NH - 12,
+      rx: 8, ry: 8,
+    }, g);
+    el("text", { class: "node-name", x: n.x, y: n.y - 11 }, g).textContent = n.name;
+    el("text", { class: "node-role idle", x: n.x, y: n.y + 15 }, g).textContent = "—";
+  });
+  const g = el("g", {}, clientLayer);
+  el("rect", { class: "client-box", x: CLIENT.x - CLIENT.hw, y: CLIENT.y - CLIENT.hh, width: CLIENT.hw * 2, height: CLIENT.hh * 2, rx: 10, ry: 10 }, g);
+  el("text", { class: "client-label", x: CLIENT.x, y: CLIENT.y }, g).textContent = "client";
+}
+
+function paintRoles(coord, base, view, baseLabel) {
+  NODES.forEach((n) => {
+    const g = nodesLayer.querySelector(`g[data-i="${n.i}"]`);
+    const box = g.querySelector(".node-box");
+    const ring = g.querySelector(".node-ring2");
+    const role = g.querySelector(".node-role");
+    const isB = base.includes(n.i), isV = view.includes(n.i), isC = n.i === coord;
+    box.setAttribute("class", "node-box" + (isC ? " coord" : isB && isV ? " both" : isB ? " base" : isV ? " view" : ""));
+    ring.setAttribute("class", "node-ring2" + (isB && isV && !isC ? " on" : ""));
+    let txt = "—", cls = "idle";
+    if (isC) { txt = "COORDINATOR"; cls = "coord"; }
+    else if (isB && isV) { txt = "BASE + VIEW"; cls = "base"; }
+    else if (isB) { txt = baseLabel || "BASE"; cls = "base"; }
+    else if (isV) { txt = "VIEW"; cls = "view"; }
+    role.setAttribute("class", "node-role " + cls);
+    role.textContent = txt;
+  });
+}
+
+function clearRoles() {
+  NODES.forEach((n) => {
+    const g = nodesLayer.querySelector(`g[data-i="${n.i}"]`);
+    g.querySelector(".node-box").setAttribute("class", "node-box");
+    g.querySelector(".node-ring2").setAttribute("class", "node-ring2");
+    const role = g.querySelector(".node-role");
+    role.setAttribute("class", "node-role idle");
+    role.textContent = "—";
+  });
+}
+
+function setBusyNode(i, on) {
+  const box = nodesLayer.querySelector(`g[data-i="${i}"] .node-box`);
+  if (box) box.classList.toggle("busy", on);
+}
+
+/* =====================================================================================
+   Animation
+   ===================================================================================== */
+const SPEEDS = [0.25, 0.5, 1, 2, 4];
+const HOP_MS = 850;
+const sleep = (ms) => new Promise((r) => setTimeout(r, ms / state.speed));
+
+// Land the arrowhead on the box edge rather than under the label in the middle of it.
+function edgePoint(a, tx, ty, gap) {
+  const dx = tx - a.x, dy = ty - a.y;
+  if (!dx && !dy) return { x: a.x, y: a.y };
+  const s = Math.min(dx ? a.hw / Math.abs(dx) : Infinity, dy ? a.hh / Math.abs(dy) : Infinity);
+  const len = Math.hypot(dx, dy);
+  return { x: a.x + dx * (s + gap / len), y: a.y + dy * (s + gap / len) };
+}
+
+// Does the arc a given bow produces stay off every node card that is not an endpoint of the
+// hop? Sampling the quadratic is enough: the cards are large and the curve is smooth.
+function arcIsClear(p1, p2, px, py, bow, skip) {
+  const cx = (p1.x + p2.x) / 2 + px * bow, cy = (p1.y + p2.y) / 2 + py * bow;
+  const PAD = 10;
+  for (let k = 1; k < 24; k++) {
+    const t = k / 24, u = 1 - t;
+    const x = u * u * p1.x + 2 * u * t * cx + t * t * p2.x;
+    const y = u * u * p1.y + 2 * u * t * cy + t * t * p2.y;
+    for (const n of NODES) {
+      if (skip.has(n.i)) continue;
+      if (Math.abs(x - n.x) < n.hw + PAD && Math.abs(y - n.y) < n.hh + PAD) return false;
+    }
+  }
+  return true;
+}
+
+// Racks put the nodes on a grid, and on a grid a third card often sits squarely on the straight
+// line between two others — an arrow drawn through an uninvolved card reads as a hop to that
+// card. The hand-tuned bow is therefore only a preference: keep it when the arc is already
+// clear, otherwise open the curve up (same side first, then the other) until it steers into one
+// of the empty lanes the layout leaves for exactly this. Note the candidates go *down* as well
+// as up: sometimes the hand-tuned curve is itself what swings the arc onto a neighbouring card
+// and a straighter line is already clear, so 0 has to be on the list. The top of the range runs
+// well past half the stage because the worst case — opposite ends of the same row, or the client
+// reaching a lower node straight beneath it — needs most of a rack's width to get around the
+// card in between.
+function pickBow(p1, p2, px, py, bow, skip) {
+  const sign = bow < 0 ? -1 : 1;
+  for (const mag of [Math.abs(bow), 0, 30, 50, 70, 110, 150, 190, 230, 280, 330, 390, 450]) {
+    for (const sg of [sign, -sign]) {
+      if (arcIsClear(p1, p2, px, py, mag * sg, skip)) return mag * sg;
+    }
+  }
+  return bow;
+}
+
+function hop(from, to, opts) {
+  const { cls = "w", label = "", dur = HOP_MS, bow = 0 } = opts || {};
+  const p1 = edgePoint(from, to.x, to.y, 6);
+  const p2 = edgePoint(to, from.x, from.y, 6);
+  const segLen = Math.hypot(p2.x - p1.x, p2.y - p1.y) || 1;
+  const px = -(p2.y - p1.y) / segLen, py = (p2.x - p1.x) / segLen;
+  // The client has no `i`, so it simply never matches a node index here.
+  const useBow = pickBow(p1, p2, px, py, bow, new Set([from.i, to.i]));
+  const cx = (p1.x + p2.x) / 2 + px * useBow, cy = (p1.y + p2.y) / 2 + py * useBow;
+
+  return new Promise((resolve) => {
+    const path = el("path", { class: "msg-line " + cls, d: `M ${p1.x} ${p1.y} Q ${cx} ${cy} ${p2.x} ${p2.y}`, "marker-end": `url(#arrow${cls.toUpperCase()})` }, messagesLayer);
+    const total = path.getTotalLength();
+    const dot = el("circle", { class: "packet " + cls, r: 6 }, messagesLayer);
+    let lab = null;
+    if (label) {
+      lab = el("text", { class: "packet-label " + cls }, messagesLayer);
+      lab.textContent = label;
+    }
+    const start = performance.now();
+    const ms = dur / state.speed;
+    (function frame(now) {
+      const t = Math.min((now - start) / ms, 1);
+      const pt = path.getPointAtLength(total * t);
+      dot.setAttribute("cx", pt.x); dot.setAttribute("cy", pt.y);
+      if (lab) { lab.setAttribute("x", pt.x); lab.setAttribute("y", pt.y - 14); }
+      if (t < 1) requestAnimationFrame(frame);
+      else setTimeout(() => { path.remove(); dot.remove(); if (lab) lab.remove(); resolve(); }, 140 / state.speed);
+    })(start);
+  });
+}
+
+// A view update that never leaves the node it started on — the whole point of a local index.
+function selfLoop(n, label, dur, cls) {
+  const c = cls || "v";
+  // The loop hangs off whichever top corner faces the middle of the stage. Always using the
+  // right corner would push it, and its much wider label, clean off the canvas for the nodes
+  // in the right-hand rack.
+  const side = n.x < STAGE_W / 2 ? 1 : -1;
+  const cx = n.x + side * (n.hw + 2), cy = n.y - n.hh - 2, r = 16;
+  return new Promise((resolve) => {
+    const d = `M ${cx} ${cy - r} A ${r} ${r} 0 1 1 ${cx - 0.1} ${cy - r}`;
+    const path = el("path", { class: "msg-line " + c, d, "marker-end": `url(#arrow${c.toUpperCase()})` }, messagesLayer);
+    const total = path.getTotalLength();
+    const dot = el("circle", { class: "packet " + c, r: 5 }, messagesLayer);
+    let lab = null;
+    if (label) { lab = el("text", { class: "local-badge", x: cx + side * 26, y: cy - r - 6 }, messagesLayer); lab.textContent = label; }
+    const start = performance.now();
+    const ms = (dur || HOP_MS) / state.speed;
+    (function frame(now) {
+      const t = Math.min((now - start) / ms, 1);
+      const pt = path.getPointAtLength(total * t);
+      dot.setAttribute("cx", pt.x); dot.setAttribute("cy", pt.y);
+      if (t < 1) requestAnimationFrame(frame);
+      else setTimeout(() => { path.remove(); dot.remove(); if (lab) lab.remove(); resolve(); }, 220 / state.speed);
+    })(start);
+  });
+}
+
+function clearMessages() { messagesLayer.innerHTML = ""; }
+
+/* =====================================================================================
+   The two paths
+   ===================================================================================== */
+function clearResults() {
+  state.hits.clear(); state.vhits.clear();
+  state.scanned = false; state.fresh = null; state.freshView = null;
+}
+
+function setBusy(on) {
+  state.busy = on;
+  ["btnInsert", "btnSelect", "btnReset"].forEach((id) => { $(id).disabled = on; });
+}
+
+function beginOp() {
+  const gen = ++state.gen;
+  clearResults();
+  clearMessages();
+  setBusy(true);
+  return () => state.gen !== gen;   // stale()
+}
+
+function endOp() {
+  setBusy(false);
+  NODES.forEach((n) => setBusyNode(n.i, false));
+}
+
+/* ---------------------------------------------------------------- write path */
+async function runInsert() {
+  if (state.busy) return;
+  const stale = beginOp();
+  const m = mode();
+
+  const chip = CHIPS[state.seq % CHIPS.length];
+  state.seq++;
+  const maxMin = state.rows.filter((r) => r.chip === chip).reduce((a, r) => Math.max(a, r.min), -1);
+  const row = mkRow(chip, maxMin + 1, 88 + Math.floor(Math.random() * 52));
+
+  const baseR = replicasFor(row.chip);
+  const viewR = m.viewCols ? replicasFor(m.viewKeyOf(row)) : [];
+  const coord = pickCoordinator(baseR, viewR, baseR[0]);
+
+  setActiveStmt("insert");
+  paintRoles(coord, baseR, viewR);
+  renderBase(); renderView();
+
+  // 1. the client picks a coordinator
+  await hop(CLIENT, NODES[coord], { cls: "w", label: "① INSERT heartrate", bow: 30 });
+  if (stale()) return;
+
+  // 2. the coordinator writes to every base replica
+  setBusyNode(coord, true);
+  await Promise.all(baseR.map((r, k) => (async () => {
+    await sleep(k * 90);
+    await routeOut(NODES[coord], NODES[r], { cls: "w", label: k === 0 ? "② base write" : "", bow: (k - 1) * 22 });
+  })()));
+  if (stale()) return;
+
+  state.rows.push(row);
+  state.fresh = row.id;
+  baseR.forEach((r) => setBusyNode(r, true));
+  renderBase();
+
+  // 3. each base replica ships the view update to its paired view replica (db/view/view.cc).
+  //    For a local index the pair is the node itself, so nothing crosses the network.
+  if (m.viewCols) {
+    const local = baseR.every((r, k) => viewR[k] === r);
+    if (local) {
+      await Promise.all(baseR.map((r, k) => (async () => {
+        await sleep(k * 90);
+        await selfLoop(NODES[r], k === 0 ? "③ local view update — no network hop" : "");
+      })()));
+    } else {
+      await Promise.all(baseR.map((r, k) => (async () => {
+        await sleep(k * 90);
+        await hop(NODES[r], NODES[viewR[k]], { cls: "v", label: k === 0 ? "③ view update" : "", bow: 26 });
+      })()));
+    }
+    if (stale()) return;
+    state.freshView = row.id;
+    viewR.forEach((r) => setBusyNode(r, true));
+    renderView();
+  }
+
+  await sleep(260);
+  if (stale()) return;
+  state.fresh = null; state.freshView = null;
+  endOp();
+}
+
+/* ---------------------------------------------------------------- read paths */
+async function runSelect() {
+  if (state.busy) return;
+  const stale = beginOp();
+  const m = mode();
+  const w = state.where;
+  setActiveStmt("select");
+
+  const matched = state.rows.filter((r) => m.matchBase(r, w));
+
+  if (state.mode === "mv") await readMv(stale, m, w);
+  else if (state.mode === "gsi") await readGsi(stale, m, w, matched);
+  else if (state.mode === "lsi") await readLsi(stale, m, w, matched);
+  else await readFiltering(stale, m, w, matched);
+
+  if (!stale()) endOp();
+}
+
+// One hop out, one hop back. The view is a table; you read it like a table.
+async function readMv(stale, m, w) {
+  const viewR = replicasFor(w.owner);
+  const coord = pickCoordinator([], viewR, viewR[0]);
+  paintRoles(coord, [], viewR);
+  renderBase(); renderView();
+
+  await hop(CLIENT, NODES[coord], { cls: "r", label: "① SELECT … by owner", bow: 30 });
+  if (stale()) return;
+  setBusyNode(coord, true);
+  await routeOut(NODES[coord], NODES[viewR[0]], { cls: "r", label: "② read the view", bow: 26 });
+  if (stale()) return;
+
+  setBusyNode(viewR[0], true);
+  viewRows().filter((v) => m.matchView(v, w)).forEach((v) => state.vhits.add(v.key));
+  renderView();
+  await sleep(220);
+  if (stale()) return;
+
+  await routeBack(NODES[viewR[0]], NODES[coord], { cls: "r", label: "③ full rows", bow: -26 });
+  if (stale()) return;
+  await hop(NODES[coord], CLIENT, { cls: "r", label: "", bow: -30 });
+}
+
+// Two round-trips: the index yields base keys, then the base partitions are fetched.
+async function readGsi(stale, m, w, matched) {
+  const idxR = replicasFor(w.owner);
+  const chips = uniq(matched.map((r) => r.chip));
+  const baseTargets = uniq(chips.map((c) => replicasFor(c)[0]));
+  const coord = pickCoordinator(baseTargets, idxR, idxR[0]);
+  paintRoles(coord, baseTargets, idxR);
+  renderBase(); renderView();
+
+  await hop(CLIENT, NODES[coord], { cls: "r", label: "① SELECT … WHERE owner = …", bow: 30 });
+  if (stale()) return;
+  setBusyNode(coord, true);
+  await routeOut(NODES[coord], NODES[idxR[0]], { cls: "v", label: "② read the index", bow: 26 });
+  if (stale()) return;
+
+  setBusyNode(idxR[0], true);
+  viewRows().filter((v) => m.matchView(v, w)).forEach((v) => state.vhits.add(v.key));
+  renderView();
+  await sleep(220);
+  if (stale()) return;
+
+  await routeBack(NODES[idxR[0]], NODES[coord], { cls: "v", label: "③ base keys", bow: -26 });
+  if (stale()) return;
+
+  // 4. one request per matching base partition — the extra hop a global index always costs
+  await Promise.all(baseTargets.map((t, k) => (async () => {
+    await sleep(k * 90);
+    await routeOut(NODES[coord], NODES[t], { cls: "r", label: k === 0 ? "④ read the base rows" : "", bow: (k - 1) * 22 });
+  })()));
+  if (stale()) return;
+
+  baseTargets.forEach((t) => setBusyNode(t, true));
+  matched.forEach((r) => state.hits.add(r.id));
+  renderBase();
+  await sleep(220);
+  if (stale()) return;
+  await hop(NODES[coord], CLIENT, { cls: "r", label: "⑤ rows", bow: -30 });
+}
+
+// Index rows and base rows share a partition key, so one replica answers the whole query.
+async function readLsi(stale, m, w, matched) {
+  const baseR = replicasFor(w.pet_chip_id);
+  const coord = pickCoordinator(baseR, baseR, baseR[0]);
+  paintRoles(coord, baseR, baseR);
+  renderBase(); renderView();
+
+  await hop(CLIENT, NODES[coord], { cls: "r", label: "① SELECT … same partition", bow: 30 });
+  if (stale()) return;
+  setBusyNode(coord, true);
+  // A smart driver is already on that replica; the selfLoop just below says "all local",
+  // so there is nothing to draw here rather than two loops on the same node in a row.
+  if (coord !== baseR[0]) {
+    await hop(NODES[coord], NODES[baseR[0]], { cls: "r", label: "② one replica, one hop", bow: 26 });
+  }
+  if (stale()) return;
+
+  setBusyNode(baseR[0], true);
+  viewRows().filter((v) => m.matchView(v, w)).forEach((v) => state.vhits.add(v.key));
+  renderView();
+  await selfLoop(NODES[baseR[0]], "index + base, both local");
+  if (stale()) return;
+
+  matched.forEach((r) => state.hits.add(r.id));
+  renderBase();
+  await sleep(220);
+  if (stale()) return;
+  await routeBack(NODES[baseR[0]], NODES[coord], { cls: "r", label: "③ rows", bow: -26 });
+  if (stale()) return;
+  await hop(NODES[coord], CLIENT, { cls: "r", label: "", bow: -30 });
+}
+
+// No index to consult, so every node reads every partition and throws most of it away.
+async function readFiltering(stale, m, w, matched) {
+  const all = NODES.map((n) => n.i);
+  const coord = 0;
+  paintRoles(coord, all.filter((i) => i !== coord), [], "SCANNED");
+  renderBase(); renderView();
+
+  await hop(CLIENT, NODES[coord], { cls: "f", label: "① SELECT … ALLOW FILTERING", bow: 30 });
+  if (stale()) return;
+  setBusyNode(coord, true);
+
+  const targets = all.filter((i) => i !== coord);
+  await Promise.all(targets.map((t, k) => (async () => {
+    await sleep(k * 70);
+    await hop(NODES[coord], NODES[t], { cls: "f", label: k === 0 ? "② scan every partition" : "", bow: (k - 2) * 16 });
+  })()));
+  if (stale()) return;
+
+  all.forEach((i) => setBusyNode(i, true));
+  state.scanned = true;
+  renderBase();
+  await sleep(420);
+  if (stale()) return;
+
+  await Promise.all(targets.map((t, k) => (async () => {
+    await sleep(k * 70);
+    await hop(NODES[t], NODES[coord], { cls: "f", label: k === 0 ? "③ mostly empty answers" : "", bow: (k - 2) * -16 });
+  })()));
+  if (stale()) return;
+
+  matched.forEach((r) => state.hits.add(r.id));
+  renderBase();
+  await sleep(220);
+  if (stale()) return;
+  await hop(NODES[coord], CLIENT, { cls: "f", label: "④ rows", bow: -30 });
+}
+
+/* =====================================================================================
+   Wiring
+   ===================================================================================== */
+function setMode(k) {
+  if (k === state.mode) return;
+  state.mode = k;
+  state.gen++;                 // abandon anything in flight
+  clearResults();
+  clearMessages();
+  clearRoles();
+  setBusy(false);
+  state.activeStmt = null;
+  renderModes(); renderWhere(); renderCql(); renderBase(); renderView();
+}
+
+function reset() {
+  state.gen++;
+  state.rows = SEED.map((r) => mkRow(r.chip, r.min, r.hr));
+  state.seq = 0;
+  clearResults();
+  clearMessages();
+  clearRoles();
+  setBusy(false);
+  state.activeStmt = null;
+  renderWhere(); renderCql(); renderBase(); renderView();
+}
+
+$("btnInsert").addEventListener("click", () => { runInsert().catch(() => endOp()); });
+$("btnSelect").addEventListener("click", () => { runSelect().catch(() => endOp()); });
+$("btnReset").addEventListener("click", reset);
+
+$("speed").addEventListener("input", (e) => {
+  state.speed = SPEEDS[Number(e.target.value)];
+  $("speedVal").textContent = state.speed.toFixed(state.speed < 1 ? 2 : 1) + "×";
+});
+
+// Changing driver only affects where the *next* request is sent; a run in flight keeps
+// the coordinator it already picked.
+$("driverGroup").addEventListener("change", (e) => {
+  if (e.target.name !== "driver") return;
+  state.smart = e.target.value === "smart";
+});
+
+function setDriver(smart) {
+  state.smart = smart;
+  const sel = $("driverGroup").querySelector('input[value="' + (smart ? "smart" : "basic") + '"]');
+  if (sel) sel.checked = true;
+}
+
+$("btnTheme").addEventListener("click", () => {
+  const KEY = "scylladb-ds-theme";
+  const order = ["system", "light", "dark"];
+  const next = order[(order.indexOf(localStorage.getItem(KEY) || "system") + 1) % order.length];
+  localStorage.setItem(KEY, next);
+  const dark = next === "dark" || (next === "system" && window.matchMedia("(prefers-color-scheme: dark)").matches);
+  document.documentElement.setAttribute("data-theme", dark ? "dark" : "light");
+});
+
+document.addEventListener("keydown", (e) => {
+  if (e.metaKey || e.ctrlKey || e.altKey) return;
+  if (/^(INPUT|SELECT|TEXTAREA)$/.test(document.activeElement && document.activeElement.tagName)) return;
+  const k = e.key.toLowerCase();
+  if (k >= "1" && k <= "4") { setMode(MODE_KEYS[Number(k) - 1]); e.preventDefault(); }
+  else if (k === "i") { $("btnInsert").click(); e.preventDefault(); }
+  else if (k === "s") { $("btnSelect").click(); e.preventDefault(); }
+  else if (k === "r") { reset(); e.preventDefault(); }
+  else if (k === "d") { setDriver(!state.smart); e.preventDefault(); }
+});
+
+renderModes();
+renderStage();
+renderWhere();
+renderCql();
+renderBase();
+renderView();
+</script>
+</body>
+</html>
