@@ -1,0 +1,2020 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>ScyllaDB Compaction Strategy Simulator — Write, Flush, Compact</title>
+<link rel="icon" type="image/svg+xml" href="favicon.svg" />
+<script>
+// ScyllaDB DS theme boot snippet (runs before the stylesheet so there's no flash).
+// No manual toggle — it just follows the OS, same as the HA simulator.
+(function () {
+  var KEY = "scylladb-ds-theme";
+  var root = document.documentElement;
+  var sysDark = window.matchMedia("(prefers-color-scheme: dark)");
+  function resolve(pref) { return pref === "system" ? (sysDark.matches ? "dark" : "light") : pref; }
+  function setTheme(pref) { root.setAttribute("data-theme", resolve(pref)); }
+  setTheme(localStorage.getItem(KEY) || "system");
+  sysDark.addEventListener("change", function () {
+    if ((localStorage.getItem(KEY) || "system") === "system") setTheme("system");
+  });
+})();
+</script>
+<link rel="stylesheet" href="scylladb-ds.css" />
+<style>
+  /* ---------- bridge: simulator-local var names -> ScyllaDB DS tokens ----------
+     Same trick as the HA simulator: local aliases so the rest of the sheet reads
+     plainly and still inherits whichever DS token is live for the current theme. */
+  :root {
+    --bg: var(--bg-page);
+    --surface: var(--bg-surface);
+    --surface-2: var(--bg-surface-alt);
+    --border: var(--border-color);
+    --text: var(--text-color);
+    --text-dim: var(--text-muted);
+    --text-faint: var(--text-disabled);
+
+    --accent: var(--btn-primary-bg);
+    --ok: var(--status-success);
+    --ok-bg: var(--status-success-bg);
+    --danger: var(--status-error);
+    --danger-bg: var(--status-error-bg);
+    --warn: var(--status-warning);
+    --warn-bg: var(--status-warning-bg);
+
+    --font-ui: var(--font-family);
+
+    /* Depth ramp for SSTable blocks: a single hue, light -> dark, so "how deep in
+       the LSM tree is this file" reads as magnitude rather than as identity.
+       Sequential ramp per the dataviz rules — never a rainbow. */
+    --tier-0: var(--color-primary-200);
+    --tier-1: var(--color-primary-300);
+    --tier-2: var(--color-primary-400);
+    --tier-3: var(--color-primary-500);
+    --tier-4: var(--color-primary-600);
+    --tier-5: var(--color-primary-700);
+    --tier-ink: var(--color-gray-900);
+
+    /* Three-series categorical set for the amplification charts. primary-500 +
+       warning-500 + magenta-500 — validated for CVD separation against the light
+       surface (the DS's own chart-1/chart-2 pair is two blues and fails deutan).
+       Read amp is a count, not a ratio, so it gets its own plot band below the
+       ratio band rather than a second y-axis on the same one. */
+    --series-space: var(--color-primary-500);
+    --series-write: var(--color-warning-500);
+    --series-read: var(--color-magenta-500);
+  }
+  [data-theme="dark"] {
+    --tier-0: var(--color-primary-800);
+    --tier-1: var(--color-primary-700);
+    --tier-2: var(--color-primary-600);
+    --tier-3: var(--color-primary-500);
+    --tier-4: var(--color-primary-400);
+    --tier-5: var(--color-primary-300);
+    --tier-ink: var(--color-gray-50);
+    /* Re-stepped for the dark surface: warning-500 sits above the dark lightness
+       band, warning-600 is inside it. */
+    --series-space: var(--color-primary-500);
+    --series-write: var(--color-warning-600);
+    --series-read: var(--color-magenta-500);
+  }
+  .sst { --tier-ink: var(--color-gray-900); }
+  .sst[data-depth="4"], .sst[data-depth="5"] { --tier-ink: var(--color-gray-50); }
+  [data-theme="dark"] .sst { --tier-ink: var(--color-gray-50); }
+  [data-theme="dark"] .sst[data-depth="3"],
+  [data-theme="dark"] .sst[data-depth="4"],
+  [data-theme="dark"] .sst[data-depth="5"] { --tier-ink: var(--color-gray-900); }
+
+  * { box-sizing: border-box; }
+
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--font-ui);
+    font-size: 16px;
+    line-height: 1.55;
+  }
+
+  .wrap {
+    /* Sized for a desktop/presentation screen — no down-scaling, so every size
+       below is the size it actually renders at. */
+    max-width: 1760px;
+    margin: 0 auto;
+    padding: 28px 28px 36px;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+  }
+
+  /* ---------- header ---------- */
+  header.top {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 20px;
+    flex-wrap: wrap;
+    border-bottom: var(--border-w) solid var(--border);
+    padding-bottom: 18px;
+  }
+  header.top h1 {
+    font-size: 25px;
+    font-weight: 700;
+    margin: 0;
+    letter-spacing: -0.01em;
+    text-wrap: balance;
+    font-family: var(--font-family);
+  }
+  header.top h1 span.accent { color: var(--accent); }
+  .head-right { display: flex; align-items: center; gap: 8px; }
+  /* Feedback for the Share button. It replaces nothing on screen, so it is a
+     live region rather than a tooltip. */
+  .share-msg { font-size: 12px; color: var(--text-dim); white-space: nowrap; }
+
+  /* ---------- cards ---------- */
+  .panel {
+    background: var(--surface);
+    border: var(--border-w) solid var(--border);
+    border-radius: var(--radius-xl);
+    box-shadow: var(--shadow-1);
+    padding: 18px 20px;
+  }
+  .panel h2, .panel h3 {
+    margin: 0;
+    font-size: 12.5px;
+    text-transform: uppercase;
+    letter-spacing: 0.07em;
+    color: var(--text-faint);
+    font-weight: 700;
+  }
+
+  /* ---------- controls ---------- */
+  .controls {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 22px 32px;
+    align-items: flex-end;
+  }
+  .ctrl { display: flex; flex-direction: column; gap: 8px; width: 200px; }
+  .ctrl.wide { width: 274px; }
+  .ctrl label {
+    font-size: 11.5px;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--text-faint);
+    font-weight: 600;
+    display: flex;
+    justify-content: space-between;
+    gap: 8px;
+  }
+  .ctrl label .val {
+    font-family: var(--font-mono);
+    font-variant-numeric: tabular-nums;
+    color: var(--accent);
+    font-weight: 700;
+    letter-spacing: 0;
+    text-transform: none;
+  }
+  .ctrl select.form-input, .ctrl input[type="number"].form-input { width: 100%; }
+  .ctrl input[type="range"] { width: 100%; }
+  .divider { width: 1px; align-self: center; height: 46px; background: var(--border); }
+  .btn-row { display: flex; gap: 6px; align-items: center; }
+  .opt-group[hidden] { display: none; }
+
+  /* ---------- main layout ---------- */
+  .stage-main { display: flex; gap: 20px; align-items: stretch; flex-wrap: wrap; }
+  .col-stage { flex: 2.3 1 760px; min-width: 560px; display: flex; flex-direction: column; gap: 20px; }
+  .col-side { flex: 1 1 380px; min-width: 360px; display: flex; flex-direction: column; gap: 20px; }
+
+  /* ---------- write path pipeline ---------- */
+  .pipe { display: flex; align-items: stretch; gap: 12px; margin-top: 16px; }
+  .pipe-node {
+    flex: 1;
+    background: var(--surface-2);
+    border: var(--border-w) solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: 11px 13px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    min-width: 0;
+  }
+  .pipe-node .pn-title {
+    font-family: var(--font-mono);
+    font-size: 11.5px;
+    font-weight: 700;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    color: var(--text-dim);
+    display: flex;
+    justify-content: space-between;
+    gap: 6px;
+  }
+  .pipe-node .pn-title b { color: var(--accent); font-variant-numeric: tabular-nums; }
+  .pipe-node .pn-sub { font-size: 12px; color: var(--text-faint); font-family: var(--font-mono); }
+  .pipe-arrow {
+    align-self: center;
+    color: var(--text-faint);
+    font-size: 20px;
+    flex: none;
+    width: 20px;
+    text-align: center;
+  }
+  .pipe-node.pulse { border-color: var(--accent); }
+  .meter { height: 12px; background: var(--bg-page); border-radius: var(--radius-sm); overflow: hidden; border: 1px solid var(--border); }
+  .meter-fill { height: 100%; width: 0; background: var(--accent); transition: width .25s ease; }
+  .meter-fill.hot { background: var(--warn); }
+  .meter.commitlog .meter-fill { background: var(--color-primary-400); }
+
+  /* ---------- disk / sstable field ---------- */
+  .disk { position: relative; margin-top: 16px; min-height: 288px; --lane-x: 178px; }
+  .lane-layer { position: absolute; inset: 0; }
+  /* Blocks live in their own layer, offset past the labels, so a block's left/width
+     are plain percentages of the track and it can be tweened between rows without
+     ever changing parent (which would restart the transition). */
+  .sst-layer { position: absolute; left: var(--lane-x); right: 0; top: 0; bottom: 0; }
+  .row-label {
+    position: absolute;
+    left: 0;
+    width: calc(var(--lane-x) - 12px);
+    font-family: var(--font-mono);
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: var(--text-faint);
+    text-align: right;
+    line-height: 1.25;
+  }
+  .row-label em { display: block; font-style: normal; font-weight: 400; text-transform: none; letter-spacing: 0; opacity: .8; }
+  .row-track {
+    position: absolute;
+    left: var(--lane-x);
+    right: 0;
+    height: 34px;
+    background: var(--bg-page);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    min-width: 0;
+  }
+  .row-track.keyspace { background: repeating-linear-gradient(90deg, transparent 0 24px, var(--border-faint) 24px 25px), var(--bg-page); }
+  .sst {
+    position: absolute;
+    height: 28px;
+    min-width: 7px;
+    border-radius: var(--radius-sm);
+    background: var(--tier-c, var(--tier-2));
+    border: 1px solid color-mix(in srgb, var(--tier-ink) 22%, transparent);
+    color: var(--tier-ink);
+    font-family: var(--font-mono);
+    font-size: 11px;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    white-space: nowrap;
+    transition: left .18s ease, width .18s ease, top .18s ease, opacity .18s ease, background .18s ease;
+    cursor: default;
+  }
+  .sst.fresh { animation: drop-in .3s ease both; }
+  @keyframes drop-in {
+    from { transform: translateY(-30px); opacity: 0; }
+    to   { transform: translateY(0); opacity: 1; }
+  }
+  .sst.compacting {
+    outline: 2px solid var(--warn);
+    outline-offset: 1px;
+    animation: sel-pulse 1.1s ease-in-out infinite;
+  }
+  @keyframes sel-pulse { 0%,100% { opacity: 1; } 50% { opacity: .55; } }
+  .sst.released { opacity: 0; }
+  .sst.output {
+    background: var(--ok-bg);
+    border: 1px dashed var(--ok);
+    color: var(--ok);
+  }
+  .sst.expired { opacity: .35; }
+  .disk-empty {
+    font-family: var(--font-mono);
+    font-size: 12.5px;
+    color: var(--text-faint);
+    padding: 30px 0;
+    text-align: center;
+  }
+
+  .legend { display: flex; flex-wrap: wrap; gap: 16px; margin-top: auto; padding-top: 18px; font-size: 12px; color: var(--text-faint); font-family: var(--font-mono); }
+  .legend span { display: inline-flex; align-items: center; gap: 5px; }
+  .swatch { width: 13px; height: 13px; border-radius: 2px; border: 1px solid color-mix(in srgb, var(--text) 20%, transparent); }
+  .ramp { display: inline-flex; }
+  .ramp i { width: 13px; height: 13px; display: block; border: 1px solid color-mix(in srgb, var(--text) 12%, transparent); }
+
+  /* ---------- KPIs ---------- */
+  .kpi-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-top: 16px; }
+  .kpi {
+    background: var(--surface-2);
+    border: var(--border-w) solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: 9px 12px;
+  }
+  .kpi .k-label { font-size: 11px; text-transform: uppercase; letter-spacing: 0.05em; color: var(--text-faint); font-weight: 600; }
+  .kpi .k-value { font-family: var(--font-mono); font-size: 23px; font-weight: 700; font-variant-numeric: tabular-nums; color: var(--text-emphasis, var(--text)); line-height: 1.25; }
+  .kpi .k-value small { font-size: 14px; font-weight: 400; color: var(--text-faint); }
+  .kpi .k-note { font-size: 11px; color: var(--text-faint); font-family: var(--font-mono); }
+  .kpi.hi .k-value { color: var(--warn); }
+
+  /* ---------- chart ---------- */
+  .chart-head { display: flex; justify-content: space-between; align-items: baseline; gap: 10px; }
+  .chart-legend { display: flex; gap: 14px; font-size: 12px; font-family: var(--font-mono); color: var(--text-dim); }
+  .chart-legend span { display: inline-flex; align-items: center; gap: 5px; }
+  .chart-legend i { width: 15px; height: 2px; display: block; border-radius: 1px; }
+  #chart { width: 100%; height: 244px; display: block; margin-top: 10px; overflow: visible; }
+  #chart .grid { stroke: var(--border); stroke-width: 1; }
+  #chart .axis-text { fill: var(--text-faint); font-family: var(--font-mono); font-size: 9px; }
+  #chart .line { fill: none; stroke-width: 2; stroke-linejoin: round; stroke-linecap: round; }
+  #chart .line.space { stroke: var(--series-space); }
+  #chart .line.write { stroke: var(--series-write); }
+  #chart .line.read { stroke: var(--series-read); }
+  #chart .dlabel { font-family: var(--font-mono); font-size: 9.5px; font-weight: 700; paint-order: stroke; stroke: var(--surface); stroke-width: 3px; stroke-linejoin: round; }
+  #chart .dlabel.space { fill: var(--series-space); }
+  #chart .dlabel.write { fill: var(--series-write); }
+  #chart .dlabel.read { fill: var(--series-read); }
+  /* Caption sits in the gutter above each band — the two bands carry different
+     units, so each says which one it is. */
+  #chart .band-cap {
+    fill: var(--text-faint);
+    font-family: var(--font-mono);
+    font-size: 9px;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+  }
+  #chart .crosshair { stroke: var(--text-faint); stroke-width: 1; stroke-dasharray: 3 3; }
+  #chart .hover-dot { stroke: var(--surface); stroke-width: 2; }
+  .chart-tip {
+    position: absolute;
+    pointer-events: none;
+    background: var(--bg-overlay, var(--surface));
+    border: var(--border-w) solid var(--border);
+    border-radius: var(--radius-md);
+    box-shadow: var(--shadow-2);
+    padding: 6px 8px;
+    font-family: var(--font-mono);
+    font-size: 12px;
+    line-height: 1.45;
+    white-space: nowrap;
+    z-index: 20;
+  }
+  .chart-tip b { font-weight: 700; }
+  .chart-wrap { position: relative; }
+
+  /* ---------- strategy comparison table ---------- */
+  .amp-table {
+    width: 100%;
+    margin: 14px 0 0;
+    border-collapse: collapse;
+    font-family: var(--font-mono);
+    font-size: 12.5px;
+  }
+  .amp-table th, .amp-table td {
+    padding: 6px 8px;
+    text-align: right;
+    border-bottom: 1px solid var(--border);
+    white-space: nowrap;
+  }
+  .amp-table thead th {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    color: var(--text-faint);
+    border-bottom: var(--border-w) solid var(--border-strong, var(--border));
+  }
+  .amp-table tbody th {
+    text-align: left;
+    font-weight: 400;
+    color: var(--text-faint);
+  }
+  .amp-table tr:last-child th, .amp-table tr:last-child td { border-bottom: none; }
+  /* The active strategy's column is the one the tiles above are measuring. */
+  .amp-table td.active {
+    background: color-mix(in srgb, var(--accent) 14%, transparent);
+    color: var(--text-emphasis, var(--text));
+    font-weight: 700;
+  }
+  .amp-table thead th.active {
+    background: color-mix(in srgb, var(--accent) 22%, transparent);
+    color: var(--accent);
+  }
+  .amp-foot { font-size: 11.5px; color: var(--text-faint); margin-top: 10px; font-family: var(--font-mono); }
+
+  /* ---------- advice bubbles, anchored to the control they talk about ------ */
+  #workloadCtrl, #sagCtrl { position: relative; }
+  .notice {
+    position: absolute;
+    top: calc(100% + 10px);
+    left: 0;
+    z-index: 50;
+    width: 370px;
+    max-width: calc(100vw - 48px);
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    background: var(--warn-bg);
+    border: var(--border-w) solid var(--warn);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-3);
+    padding: 11px 14px;
+    font-size: 12.5px;
+    color: var(--text);
+    line-height: 1.45;
+    text-transform: none;
+    letter-spacing: 0;
+    font-weight: 400;
+  }
+  /* Rotated square peeking out of the top edge — the two visible borders form
+     the arrow outline, and its fill matches the bubble so the seam disappears. */
+  .notice::before {
+    content: "";
+    position: absolute;
+    top: -7px;
+    left: 30px;
+    width: 12px;
+    height: 12px;
+    background: var(--warn-bg);
+    border-left: var(--border-w) solid var(--warn);
+    border-top: var(--border-w) solid var(--warn);
+    transform: rotate(45deg);
+  }
+  /* The warning skin is the default; --info is the same bubble in accent ink,
+     for a tip that explains a knob rather than flagging a broken setup. */
+  .notice--info {
+    background: color-mix(in srgb, var(--accent) 10%, var(--surface));
+    border-color: var(--accent);
+  }
+  .notice--info::before {
+    background: color-mix(in srgb, var(--accent) 10%, var(--surface));
+    border-left-color: var(--accent);
+    border-top-color: var(--accent);
+  }
+  .notice--info .n-icon { color: var(--accent); font-style: italic; }
+  .notice[hidden] { display: none; }
+  .notice .n-icon { flex: none; font-weight: 700; color: var(--warn); font-family: var(--font-mono); }
+  .notice .n-body { flex: 1; }
+  .notice .n-body b { font-weight: 700; }
+  .notice button {
+    flex: none;
+    background: none;
+    border: 0;
+    color: var(--text-faint);
+    cursor: pointer;
+    font-size: 16px;
+    line-height: 1;
+    padding: 0 2px;
+  }
+  .notice button:hover { color: var(--text); }
+
+  .page-footer { text-align: center; font-size: 12.5px; color: var(--text-faint); padding-top: 4px; }
+  .page-footer a { color: var(--accent); text-decoration: none; }
+  .page-footer a:hover, .page-footer a:focus-visible { text-decoration: underline; }
+
+  ::-webkit-scrollbar { width: 8px; height: 8px; }
+  ::-webkit-scrollbar-thumb { background: var(--border); border-radius: var(--radius-sm); }
+
+  @media (prefers-reduced-motion: reduce) { * { transition-duration: 0.01ms !important; animation-duration: 0.01ms !important; } }
+  @media (max-width: 980px) {
+    .controls { flex-direction: column; align-items: stretch; }
+    .divider { display: none; }
+    .disk { --lane-x: 128px; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header class="top">
+    <div>
+      <h1>ScyllaDB <span class="accent">Compaction Strategy</span> Simulator</h1>
+    </div>
+    <div class="head-right">
+      <button type="button" class="btn btn--xs" id="btnStep">Step</button>
+      <button type="button" class="btn btn--xs btn--primary" id="btnPlay">Pause</button>
+      <button type="button" class="btn btn--xs" id="btnReset">Reset</button>
+      <button type="button" class="btn btn--xs" id="btnShare"
+              title="Copy a link that opens the simulator at this exact state">Share</button>
+      <span class="share-msg" id="shareMsg" role="status" aria-live="polite" hidden></span>
+    </div>
+  </header>
+
+  <!-- ---------------- controls ---------------- -->
+  <div class="panel controls">
+    <div class="ctrl wide">
+      <label for="strategySelect">Compaction strategy</label>
+      <select id="strategySelect" class="form-input form-input--compact">
+        <option value="lcs">LCS — Leveled</option>
+        <option value="ics" selected>ICS — Incremental</option>
+        <option value="twcs">TWCS — Time-Window</option>
+      </select>
+    </div>
+
+    <div class="ctrl wide" id="workloadCtrl">
+      <label for="workloadSelect">Workload</label>
+      <select id="workloadSelect" class="form-input form-input--compact">
+        <option value="hot">Overwrite-heavy (80/20 hot keys)</option>
+        <option value="uniform">Uniform random keys</option>
+        <option value="ts">Time series (new key each write)</option>
+      </select>
+      <div class="notice" id="twcsNotice" role="status" hidden>
+        <span class="n-icon">&#9888;</span>
+        <span class="n-body" id="twcsNoticeBody"></span>
+        <button type="button" id="twcsNoticeClose" aria-label="Dismiss">&times;</button>
+      </div>
+    </div>
+
+    <div class="divider"></div>
+
+    <!-- strategy sub-properties: only the ones that exist for the selected class -->
+    <div class="ctrl opt-group" data-for="ics twcs">
+      <label for="minThRange">min_threshold <span class="val" id="minThVal">4</span></label>
+      <input type="range" id="minThRange" min="2" max="8" value="4" step="1" />
+    </div>
+
+    <div class="ctrl opt-group" data-for="ics">
+      <label for="fragRange">sstable_size_in_mb <span class="val" id="fragVal">1000</span></label>
+      <input type="range" id="fragRange" min="200" max="2000" value="1000" step="100" />
+    </div>
+
+    <div class="ctrl wide opt-group" id="sagCtrl" data-for="ics">
+      <label for="sagSelect">space_amplification_goal</label>
+      <select id="sagSelect" class="form-input form-input--compact">
+        <option value="0" selected>null (off)</option>
+        <option value="1.25">1.25</option>
+        <option value="1.5">1.5</option>
+        <option value="2">2.0</option>
+      </select>
+      <div class="notice notice--info" id="sagNotice" role="status" hidden>
+        <span class="n-icon">i</span>
+        <span class="n-body" id="sagNoticeBody"></span>
+        <button type="button" id="sagNoticeClose" aria-label="Dismiss">&times;</button>
+      </div>
+    </div>
+
+    <div class="ctrl opt-group" data-for="lcs">
+      <label for="lcsSizeRange">sstable_size_in_mb <span class="val" id="lcsSizeVal">160</span></label>
+      <input type="range" id="lcsSizeRange" min="32" max="320" value="160" step="32" />
+    </div>
+
+    <div class="ctrl opt-group" data-for="twcs">
+      <label for="windowSizeRange">compaction_window_size <span class="val" id="windowSizeVal">1</span></label>
+      <input type="range" id="windowSizeRange" min="1" max="12" value="1" step="1" />
+    </div>
+
+    <div class="ctrl wide opt-group" data-for="twcs">
+      <label for="windowUnitSelect">compaction_window_unit <span class="val" id="windowDerived">24 h</span></label>
+      <select id="windowUnitSelect" class="form-input form-input--compact">
+        <option value="MINUTES">MINUTES</option>
+        <option value="HOURS">HOURS</option>
+        <option value="DAYS" selected>DAYS</option>
+      </select>
+    </div>
+
+    <div class="divider"></div>
+
+    <div class="ctrl" style="min-width:104px;">
+      <label for="speedRange">Speed <span class="val" id="speedVal">1&times;</span></label>
+      <!-- Index into SPEEDS, because the steps are not evenly spaced. -->
+      <input type="range" id="speedRange" min="0" max="9" value="2" step="1" />
+    </div>
+  </div>
+
+  <!-- ---------------- main ---------------- -->
+  <div class="stage-main">
+    <div class="col-stage">
+
+      <div class="panel">
+        <h2>Write path</h2>
+        <div class="pipe">
+          <div class="pipe-node" id="pnClient">
+            <div class="pn-title"><span>Client</span><b id="cWrites">0</b></div>
+            <div class="pn-sub" id="cWorkload">writes issued</div>
+          </div>
+          <div class="pipe-arrow">&rarr;</div>
+          <div class="pipe-node" id="pnCommitlog">
+            <div class="pn-title"><span>Commitlog</span><b id="cClog">0 MB</b></div>
+            <div class="meter commitlog"><div class="meter-fill" id="clogFill"></div></div>
+            <div class="pn-sub">append-only, truncated on flush</div>
+          </div>
+          <div class="pipe-arrow">&rarr;</div>
+          <div class="pipe-node" id="pnMemtable">
+            <div class="pn-title"><span>Memtable</span><b id="cMem">0 / 12 MB</b></div>
+            <div class="meter"><div class="meter-fill" id="memFill"></div></div>
+            <div class="pn-sub" id="memSub">in RAM, sorted by key</div>
+          </div>
+          <div class="pipe-arrow">&rarr;</div>
+          <div class="pipe-node" id="pnFlush">
+            <div class="pn-title"><span>Flush</span><b id="cFlushes">0</b></div>
+            <div class="pn-sub" id="flushSub">SSTables written</div>
+          </div>
+          <div class="pipe-arrow">&rarr;</div>
+          <div class="pipe-node" id="pnCompact">
+            <div class="pn-title"><span>Compaction</span><b id="cCompactions">0</b></div>
+            <div class="meter"><div class="meter-fill" id="compFill"></div></div>
+            <div class="pn-sub" id="compSub">idle</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="panel" style="flex:1; display:flex; flex-direction:column;">
+        <h2>SSTables on disk <span id="diskShape" style="text-transform:none;letter-spacing:0;font-weight:400;color:var(--text-faint)"></span></h2>
+        <div class="disk" id="disk"></div>
+        <div class="legend">
+          <span><span class="ramp"><i style="background:var(--tier-0)"></i><i style="background:var(--tier-1)"></i><i style="background:var(--tier-2)"></i><i style="background:var(--tier-3)"></i><i style="background:var(--tier-4)"></i><i style="background:var(--tier-5)"></i></span> newer / smaller &rarr; older / larger</span>
+          <span><span class="swatch" style="background:var(--warn-bg);outline:2px solid var(--warn);outline-offset:-1px"></span> selected for compaction</span>
+          <span><span class="swatch" style="background:var(--ok-bg);border-style:dashed;border-color:var(--ok)"></span> being written</span>
+          <span>block width &prop; size on disk</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-side">
+      <div class="panel">
+        <h2>Amplification</h2>
+        <div class="kpi-grid">
+          <div class="kpi"><div class="k-label">SSTables</div><div class="k-value" id="kSst">0</div><div class="k-note" id="kSstNote">&nbsp;</div></div>
+          <div class="kpi"><div class="k-label">On disk</div><div class="k-value" id="kDisk">0<small> MB</small></div><div class="k-note" id="kDiskNote">&nbsp;</div></div>
+          <div class="kpi"><div class="k-label">Live data</div><div class="k-value" id="kLive">0<small> MB</small></div><div class="k-note">unique live rows</div></div>
+          <div class="kpi" id="kpiSA"><div class="k-label">Space amp</div><div class="k-value" id="kSA">1.00<small>&times;</small></div><div class="k-note" id="kSANote">peak 1.00&times;</div></div>
+          <div class="kpi" id="kpiWA"><div class="k-label">Write amp</div><div class="k-value" id="kWA">1.00<small>&times;</small></div><div class="k-note">bytes written / flushed</div></div>
+          <div class="kpi" id="kpiRA"><div class="k-label">Read amp</div><div class="k-value" id="kRA">0</div><div class="k-note" id="kRANote">files per lookup</div></div>
+        </div>
+      </div>
+
+      <div class="panel">
+        <div class="chart-head">
+          <h3>Amplification over time</h3>
+          <div class="chart-legend">
+            <span><i style="background:var(--series-space)"></i>Space</span>
+            <span><i style="background:var(--series-write)"></i>Write</span>
+            <span><i style="background:var(--series-read)"></i>Read</span>
+          </div>
+        </div>
+        <div class="chart-wrap">
+          <svg id="chart" viewBox="0 0 320 196" preserveAspectRatio="xMidYMid meet" role="img" aria-label="Two stacked plots sharing a time axis: space and write amplification as ratios, and read amplification as a file count per lookup"></svg>
+          <div class="chart-tip" id="chartTip" hidden></div>
+        </div>
+      </div>
+
+      <div class="panel explain" style="flex:1;">
+        <h2>Strategy comparison</h2>
+        <table class="amp-table" id="ampTable"></table>
+        <div class="amp-foot">typical at production scale &mdash; the tiles above measure <em>this</em> run</div>
+      </div>
+    </div>
+  </div>
+
+  <footer class="page-footer">
+    Educational simulator &mdash; the strategy bucketing/level rules follow ScyllaDB's source, but this is not a
+    faithful model of real ScyllaDB behavior (no bloom filters, no shards, no tombstone GC rules).
+    &middot; <a href="https://docs.scylladb.com/manual/stable/cql/compaction.html" target="_blank" rel="noopener noreferrer">Compaction docs</a>
+    &middot; <a href="https://www.scylladb.com/2021/04/28/incremental-compaction-2-0-a-revolutionary-space-and-write-optimized-compaction-strategy/" target="_blank" rel="noopener noreferrer">ICS 2.0 blog post</a>
+    &middot; <a href="https://github.com/tzach/compaction-viz" target="_blank" rel="noopener noreferrer">Source on GitHub</a>
+  </footer>
+</div>
+<script>
+(function () {
+"use strict";
+
+/* ============================================================================
+   ScyllaDB compaction strategy simulator.
+
+   The model is deliberately small but the *selection* rules are ports of the
+   real thing (scylladb/compaction/*.cc):
+
+     - STCS  size_tiered_compaction_strategy::get_buckets / most_interesting_bucket
+     - ICS   incremental_compaction_strategy — identical bucketing, but over
+             SSTable *runs* instead of individual files, plus the SAG cross-tier job
+     - LCS   leveled_manifest — L0 threshold, per-level score, fan-out of 10
+     - TWCS  time_window_compaction_strategy — bucket by window, STCS inside the
+             current window, seal older windows, drop fully-expired SSTables
+
+   One row of data == 1 "MB", so every size in the UI is in the same unit as the
+   CQL sub-properties it mirrors, and every sub-property default below is the one
+   from the ScyllaDB source (master @ e2c99436cf):
+
+     sstable_size_in_mb        ICS 1000 / LCS 160
+     min|max_compaction_threshold  4 / 32
+     space_amplification_goal  null, valid range (1.0, 2.0]
+     compaction_window_size|unit   1 DAYS
+     bucket_low|high           0.5 / 1.5   min_sstable_size 50 MB
+     leveled_fan_out 10, MAX_LEVELS 9
+
+   The one number with no upstream default is the memtable flush threshold:
+   memtable_total_space_in_mb is value_status::Invalid in db/config.cc because the
+   real memtable is sized from available RAM. 256 MB is chosen here, and the write
+   rate, keyspace and compaction rate are derived from it.
+   ========================================================================== */
+
+var KEYSPACE      = 20000; // distinct keys for the non-time-series workloads
+var COMPACT_RATE  = 512;   // MB of input merged per tick
+var HIST_MAX      = 240;   // points kept for the amplification chart
+var LCS_FANOUT    = 10;    // leveled_manifest::leveled_fan_out
+var LCS_MAX_LEVELS = 9;    // leveled_manifest::MAX_LEVELS
+var ICS_MIN_SSTABLE_SIZE = 50;  // incremental_compaction_strategy_options::DEFAULT_MIN_SSTABLE_SIZE
+var TICK_HOURS    = 1;     // one tick of simulated time == one hour of wall clock
+// time_window_compaction_strategy: the valid compaction_window_unit values.
+var WINDOW_UNIT_HOURS = { MINUTES: 1 / 60, HOURS: 1, DAYS: 24 };
+var MAX_THRESHOLD = 32;    // max_compaction_threshold default
+var MAX_L0        = 32;    // leveled_manifest::MAX_COMPACTING_L0
+var SPEEDS        = [0.25, 0.5, 1, 2, 3, 4, 5, 6, 7, 8];  // speed slider steps
+
+var $ = function (id) { return document.getElementById(id); };
+
+/* ---------------------------------------------------------------- options -- */
+var opt = {
+  strategy: "ics",
+  workload: "hot",
+  rate: 64,
+  // No ScyllaDB default to copy: memtable_total_space_in_mb is value_status::Invalid
+  // in db/config.cc — the real memtable is sized from available RAM. 256 MB is the
+  // anchor the rest of this scale is derived from.
+  memThreshold: 256,
+  minThreshold: 4,
+  fragSize: 1000,        // ICS sstable_size_in_mb — DEFAULT_MAX_FRAGMENT_SIZE_IN_MB
+  sag: 0,
+  lcsSize: 160,          // LCS sstable_size_in_mb — DEFAULT_MAX_SSTABLE_SIZE_IN_MB
+  windowSize: 1,         // compaction_window_size — DEFAULT_COMPACTION_WINDOW_SIZE
+  windowUnit: "DAYS",    // compaction_window_unit — DEFAULT_COMPACTION_WINDOW_UNIT (86400s)
+  window: 24,            // derived: windowSize × unit, in ticks
+  ttl: 0,
+  speed: 1
+};
+
+/* ------------------------------------------------------------------ state -- */
+var S, timer = null, running = true;
+
+// Deterministic PRNG so a Reset with the same settings replays the same run.
+function mulberry32(a) {
+  return function () {
+    a |= 0; a = (a + 0x6D2B79F5) | 0;
+    var t = Math.imul(a ^ (a >>> 15), 1 | a);
+    t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  };
+}
+
+function newState() {
+  return {
+    tick: 0,
+    nextId: 1,
+    nextRun: 1,
+    mem: new Map(),        // key -> ts (the row version)
+    commitlog: 0,
+    ssts: [],
+    job: null,
+    writes: 0,
+    flushes: 0,
+    compactions: 0,
+    flushedBytes: 0,       // memtable -> disk
+    writtenBytes: 0,       // everything ever written to disk (flush + compaction output)
+    peakSA: 1,
+    seqKey: 0,
+    lastCompactedKey: {},  // LCS: per-level round-robin cursor
+    hist: [],
+    log: [],
+    rng: mulberry32(0xC0FFEE)
+  };
+}
+
+/* ------------------------------------------------------------- primitives -- */
+function mkSST(rows, meta) {
+  // rows: array of [key, ts] sorted by key. Returns an SSTable record.
+  var e = new Map(), minK = Infinity, maxK = -Infinity, minT = Infinity, maxT = -Infinity;
+  for (var i = 0; i < rows.length; i++) {
+    var k = rows[i][0], t = rows[i][1];
+    e.set(k, t);
+    if (k < minK) minK = k;
+    if (k > maxK) maxK = k;
+    if (t < minT) minT = t;
+    if (t > maxT) maxT = t;
+  }
+  return {
+    id: S.nextId++,
+    e: e,
+    size: rows.length,
+    level: meta.level || 0,
+    run: meta.run || 0,
+    frag: meta.frag || 0,
+    win: meta.win === undefined ? null : meta.win,
+    minKey: minK, maxKey: maxK,
+    minTs: minT, maxTs: maxT,
+    born: S.tick
+  };
+}
+
+function sstExpired(s) { return opt.ttl > 0 && s.maxTs + opt.ttl <= S.tick; }
+function rowExpired(ts) { return opt.ttl > 0 && ts + opt.ttl <= S.tick; }
+
+function diskBytes() {
+  var n = 0;
+  for (var i = 0; i < S.ssts.length; i++) n += S.ssts[i].size;
+  if (S.job) n += S.job.partialBytes;
+  return n;
+}
+
+// Live data = one copy of every key that is still current and unexpired.
+function liveBytes() {
+  var seen = new Set();
+  for (var i = 0; i < S.ssts.length; i++) {
+    var e = S.ssts[i].e;
+    e.forEach(function (ts, k) { if (!rowExpired(ts)) seen.add(k); });
+  }
+  return seen.size;
+}
+
+// Not rendered any more — kept as an in-memory trace of what the strategy did,
+// which is what you want in the console when a run looks wrong.
+function log(tag, msg, cls) {
+  S.log.push({ t: S.tick, tag: tag, msg: msg, cls: cls || "info" });
+  if (S.log.length > 300) S.log.shift();
+}
+
+/* --------------------------------------------------------------- workload -- */
+function nextKey() {
+  if (opt.workload === "ts") return S.seqKey++;
+  if (opt.workload === "hot") {
+    // 80% of writes land on the hottest 20% of keys — the classic overwrite
+    // pattern that makes space amplification visible.
+    var hot = Math.max(1, Math.floor(KEYSPACE * 0.2));
+    return S.rng() < 0.8 ? Math.floor(S.rng() * hot) : Math.floor(S.rng() * KEYSPACE);
+  }
+  return Math.floor(S.rng() * KEYSPACE);
+}
+
+function doWrites() {
+  for (var i = 0; i < opt.rate; i++) {
+    var k = nextKey();
+    S.commitlog++;              // every row is appended; the memtable dedupes, the log doesn't
+    S.mem.set(k, S.tick);
+    S.writes++;
+  }
+}
+
+function maybeFlush() {
+  if (S.mem.size < opt.memThreshold) return;
+  var rows = Array.from(S.mem.entries()).sort(function (a, b) { return a[0] - b[0]; });
+  var meta = {};
+  if (opt.strategy === "ics") { meta.run = S.nextRun++; meta.frag = 0; }
+  if (opt.strategy === "twcs") meta.win = Math.floor(S.tick / opt.window);
+  var sst = mkSST(rows, meta);
+  sst.fresh = true;
+  S.ssts.push(sst);
+  S.flushes++;
+  S.flushedBytes += sst.size;
+  S.writtenBytes += sst.size;
+  S.mem = new Map();
+  S.commitlog = 0;                      // commitlog segment is released after flush
+  log("FLUSH", "memtable -> SSTable #" + sst.id + " (" + sst.size + " MB, " + sst.e.size + " rows)", "success");
+}
+
+/* ------------------------------------------------- STCS / ICS bucketing ---- */
+// Port of size_tiered_compaction_strategy::get_buckets. `items` are {size} —
+// individual SSTables for STCS, whole runs for ICS.
+function getBuckets(items) {
+  var bucketLow = 0.5, bucketHigh = 1.5;
+  var minSize = ICS_MIN_SSTABLE_SIZE;
+  var sorted = items.slice().sort(function (a, b) { return a.size - b.size; });
+  var buckets = [], avgs = [];
+  for (var i = 0; i < sorted.length; i++) {
+    var it = sorted[i], size = it.size;
+    if (buckets.length) {
+      var avg = avgs[avgs.length - 1];
+      if ((size > avg * bucketLow && size < avg * bucketHigh) || (size < minSize && avg < minSize)) {
+        var b = buckets[buckets.length - 1];
+        var newAvg = (b.length * avg + size) / (b.length + 1);
+        // Don't let the average drift so high that the bucket's smallest member
+        // would fall out of range.
+        if (size < minSize || b[0].size > newAvg * bucketLow) {
+          b.push(it);
+          avgs[avgs.length - 1] = newAvg;
+          continue;
+        }
+      }
+    }
+    buckets.push([it]);
+    avgs.push(size);
+  }
+  return buckets;
+}
+
+// most_interesting_bucket: prune to buckets that meet the threshold, then take
+// the one with the most members ("efficiency increases with number of files").
+function mostInteresting(buckets, minT) {
+  var pruned = buckets.filter(function (b) { return b.length >= minT; });
+  if (!pruned.length) return null;
+  return pruned.reduce(function (a, b) { return b.length > a.length ? b : a; });
+}
+
+/* ------------------------------------------------------------ strategies -- */
+function pickSTCS(pool) {
+  var buckets = getBuckets(pool);
+  var best = mostInteresting(buckets, opt.minThreshold);
+  var reason = "tier of " + opt.minThreshold + "+ similar-sized SSTables";
+  if (!best) {
+    // compaction_enforce_min_threshold defaults to false: any pair in a tier goes.
+    best = mostInteresting(buckets, 2);
+    reason = "pair in the same tier (min_threshold not enforced)";
+  }
+  if (!best) return null;
+  return { inputs: best.slice(0, MAX_THRESHOLD), reason: reason };
+}
+
+function runsOf(ssts) {
+  var by = new Map();
+  for (var i = 0; i < ssts.length; i++) {
+    var s = ssts[i];
+    if (!by.has(s.run)) by.set(s.run, { run: s.run, frags: [], size: 0 });
+    var r = by.get(s.run);
+    r.frags.push(s);
+    r.size += s.size;
+  }
+  var out = Array.from(by.values());
+  out.forEach(function (r) { r.frags.sort(function (a, b) { return a.minKey - b.minKey; }); });
+  return out;
+}
+
+function pickICS() {
+  var runs = runsOf(S.ssts);
+  var buckets = getBuckets(runs);
+  var best = mostInteresting(buckets, opt.minThreshold);
+  var reason = "tier of " + opt.minThreshold + "+ similar-sized runs";
+  if (!best) { best = mostInteresting(buckets, 2); reason = "pair of runs in the same tier"; }
+
+  if (best) {
+    var inputs = [];
+    best.slice(0, MAX_THRESHOLD).forEach(function (r) { inputs = inputs.concat(r.frags); });
+    return { inputs: inputs, reason: reason + " (" + best.length + " runs, " + inputs.length + " fragments)" };
+  }
+
+  // space_amplification_goal: no normal job to do, so consider a cross-tier
+  // compaction of the two largest tiers if SA has drifted above the goal.
+  if (opt.sag > 0 && buckets.length >= 2) {
+    var byAvg = buckets.slice().sort(function (a, b) {
+      var av = a.reduce(function (t, r) { return t + r.size; }, 0) / a.length;
+      var bv = b.reduce(function (t, r) { return t + r.size; }, 0) / b.length;
+      return bv - av;
+    });
+    var s0 = byAvg[0], s1 = byAvg[1];
+    var tot = function (b) { return b.reduce(function (t, r) { return t + r.size; }, 0); };
+    var s0b = tot(s0), s1b = tot(s1);
+    var sa = (s0b + s1b) / s0b;
+    if (sa > opt.sag) {
+      var ins = [];
+      s0.concat(s1).forEach(function (r) { ins = ins.concat(r.frags); });
+      return {
+        inputs: ins,
+        reason: "SAG cross-tier: SA " + sa.toFixed(2) + "x > goal " + opt.sag.toFixed(2) + "x",
+        sag: true
+      };
+    }
+  }
+  return null;
+}
+
+function levelsOf(ssts) {
+  var lv = [];
+  for (var i = 0; i < ssts.length; i++) {
+    var l = ssts[i].level;
+    while (lv.length <= l) lv.push([]);
+    lv[l].push(ssts[i]);
+  }
+  lv.forEach(function (a) { a.sort(function (x, y) { return x.minKey - y.minKey; }); });
+  return lv;
+}
+
+function maxBytesForLevel(l) {
+  return l === 0 ? 4 * opt.lcsSize : Math.pow(LCS_FANOUT, l) * opt.lcsSize;
+}
+
+// leveled_manifest tops out at MAX_LEVELS; nothing is promoted past it.
+function cappedLevel(l) { return Math.min(l, LCS_MAX_LEVELS - 1); }
+
+function overlapping(list, minK, maxK) {
+  return (list || []).filter(function (s) { return s.maxKey >= minK && s.minKey <= maxK; });
+}
+
+function pickLCS() {
+  var lv = levelsOf(S.ssts);
+  var l0 = lv[0] || [];
+
+  // L0 is the only level whose SSTables overlap each other, so it is compacted
+  // wholesale into L1 as soon as it reaches the threshold.
+  if (l0.length >= 4) {
+    var batch = l0.slice(0, MAX_L0);
+    var minK = Math.min.apply(null, batch.map(function (s) { return s.minKey; }));
+    var maxK = Math.max.apply(null, batch.map(function (s) { return s.maxKey; }));
+    var ov = overlapping(lv[1], minK, maxK);
+    return {
+      inputs: batch.concat(ov),
+      level: 1,
+      reason: "L0 has " + l0.length + " overlapping SSTables (>= 4) -> merge with " + ov.length + " from L1"
+    };
+  }
+
+  // Otherwise compact the deepest level whose score (bytes / ideal bytes) > 1.
+  for (var i = lv.length - 1; i >= 1; i--) {
+    if (!lv[i] || !lv[i].length) continue;
+    var bytes = lv[i].reduce(function (t, s) { return t + s.size; }, 0);
+    var score = bytes / maxBytesForLevel(i);
+    if (score <= 1.001) continue;
+    // Round-robin through the level by key so every SSTable gets its turn.
+    var cursor = S.lastCompactedKey[i] === undefined ? -1 : S.lastCompactedKey[i];
+    var pickIdx = 0;
+    for (var j = 0; j < lv[i].length; j++) { if (lv[i][j].minKey > cursor) { pickIdx = j; break; } }
+    var chosen = lv[i][pickIdx];
+    S.lastCompactedKey[i] = chosen.maxKey;
+    if (pickIdx === lv[i].length - 1) S.lastCompactedKey[i] = -1;
+    var target = cappedLevel(i + 1);
+    var ov2 = overlapping(lv[target], chosen.minKey, chosen.maxKey)
+      .filter(function (s) { return s !== chosen; });
+    return {
+      inputs: [chosen].concat(ov2),
+      level: target,
+      reason: "L" + i + " score " + score.toFixed(2) + " > 1 -> push 1 SSTable + " + ov2.length + " overlapping into L" + target
+    };
+  }
+  return null;
+}
+
+function pickTWCS() {
+  var cw = Math.floor(S.tick / opt.window);
+  var by = new Map();
+  for (var i = 0; i < S.ssts.length; i++) {
+    var w = S.ssts[i].win === null ? cw : S.ssts[i].win;
+    if (!by.has(w)) by.set(w, []);
+    by.get(w).push(S.ssts[i]);
+  }
+  // Older windows are sealed down to exactly one SSTable each.
+  var wins = Array.from(by.keys()).filter(function (w) { return w < cw; }).sort(function (a, b) { return b - a; });
+  for (var j = 0; j < wins.length; j++) {
+    var list = by.get(wins[j]);
+    if (list.length > 1) {
+      return {
+        inputs: list.slice(0, MAX_THRESHOLD),
+        win: wins[j],
+        reason: "sealing window " + wins[j] + ": " + list.length + " SSTables -> 1"
+      };
+    }
+  }
+  // Inside the current window, plain size-tiered.
+  var cur = by.get(cw) || [];
+  var p = pickSTCS(cur);
+  if (p) { p.win = cw; p.reason = "current window " + cw + ": " + p.reason; }
+  return p;
+}
+
+/* --------------------------------------------------------- compaction job -- */
+function removeSST(s) {
+  var i = S.ssts.indexOf(s);
+  if (i >= 0) S.ssts.splice(i, 1);
+}
+
+function startJob(pick, kind) {
+  var inputs = pick.inputs;
+  var need = kind === "lcs" ? 1 : 2;
+  if (!inputs || inputs.length < need) return false;
+
+  // Merge: newest timestamp per key wins, expired rows are dropped.
+  var merged = new Map();
+  inputs.forEach(function (s) {
+    s.e.forEach(function (ts, k) {
+      var cur = merged.get(k);
+      if (cur === undefined || ts > cur) merged.set(k, ts);
+    });
+  });
+  if (opt.ttl > 0) merged.forEach(function (ts, k) { if (rowExpired(ts)) merged.delete(k); });
+
+  var rows = Array.from(merged.entries()).sort(function (a, b) { return a[0] - b[0]; });
+
+  // Only strategies that bound their output size can split it — that bound is
+  // exactly what lets ScyllaDB release input SSTables mid-compaction.
+  var fragSize = kind === "ics" ? opt.fragSize : (kind === "lcs" ? opt.lcsSize : rows.length || 1);
+  var chunks = [];
+  for (var i = 0; i < rows.length; i += fragSize) chunks.push(rows.slice(i, i + fragSize));
+
+  var totalIn = inputs.reduce(function (t, s) { return t + s.size; }, 0);
+  inputs.forEach(function (s) { s.compacting = true; });
+
+  S.job = {
+    kind: kind,
+    inputs: inputs.slice(),
+    all: inputs.slice(),
+    chunks: chunks,
+    outRows: rows.length,
+    emitted: 0,
+    readBytes: 0,
+    totalIn: totalIn,
+    partialBytes: 0,
+    run: kind === "ics" ? S.nextRun++ : 0,
+    level: pick.level || 0,
+    win: pick.win,
+    incremental: kind === "ics" || kind === "lcs",
+    reason: pick.reason
+  };
+  S.compactions++;
+  log("COMPACT", kind.toUpperCase() + " picks " + inputs.length + " files / " + totalIn + " MB — " + pick.reason,
+      pick.sag ? "warn" : "info");
+  return true;
+}
+
+function releaseInputs(j, boundaryKey) {
+  var keep = [];
+  var freed = 0;
+  j.inputs.forEach(function (s) {
+    if (s.maxKey <= boundaryKey) { freed += s.size; removeSST(s); }
+    else keep.push(s);
+  });
+  j.inputs = keep;
+  return freed;
+}
+
+function advanceJob() {
+  var j = S.job;
+  j.readBytes = Math.min(j.totalIn, j.readBytes + COMPACT_RATE);
+  var done = j.readBytes >= j.totalIn;
+  var frac = j.totalIn ? j.readBytes / j.totalIn : 1;
+  var outProgress = frac * j.outRows;
+
+  var cum = 0, i;
+  for (i = 0; i < j.emitted; i++) cum += j.chunks[i].length;
+
+  var freed = 0;
+  while (j.emitted < j.chunks.length && (done || cum + j.chunks[j.emitted].length <= outProgress)) {
+    var ch = j.chunks[j.emitted];
+    var meta = {};
+    if (j.kind === "ics") { meta.run = j.run; meta.frag = j.emitted; }
+    if (j.kind === "lcs") meta.level = j.level;
+    if (j.kind === "twcs") meta.win = j.win;
+    var sst = mkSST(ch, meta);
+    sst.fresh = true;
+    S.ssts.push(sst);
+    S.writtenBytes += sst.size;
+    j.emitted++;
+    cum += ch.length;
+    // The whole point of ICS: as soon as an output fragment is sealed, every
+    // input fragment that ends below its last key is dead weight and is deleted.
+    if (j.incremental && !done) freed += releaseInputs(j, ch[ch.length - 1][0]);
+  }
+  j.partialBytes = done ? 0 : Math.max(0, Math.round(outProgress - cum));
+
+  if (freed > 0) log("RELEASE", "incremental: " + freed + " MB of input freed mid-compaction", "success");
+
+  if (done) {
+    var reclaimed = j.totalIn - cum;
+    j.inputs.forEach(removeSST);
+    log("COMPACT", "done — " + j.totalIn + " MB in / " + cum + " MB out" +
+        (reclaimed > 0 ? " (" + reclaimed + " MB of duplicates & expired rows reclaimed)" : ""), "success");
+    S.job = null;
+  }
+}
+
+function dropExpired() {
+  if (opt.ttl <= 0) return;
+  var freed = 0, n = 0;
+  for (var i = S.ssts.length - 1; i >= 0; i--) {
+    var s = S.ssts[i];
+    if (s.compacting) continue;
+    if (sstExpired(s)) { freed += s.size; n++; S.ssts.splice(i, 1); }
+  }
+  if (n) log("EXPIRE", n + " fully-expired SSTable(s) dropped, " + freed + " MB reclaimed with no rewrite", "success");
+}
+
+/* ------------------------------------------------------------------- tick -- */
+function pickForStrategy() {
+  if (opt.strategy === "ics") return pickICS();
+  if (opt.strategy === "lcs") return pickLCS();
+  return pickTWCS();
+}
+
+// One step of the model, with no painting. Kept separate from tick() so a shared
+// link can replay hundreds of steps in one frame.
+function stepModel() {
+  S.tick++;
+  doWrites();
+  maybeFlush();
+  dropExpired();
+  if (S.job) advanceJob();
+  else {
+    var p = pickForStrategy();
+    if (p) startJob(p, opt.strategy);
+  }
+  record();
+}
+
+function tick() {
+  stepModel();
+  render();
+}
+
+/* ---------------------------------------------------------------- metrics -- */
+function readAmp() {
+  if (opt.strategy === "lcs") {
+    var lv = levelsOf(S.ssts);
+    var n = (lv[0] || []).length;
+    for (var i = 1; i < lv.length; i++) if (lv[i] && lv[i].length) n++;
+    return n;
+  }
+  if (opt.strategy === "ics") return runsOf(S.ssts).length;
+  return S.ssts.length;
+}
+
+function record() {
+  var d = diskBytes(), l = liveBytes();
+  var sa = l > 0 ? d / l : 1;
+  var wa = S.flushedBytes > 0 ? S.writtenBytes / S.flushedBytes : 1;
+  if (sa > S.peakSA) S.peakSA = sa;
+  S.hist.push({ t: S.tick, sa: sa, wa: wa, ra: readAmp() });
+  if (S.hist.length > HIST_MAX) S.hist.shift();
+}
+
+/* ----------------------------------------------------------------- layout -- */
+function layout() {
+  var rows = [];
+  var i;
+
+  if (opt.strategy === "ics") {
+    var runs = runsOf(S.ssts);
+    var rb = getBuckets(runs);
+    var depth = new Map();
+    rb.forEach(function (b, idx) { b.forEach(function (r) { depth.set(r.run, Math.min(5, idx)); }); });
+    runs.sort(function (a, b) { return a.size - b.size || a.run - b.run; });
+    runs.forEach(function (r) {
+      rows.push({
+        label: "RUN #" + r.run,
+        sub: r.frags.length + (r.frags.length === 1 ? " fragment" : " fragments") + " &middot; " + r.size + " MB",
+        items: r.frags.map(function (s) { return { sst: s, depth: depth.get(r.run) || 0 }; })
+      });
+    });
+
+  } else if (opt.strategy === "lcs") {
+    var lv = levelsOf(S.ssts);
+    var top = Math.max(lv.length, 2);
+    for (i = 0; i < top; i++) {
+      var list = lv[i] || [];
+      var bytes = list.reduce(function (t, s) { return t + s.size; }, 0);
+      rows.push({
+        label: "L" + i,
+        sub: i === 0
+          ? list.length + " overlapping"
+          : bytes + " / " + maxBytesForLevel(i) + " MB",
+        keyed: i > 0,
+        items: list.map(function (s) { return { sst: s, depth: Math.min(5, i) }; })
+      });
+    }
+
+  } else { // twcs
+    var cw = Math.floor(S.tick / opt.window);
+    var by = new Map();
+    S.ssts.forEach(function (s) {
+      var w = s.win === null ? cw : s.win;
+      if (!by.has(w)) by.set(w, []);
+      by.get(w).push(s);
+    });
+    var wins = Array.from(by.keys()).sort(function (a, b) { return b - a; });
+    wins.forEach(function (w) {
+      var list = by.get(w);
+      var bytes = list.reduce(function (t, s) { return t + s.size; }, 0);
+      rows.push({
+        label: "WINDOW " + w + (w === cw ? " &middot; NOW" : ""),
+        sub: "t" + (w * opt.window) + "&ndash;" + ((w + 1) * opt.window - 1) + " &middot; " + bytes + " MB",
+        items: list.map(function (s) { return { sst: s, depth: Math.min(5, cw - w) }; })
+      });
+    });
+    if (!wins.length) rows.push({ label: "WINDOW " + cw, sub: "current", items: [] });
+  }
+
+  // Keep the stage a sane height: fold the tail into one summary lane.
+  var MAX_ROWS = 13;
+  if (rows.length > MAX_ROWS) {
+    var tail = rows.slice(MAX_ROWS - 1);
+    var folded = [];
+    tail.forEach(function (r) { folded = folded.concat(r.items); });
+    rows = rows.slice(0, MAX_ROWS - 1);
+    rows.push({
+      label: "+" + tail.length + " MORE",
+      sub: folded.length + " SSTables",
+      items: folded
+    });
+  }
+
+  if (S.job && S.job.partialBytes > 0) {
+    rows.push({
+      label: "WRITING",
+      sub: S.job.kind.toUpperCase() + " output",
+      items: [{ partial: true, size: S.job.partialBytes, depth: 3 }]
+    });
+  }
+
+  /* ---- positions ------------------------------------------------------- */
+  var keySpan = 1, keyMin = 0;
+  if (S.ssts.length) {
+    keyMin = Math.min.apply(null, S.ssts.map(function (s) { return s.minKey; }));
+    var keyMax = Math.max.apply(null, S.ssts.map(function (s) { return s.maxKey; }));
+    keySpan = Math.max(1, keyMax - keyMin + 1);
+  }
+  var maxRow = 1;
+  rows.forEach(function (r) {
+    if (r.keyed) return;
+    var t = r.items.reduce(function (a, it) { return a + (it.partial ? it.size : it.sst.size); }, 0);
+    if (t > maxRow) maxRow = t;
+  });
+  var scale = 100 / maxRow;
+
+  rows.forEach(function (r) {
+    var cursor = 0;
+    r.items.forEach(function (it) {
+      var s = it.sst;
+      if (it.partial) {
+        it.left = 0;
+        it.width = Math.max(1.2, it.size * scale - 0.4);
+        it.key = "partial";
+        it.text = it.size + " MB";
+        it.title = "Compaction output being written: " + it.size + " MB so far";
+        it.output = true;
+        return;
+      }
+      if (r.keyed) {
+        it.left = ((s.minKey - keyMin) / keySpan) * 100;
+        it.width = Math.max(0.8, ((s.maxKey - s.minKey + 1) / keySpan) * 100 - 0.3);
+      } else {
+        it.left = cursor * scale;
+        it.width = Math.max(0.8, s.size * scale - 0.4);
+        cursor += s.size;
+      }
+      it.key = "s" + s.id;
+      it.text = s.size >= 6 ? String(s.size) : "";
+      it.compacting = !!s.compacting;
+      it.expired = sstExpired(s);
+      it.fresh = !!s.fresh;
+      it.title =
+        "SSTable #" + s.id + "\n" + s.size + " MB / " + s.e.size + " rows" +
+        "\nkeys " + s.minKey + "–" + s.maxKey +
+        "\nwritten at t" + s.born +
+        (opt.strategy === "lcs" ? "\nlevel L" + s.level : "") +
+        (opt.strategy === "ics" ? "\nrun #" + s.run + ", fragment " + s.frag : "") +
+        (opt.strategy === "twcs" ? "\nwindow " + s.win : "") +
+        (it.expired ? "\nFULLY EXPIRED — droppable" : "");
+    });
+  });
+  return rows;
+}
+
+/* ----------------------------------------------------------------- render -- */
+var laneLayer, sstLayer, diskEl;
+var els = new Map();
+
+function render() {
+  var rows = layout();
+
+  /* lanes + labels (cheap, rebuilt every frame; they don't animate) */
+  var lanes = "";
+  rows.forEach(function (r, i) {
+    lanes += '<div class="row-label" style="top:' + (i * 41 + 1) + 'px">' + r.label + "<em>" + (r.sub || "") + "</em></div>";
+    lanes += '<div class="row-track' + (r.keyed ? " keyspace" : "") + '" style="top:' + (i * 41) + 'px"></div>';
+  });
+  laneLayer.innerHTML = lanes;
+  diskEl.style.height = Math.max(288, rows.length * 41 + 7) + "px";
+
+  /* SSTable blocks are persistent DOM nodes so CSS can tween them between rows */
+  var seen = new Set();
+  rows.forEach(function (r, i) {
+    r.items.forEach(function (it) {
+      seen.add(it.key);
+      var el = els.get(it.key);
+      if (!el) {
+        el = document.createElement("div");
+        sstLayer.appendChild(el);
+        els.set(it.key, el);
+      }
+      el.className = "sst" + (it.compacting ? " compacting" : "") + (it.output ? " output" : "") +
+                     (it.expired ? " expired" : "") + (it.fresh ? " fresh" : "");
+      el.dataset.depth = it.depth;
+      el.style.setProperty("--tier-c", "var(--tier-" + it.depth + ")");
+      el.style.top = (i * 41 + 3) + "px";
+      el.style.left = it.left.toFixed(3) + "%";
+      el.style.width = it.width.toFixed(3) + "%";
+      el.textContent = it.text;
+      el.title = it.title;
+    });
+  });
+  els.forEach(function (el, key) {
+    if (!seen.has(key)) { el.remove(); els.delete(key); }
+  });
+  S.ssts.forEach(function (s) { s.fresh = false; });
+
+  if (!rows.length || !S.ssts.length) {
+    laneLayer.innerHTML += '<div class="disk-empty">no SSTables yet &mdash; waiting for the first memtable flush</div>';
+  }
+
+  renderPipeline();
+  renderKPIs(rows);
+  renderChart();
+}
+
+function renderPipeline() {
+  $("cWrites").textContent = S.writes.toLocaleString();
+  $("cWorkload").textContent = { hot: "80/20 hot keys", uniform: "uniform random", ts: "new key each write" }[opt.workload];
+
+  var clogCap = opt.memThreshold * 2;
+  $("cClog").textContent = S.commitlog + " MB";
+  $("clogFill").style.width = Math.min(100, (S.commitlog / clogCap) * 100) + "%";
+
+  $("cMem").textContent = S.mem.size + " / " + opt.memThreshold + " MB";
+  var memPct = Math.min(100, (S.mem.size / opt.memThreshold) * 100);
+  $("memFill").style.width = memPct + "%";
+  $("memFill").className = "meter-fill" + (memPct > 80 ? " hot" : "");
+  $("memSub").textContent = S.commitlog > S.mem.size
+    ? (S.commitlog - S.mem.size) + " MB deduped in RAM"
+    : "in RAM, sorted by key";
+
+  $("cFlushes").textContent = S.flushes;
+  $("flushSub").textContent = S.flushedBytes + " MB flushed";
+
+  $("cCompactions").textContent = S.compactions;
+  if (S.job) {
+    var pct = S.job.totalIn ? (S.job.readBytes / S.job.totalIn) * 100 : 100;
+    $("compFill").style.width = pct + "%";
+    $("compSub").textContent = S.job.inputs.length + " files left, " + S.job.emitted + "/" + S.job.chunks.length + " out";
+    $("pnCompact").classList.add("pulse");
+  } else {
+    $("compFill").style.width = "0%";
+    $("compSub").textContent = "idle";
+    $("pnCompact").classList.remove("pulse");
+  }
+}
+
+function renderKPIs(rows) {
+  var d = diskBytes(), l = liveBytes();
+  var sa = l > 0 ? d / l : 1;
+  var wa = S.flushedBytes > 0 ? S.writtenBytes / S.flushedBytes : 1;
+  var ra = readAmp();
+
+  $("kSst").textContent = S.ssts.length;
+  var shape = { ics: "run", lcs: "level", twcs: "window" }[opt.strategy];
+  var groupCount = rows.filter(function (r) { return r.label !== "WRITING" && r.items.length; }).length;
+  $("kSstNote").textContent = groupCount + " " + shape + (groupCount === 1 ? "" : "s");
+  $("diskShape").textContent = "— " + groupCount + " " + shape + (groupCount === 1 ? "" : "s");
+
+  $("kDisk").innerHTML = d + "<small> MB</small>";
+  $("kDiskNote").textContent = S.writtenBytes + " MB written total";
+  $("kLive").innerHTML = l + "<small> MB</small>";
+
+  $("kSA").innerHTML = sa.toFixed(2) + "<small>&times;</small>";
+  $("kSANote").textContent = "peak " + S.peakSA.toFixed(2) + "×";
+  $("kpiSA").classList.toggle("hi", sa >= 1.6);
+
+  $("kWA").innerHTML = wa.toFixed(2) + "<small>&times;</small>";
+  $("kpiWA").classList.toggle("hi", wa >= 3);
+
+  $("kRA").textContent = ra;
+  $("kRANote").textContent = { ics: "runs to check", lcs: "L0 files + levels", twcs: "SSTables to check" }[opt.strategy];
+  $("kpiRA").classList.toggle("hi", ra >= 8);
+}
+
+/* ------------------------------------------------------------------ chart -- */
+/* Two plot bands stacked on a shared time axis. Space/write are ratios and read
+   amp is a file count, so they get separate bands with their own y-scales — a
+   second y-axis on one band would put two units on one plot and invite reading
+   a crossing as meaningful. */
+var CW = 320, CH = 196, PL = 26, PR = 34;
+var AT = 16,  AB = 108;   // band A — ratios, baseline 1.0
+var BT = 134, BB = 180;   // band B — read amp, baseline 0
+var chartHover = null;
+
+function chartScales() {
+  var h = S.hist;
+  var maxY = 2, maxR = 4, i;
+  for (i = 0; i < h.length; i++) {
+    maxY = Math.max(maxY, h[i].sa, h[i].wa);
+    maxR = Math.max(maxR, h[i].ra);
+  }
+  maxY = Math.ceil(maxY * 10) / 10;
+  maxR = Math.ceil(maxR / 2) * 2;          // even, so the mid tick is a whole file
+  return {
+    x: function (i) { return PL + (h.length < 2 ? 0 : (i / (h.length - 1)) * (CW - PL - PR)); },
+    y: function (v) { return AT + (1 - (v - 1) / (maxY - 1)) * (AB - AT); },
+    r: function (v) { return BT + (1 - v / maxR) * (BB - BT); },
+    maxY: maxY, maxR: maxR
+  };
+}
+
+function renderChart() {
+  var svg = $("chart"), h = S.hist;
+  if (h.length < 2) { svg.innerHTML = ""; return; }
+  var sc = chartScales();
+  var parts = [];
+
+  function cap(x, y, txt) {
+    parts.push('<text class="band-cap" x="' + x + '" y="' + y + '">' + txt + "</text>");
+  }
+  function grid(v, yv, label) {
+    parts.push('<line class="grid" x1="' + PL + '" x2="' + (CW - PR) + '" y1="' + yv.toFixed(1) + '" y2="' + yv.toFixed(1) + '"/>');
+    parts.push('<text class="axis-text" x="' + (PL - 4) + '" y="' + (yv + 3).toFixed(1) + '" text-anchor="end">' + label + "</text>");
+  }
+
+  cap(PL, AT - 5, "space / write &mdash; × ratio");
+  [1, (1 + sc.maxY) / 2, sc.maxY].forEach(function (v) { grid(v, sc.y(v), v.toFixed(1)); });
+
+  cap(PL, BT - 5, "read &mdash; files per lookup");
+  [0, sc.maxR / 2, sc.maxR].forEach(function (v) { grid(v, sc.r(v), String(v)); });
+
+  // Shared time axis, labelled once under the lower band.
+  parts.push('<text class="axis-text" x="' + PL + '" y="' + (CH - 3) + '">t' + h[0].t + "</text>");
+  parts.push('<text class="axis-text" x="' + (CW - PR) + '" y="' + (CH - 3) + '" text-anchor="end">t' + h[h.length - 1].t + "</text>");
+
+  [["sa", "space", "y"], ["wa", "write", "y"], ["ra", "read", "r"]].forEach(function (d) {
+    var pts = h.map(function (p, i) { return sc.x(i).toFixed(1) + "," + sc[d[2]](p[d[0]]).toFixed(1); }).join(" ");
+    parts.push('<polyline class="line ' + d[1] + '" points="' + pts + '"/>');
+  });
+
+  // Direct labels at the live end — identity is never colour-alone. The two
+  // ratio labels share a band, so push them apart when they'd collide.
+  var last = h[h.length - 1];
+  var ys = sc.y(last.sa), yw = sc.y(last.wa);
+  if (Math.abs(ys - yw) < 9) { if (ys < yw) { ys -= 4; yw += 5; } else { ys += 5; yw -= 4; } }
+  function dlabel(cls, y, txt) {
+    parts.push('<text class="dlabel ' + cls + '" x="' + (CW - PR + 4) + '" y="' + (y + 3).toFixed(1) + '">' + txt + "</text>");
+  }
+  dlabel("space", ys, last.sa.toFixed(2) + "×");
+  dlabel("write", yw, last.wa.toFixed(2) + "×");
+  dlabel("read", sc.r(last.ra), String(last.ra));
+
+  if (chartHover !== null && chartHover >= 0 && chartHover < h.length) {
+    var p = h[chartHover], hx = sc.x(chartHover).toFixed(1);
+    // One segment per band, so the crosshair doesn't run through band B's caption.
+    [[AT, AB], [BT, BB]].forEach(function (b) {
+      parts.push('<line class="crosshair" x1="' + hx + '" x2="' + hx + '" y1="' + b[0] + '" y2="' + b[1] + '"/>');
+    });
+    [[sc.y(p.sa), "space"], [sc.y(p.wa), "write"], [sc.r(p.ra), "read"]].forEach(function (d) {
+      parts.push('<circle class="hover-dot" cx="' + hx + '" cy="' + d[0].toFixed(1) + '" r="3.5" fill="var(--series-' + d[1] + ')"/>');
+    });
+  }
+  svg.innerHTML = parts.join("");
+}
+
+function bindChartHover() {
+  var svg = $("chart"), tip = $("chartTip");
+  svg.addEventListener("mousemove", function (ev) {
+    var h = S.hist;
+    if (h.length < 2) return;
+    var r = svg.getBoundingClientRect();
+    var vx = ((ev.clientX - r.left) / r.width) * CW;
+    var f = (vx - PL) / (CW - PL - PR);
+    var i = Math.round(f * (h.length - 1));
+    chartHover = Math.max(0, Math.min(h.length - 1, i));
+    var p = h[chartHover];
+    tip.hidden = false;
+    tip.innerHTML = "t" + p.t +
+      "<br><b style='color:var(--series-space)'>&#9679;</b> space " + p.sa.toFixed(2) + "&times;" +
+      "<br><b style='color:var(--series-write)'>&#9679;</b> write " + p.wa.toFixed(2) + "&times;" +
+      "<br><b style='color:var(--series-read)'>&#9679;</b> read " + p.ra + (p.ra === 1 ? " file" : " files");
+    var sc = chartScales();
+    var px = (sc.x(chartHover) / CW) * r.width;
+    tip.style.left = Math.min(r.width - tip.offsetWidth - 4, Math.max(0, px + 10)) + "px";
+    tip.style.top = "6px";
+    renderChart();
+  });
+  svg.addEventListener("mouseleave", function () {
+    chartHover = null;
+    tip.hidden = true;
+    renderChart();
+  });
+}
+
+/* -------------------------------------------------------------- explainer -- */
+var EXPLAIN = {
+  lcs: {
+    name: "Leveled Compaction Strategy",
+    v: { Write: 5, Space: 2, Read: 1 }
+  },
+  ics: {
+    name: "Incremental Compaction Strategy",
+    v: { Write: 2, Space: 2, Read: 4 }
+  },
+  twcs: {
+    name: "Time-Window Compaction Strategy",
+    v: { Write: 1, Space: 3, Read: 3 }
+  }
+};
+
+var AMP_WORD = ["", "very low", "low", "medium", "high", "very high"];
+var STRATS = ["lcs", "ics", "twcs"];
+
+function renderExplain() {
+  var head = '<thead><tr><th></th>' + STRATS.map(function (k) {
+    return '<th class="' + (k === opt.strategy ? "active" : "") + '">' + k.toUpperCase() + "</th>";
+  }).join("") + "</tr></thead>";
+
+  var body = ["Write", "Space", "Read"].map(function (amp) {
+    return "<tr><th>" + amp + " amp</th>" + STRATS.map(function (k) {
+      return '<td class="' + (k === opt.strategy ? "active" : "") + '">' + AMP_WORD[EXPLAIN[k].v[amp]] + "</td>";
+    }).join("") + "</tr>";
+  }).join("");
+
+  $("ampTable").innerHTML = head + "<tbody>" + body + "</tbody>";
+}
+
+/* ------------------------------------------------------------ TWCS advice -- */
+// Dismissal is remembered for the recommendation, but a workload that actively
+// breaks TWCS re-opens the bubble — that one is a warning, not a tip.
+var noticeDismissed = false;
+
+function showTwcsNotice() {
+  var el = $("twcsNotice"), body = $("twcsNoticeBody");
+  if (opt.strategy !== "twcs") { el.hidden = true; return; }
+
+  if (opt.workload !== "ts") {
+    body.innerHTML = "<b>TWCS outside its design.</b> It seals each window permanently, so overwrites that " +
+      "straddle windows are never merged away and space amplification climbs without bound. " +
+      "Switch back to <b>Time series</b>.";
+    el.hidden = false;
+    return;
+  }
+
+  body.innerHTML = "<b>Workload switched to Time series.</b> TWCS is only recommended for append-only " +
+    "time-series data with a single TTL.";
+  el.hidden = noticeDismissed;
+}
+
+/* ------------------------------------------------------------ share link -- */
+/* The run is a pure function of `opt` plus the number of ticks elapsed — the PRNG
+   is seeded from a constant — so a link only has to carry the settings and how far
+   the run got. Opening it replays the run from tick 0 in a single frame.
+
+   The one thing a link cannot carry is a setting that was changed *mid-run*: the
+   replay applies the settings from tick 0, so a link taken after you moved a
+   slider shows the run that setting would have produced all along. */
+
+var MAX_SHARE_TICK = 4000;   // a hand-edited tick= must not freeze the browser
+var STRATEGIES = ["lcs", "ics", "twcs"];
+var WORKLOADS  = ["hot", "uniform", "ts"];
+var SAG_VALUES = [0, 1.25, 1.5, 2];
+
+function shareURL() {
+  var p = new URLSearchParams();
+  p.set("strategy", opt.strategy);
+  p.set("workload", opt.workload);
+  // Only the sub-properties the selected strategy actually reads — the same rule
+  // the controls follow, so the link reads like the panel looks.
+  if (opt.strategy === "ics") {
+    p.set("min_threshold", opt.minThreshold);
+    p.set("sstable_size", opt.fragSize);
+    p.set("sag", opt.sag);
+  } else if (opt.strategy === "lcs") {
+    p.set("sstable_size", opt.lcsSize);
+  } else {
+    p.set("min_threshold", opt.minThreshold);
+    p.set("window_size", opt.windowSize);
+    p.set("window_unit", opt.windowUnit);
+  }
+  if (opt.ttl > 0) p.set("ttl", opt.ttl);
+  if (opt.speed !== 1) p.set("speed", opt.speed);
+  p.set("tick", Math.min(S.tick, MAX_SHARE_TICK));
+  return location.href.split(/[?#]/)[0] + "?" + p.toString();
+}
+
+function numParam(p, name, lo, hi, step, dflt) {
+  if (!p.has(name)) return dflt;
+  var v = Number(p.get(name));
+  if (!isFinite(v)) return dflt;
+  v = Math.round(v / step) * step;                  // snap to the control's step
+  return Math.min(hi, Math.max(lo, v));
+}
+
+function enumParam(p, name, allowed, dflt) {
+  var v = p.get(name);
+  return allowed.indexOf(v) === -1 ? dflt : v;
+}
+
+function numControlParam(p, name, inputId, dflt) {
+  var el = $(inputId);
+  return numParam(p, name, Number(el.min), Number(el.max), Number(el.step) || 1, dflt);
+}
+
+function speedParam(p, dflt) {
+  if (!p.has("speed")) return dflt;
+  var v = Number(p.get("speed"));
+  return SPEEDS.indexOf(v) === -1 ? dflt : v;
+}
+
+function setWindowControl(hours) {
+  var maxSize = Number($("windowSizeRange").max);
+  return [["DAYS", 24], ["HOURS", 1], ["MINUTES", 1 / 60]].some(function (entry) {
+    var unit = entry[0], unitHours = entry[1], size = hours / unitHours;
+    if (size >= 1 && size <= maxSize && Math.abs(size - Math.round(size)) < 1e-9) {
+      opt.windowSize = Math.round(size);
+      opt.windowUnit = unit;
+      return true;
+    }
+    return false;
+  });
+}
+
+function applyWindowParams(p) {
+  if (p.has("window_size")) {
+    opt.windowSize = numControlParam(p, "window_size", "windowSizeRange", opt.windowSize);
+    opt.windowUnit = enumParam(p, "window_unit", Object.keys(WINDOW_UNIT_HOURS), opt.windowUnit);
+    return;
+  }
+
+  // Back-compat for old shared links that carried the derived window in ticks.
+  var maxTicks = Number($("windowSizeRange").max) * WINDOW_UNIT_HOURS.DAYS / TICK_HOURS;
+  var ticks = numParam(p, "window", 1, maxTicks, 1, 0);
+  if (ticks > 0) setWindowControl(ticks * TICK_HOURS);
+}
+
+// Reads the query string into `opt`. Returns the tick to fast-forward to.
+function readShareURL() {
+  var p = new URLSearchParams(location.search);
+  if (!p.toString()) return 0;
+
+  opt.strategy = enumParam(p, "strategy", STRATEGIES, opt.strategy);
+  opt.workload = enumParam(p, "workload", WORKLOADS, opt.workload);
+  opt.minThreshold = numControlParam(p, "min_threshold", "minThRange", opt.minThreshold);
+  if (opt.strategy === "lcs") opt.lcsSize = numControlParam(p, "sstable_size", "lcsSizeRange", opt.lcsSize);
+  else if (opt.strategy === "ics") opt.fragSize = numControlParam(p, "sstable_size", "fragRange", opt.fragSize);
+  if (p.has("sag") && SAG_VALUES.indexOf(Number(p.get("sag"))) !== -1) opt.sag = Number(p.get("sag"));
+  applyWindowParams(p);
+  opt.ttl = numParam(p, "ttl", 0, MAX_SHARE_TICK, 1, opt.ttl);
+  opt.speed = speedParam(p, opt.speed);
+
+  // The same two couplings the controls enforce, so a hand-edited link cannot
+  // reach a combination the UI refuses to produce.
+  if (opt.strategy === "twcs") opt.workload = "ts";
+  if (opt.workload === "ts" && opt.ttl === 0) opt.ttl = 96;
+
+  // The TWCS tip reports a switch the reader did not make, and it covers the write
+  // path on arrival. Start it closed; the warning it also carries can still open it.
+  noticeDismissed = true;
+
+  return numParam(p, "tick", 0, MAX_SHARE_TICK, 1, 0);
+}
+
+// Push `opt` back into the controls, for the values that came from a link.
+function syncControls() {
+  $("strategySelect").value = opt.strategy;
+  $("workloadSelect").value = opt.workload;
+  $("minThRange").value = opt.minThreshold;
+  $("fragRange").value = opt.fragSize;
+  $("sagSelect").value = String(opt.sag);
+  $("lcsSizeRange").value = opt.lcsSize;
+  $("windowSizeRange").value = opt.windowSize;
+  $("windowSizeVal").textContent = opt.windowSize;
+  $("windowUnitSelect").value = opt.windowUnit;
+  $("speedRange").value = String(SPEEDS.indexOf(opt.speed));
+  $("speedVal").textContent = opt.speed + "×";
+}
+
+function pause() {
+  running = false;
+  $("btnPlay").textContent = "Play";
+  $("btnPlay").classList.remove("btn--primary");
+}
+
+function fastForward(n) {
+  for (var i = 0; i < n; i++) stepModel();
+  // Nothing on screen has just landed, so clear the drop-in flags — otherwise the
+  // whole disk animates in at once when a link opens.
+  S.ssts.forEach(function (s) { s.fresh = false; });
+  render();
+}
+
+// Once the reader touches a control, the link in the address bar no longer
+// describes what is on screen. Drop it; the Share button mints a fresh one.
+var booting = true;
+function clearShareURL() {
+  if (booting || !location.search) return;
+  try { history.replaceState(null, "", location.href.split(/[?#]/)[0]); } catch (e) { /* file:// */ }
+}
+
+var shareMsgTimer = null;
+function flashShare(msg) {
+  var el = $("shareMsg");
+  el.textContent = msg;
+  el.hidden = false;
+  clearTimeout(shareMsgTimer);
+  shareMsgTimer = setTimeout(function () { el.hidden = true; }, 3000);
+}
+
+// The old execCommand path first: it is synchronous, so the message on screen is
+// always true, and it also works from a file:// page, where the Clipboard API is
+// refused. The Clipboard API is the fallback for browsers that dropped it.
+function copyText(text) {
+  var ta = document.createElement("textarea");
+  ta.value = text;
+  ta.setAttribute("readonly", "");
+  ta.style.cssText = "position:fixed;top:0;left:0;opacity:0;";
+  document.body.appendChild(ta);
+  ta.select();
+  var ok = false;
+  try { ok = document.execCommand("copy"); } catch (e) { ok = false; }
+  document.body.removeChild(ta);
+  return ok;
+}
+
+function doShare() {
+  var url = shareURL();
+  // Put the link in the address bar too, so a manual copy gets the same link.
+  try { history.replaceState(null, "", url); } catch (e) { /* file:// */ }
+
+  if (copyText(url)) { flashShare("Link copied"); return; }
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(url).then(
+      function () { flashShare("Link copied"); },
+      function () { flashShare("Copy the link from the address bar"); }
+    );
+    return;
+  }
+  flashShare("Copy the link from the address bar");
+}
+
+/* ------------------------------------------------------------- SAG advice -- */
+// Opens when the user switches to ICS, since space_amplification_goal is the one
+// ICS sub-property with no counterpart in the other strategies. Dismissal sticks
+// for the session — it is a tip, not a warning.
+var sagTipDismissed = false;
+
+function showSagNotice(open) {
+  var el = $("sagNotice");
+  if (opt.strategy !== "ics") { el.hidden = true; return; }
+  if (open && !sagTipDismissed) {
+    $("sagNoticeBody").innerHTML = "<b>ICS-only knob.</b> Left at <b>null</b>, ICS only ever merges runs of " +
+      "similar size, so the largest tiers keep their duplicate copies. Set a goal and ICS gains a " +
+      "last-resort job: when there is no normal compaction to do, it merges the two largest tiers if " +
+      "together they inflate the largest by more than the goal. Lower goal &rarr; less space, more writes.";
+    el.hidden = false;
+  }
+}
+
+/* --------------------------------------------------------------- controls -- */
+// compaction_window_size × compaction_window_unit -> ticks. A tick is an hour, so
+// the default (1 DAYS) is 24 ticks. Sub-tick windows (small MINUTES values) clamp
+// to 1 — the label shows the real duration either way.
+function syncWindow() {
+  var hours = opt.windowSize * WINDOW_UNIT_HOURS[opt.windowUnit];
+  opt.window = Math.max(1, Math.round(hours / TICK_HOURS));
+  var el = $("windowDerived");
+  if (el) el.textContent = hours < 1 ? "< 1 h (clamped)" : hours + " h";
+}
+
+function syncOptGroups() {
+  document.querySelectorAll(".opt-group").forEach(function (g) {
+    g.hidden = g.dataset.for.split(" ").indexOf(opt.strategy) === -1;
+  });
+}
+
+function reset(quiet) {
+  clearShareURL();
+  S = newState();
+  els.forEach(function (el) { el.remove(); });
+  els.clear();
+  chartHover = null;
+  $("chartTip").hidden = true;
+  if (!quiet) log("RESET", EXPLAIN[opt.strategy].name + " · " +
+    { hot: "overwrite-heavy", uniform: "uniform", ts: "time-series" }[opt.workload] +
+    " workload · flush at " + opt.memThreshold + " MB", "info");
+  renderExplain();
+  render();
+}
+
+function bind(id, key, fmt, needsReset) {
+  var el = $(id);
+  var valEl = $(id.replace(/Range$|Select$/, "Val"));
+  function apply() {
+    var v = el.type === "range" ? Number(el.value) : (isNaN(Number(el.value)) ? el.value : Number(el.value));
+    opt[key] = v;
+    if (valEl) valEl.textContent = fmt ? fmt(v) : v;
+    if (needsReset) { reset(); } else { clearShareURL(); render(); }
+  }
+  el.addEventListener("input", apply);
+  el.addEventListener("change", apply);
+  if (valEl) valEl.textContent = fmt ? fmt(opt[key]) : opt[key];
+}
+
+/* The speed slider moves through SPEEDS by index, so it can hold the slow
+   fractional steps and the whole numbers on one evenly spaced track. */
+function bindSpeed() {
+  var el = $("speedRange"), valEl = $("speedVal");
+  function apply() {
+    opt.speed = SPEEDS[Number(el.value)];
+    valEl.textContent = opt.speed + "×";
+    render();
+  }
+  el.addEventListener("input", apply);
+  el.addEventListener("change", apply);
+  el.value = String(SPEEDS.indexOf(opt.speed));
+  valEl.textContent = opt.speed + "×";
+}
+
+function loop() {
+  if (timer) clearTimeout(timer);
+  timer = setTimeout(function () {
+    if (running) tick();
+    loop();
+  }, Math.round(760 / opt.speed));
+}
+
+function init() {
+  // Settings first: bind() reads `opt` for its value labels, and reset() for the run.
+  var jumpTo = readShareURL();
+
+  diskEl = $("disk");
+  diskEl.innerHTML = '<div class="lane-layer" id="laneLayer"></div><div class="sst-layer" id="sstLayer"></div>';
+  laneLayer = $("laneLayer");
+  sstLayer = $("sstLayer");
+
+  $("strategySelect").addEventListener("change", function () {
+    opt.strategy = this.value;
+    // TWCS buckets by write time and seals a window once it closes, so it only
+    // behaves sensibly on append-only data. Move the workload with it.
+    if (opt.strategy === "twcs" && opt.workload !== "ts") {
+      opt.workload = "ts";
+      $("workloadSelect").value = "ts";
+      if (opt.ttl === 0) opt.ttl = 96;
+    }
+    syncOptGroups();
+    showTwcsNotice();
+    showSagNotice(true);
+    reset();
+  });
+  $("workloadSelect").addEventListener("change", function () {
+    opt.workload = this.value;
+    // A time-series workload without a TTL just grows forever — which is exactly
+    // the shape TWCS is built for, so switch the TTL on with it.
+    if (opt.workload === "ts" && opt.ttl === 0) opt.ttl = 96;
+    showTwcsNotice();
+    reset();
+  });
+  // Touching the knob is as good as reading the tip.
+  $("sagSelect").addEventListener("change", function () {
+    $("sagNotice").hidden = true;
+    sagTipDismissed = true;
+  });
+  $("sagNoticeClose").addEventListener("click", function () {
+    $("sagNotice").hidden = true;
+    sagTipDismissed = true;
+  });
+  $("twcsNoticeClose").addEventListener("click", function () {
+    $("twcsNotice").hidden = true;
+    noticeDismissed = true;
+  });
+
+  syncControls();
+  bind("minThRange", "minThreshold");
+  bind("fragRange", "fragSize");
+  bind("sagSelect", "sag");
+  bind("lcsSizeRange", "lcsSize");
+  $("windowSizeRange").addEventListener("input", function () {
+    opt.windowSize = Number(this.value);
+    $("windowSizeVal").textContent = opt.windowSize;
+    syncWindow();
+    reset();
+  });
+  $("windowUnitSelect").addEventListener("change", function () {
+    opt.windowUnit = this.value;
+    syncWindow();
+    reset();
+  });
+  bindSpeed();
+
+  $("btnPlay").addEventListener("click", function () {
+    running = !running;
+    this.textContent = running ? "Pause" : "Play";
+    this.classList.toggle("btn--primary", running);
+  });
+  $("btnStep").addEventListener("click", function () {
+    pause();
+    tick();
+  });
+  $("btnReset").addEventListener("click", function () { reset(); });
+  $("btnShare").addEventListener("click", doShare);
+
+  bindChartHover();
+  syncWindow();
+  syncOptGroups();
+  showTwcsNotice();
+  reset(jumpTo > 0);
+  if (jumpTo > 0) {
+    // Land on the shared state, stopped — the reader came to look at this tick,
+    // not to watch it scroll past.
+    fastForward(jumpTo);
+    pause();
+  }
+  booting = false;
+  loop();
+}
+
+if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", init);
+else init();
+
+})();
+</script>
+</body>
+</html>
