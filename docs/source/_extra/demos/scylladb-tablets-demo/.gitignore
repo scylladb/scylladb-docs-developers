@@ -1,0 +1,7 @@
+# editor / OS cruft
+.DS_Store
+*.swp
+*~
+
+# local scratch used while developing the sim
+_*.html
