@@ -15,6 +15,7 @@
    getting-started/index
    getting-started/dynamodb/index
    Switching from Aerospike <compare/aerospike>
+   simulations/index
 
 .. hero-box::
   :title: Developing Monster Scale
@@ -58,6 +59,16 @@
   :anchor: Learn more
 
   Experiment with ScyllaDB in your browser with these interactive labs.
+
+.. topic-box::
+  :title: Simulations
+  :link: simulations/index
+  :link_target: _self
+  :icon: icon-play-circle-outline
+  :class: large-6
+  :anchor: Learn more
+
+  See how ScyllaDB works with these interactive simulations of its internals.
 
 .. topic-box::
   :title: University
