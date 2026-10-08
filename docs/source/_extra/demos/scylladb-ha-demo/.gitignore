@@ -1,0 +1,5 @@
+# Contains an Authorization bearer token for the scylladb-ds MCP server
+.mcp.json
+
+# Local-only Claude Code tool permissions, not meant to be shared
+.claude/settings.local.json

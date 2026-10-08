@@ -207,3 +207,70 @@ aside.footnote .label {
 aside.footnote p {
     margin: 0;
 }
+
+/* Simulations */
+
+.simulation-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 1.5rem;
+    margin: 1.5rem 0;
+}
+
+.simulation-card {
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    border: 1px solid var(--border-color);
+    border-radius: var(--border-radius-md, 8px);
+    background: var(--card-bg);
+    color: var(--text-color);
+    text-decoration: none;
+    transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.simulation-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+    text-decoration: none;
+}
+
+.content .content-body .simulation-card__image,
+.simulation-card__image {
+    display: block;
+    width: 100%;
+    aspect-ratio: 16 / 10;
+    object-fit: cover;
+    object-position: top left;
+    margin: 0;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.simulation-card__title,
+.simulation-card__description {
+    display: block;
+    line-height: 1.5;
+}
+
+.simulation-card__title {
+    padding: 1rem 1rem 0.25rem;
+    font-weight: 600;
+    color: var(--link-color);
+}
+
+.simulation-card__description {
+    padding: 0 1rem 1rem;
+    font-size: 0.9rem;
+}
+
+.simulation {
+    display: block;
+    margin: 1.5rem 0 0.5rem;
+    overflow: hidden;
+    border: 1px solid var(--border-color);
+    border-radius: var(--border-radius-md, 8px);
+}
+
+.simulation__open {
+    margin-bottom: 1.5rem;
+}

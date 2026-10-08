@@ -1,0 +1,1531 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>ScyllaDB Tablet Simulator — Elasticity &amp; Rebalancing</title>
+<script>
+// ScyllaDB DS theme boot snippet (runs before the stylesheet so there's no flash of the
+// wrong theme). No manual toggle here — it just follows the OS, same as the HA simulator.
+(function () {
+  var KEY = "scylladb-ds-theme";
+  var root = document.documentElement;
+  var sysDark = window.matchMedia("(prefers-color-scheme: dark)");
+  function resolve(pref) { return pref === "system" ? (sysDark.matches ? "dark" : "light") : pref; }
+  function setTheme(pref) { root.setAttribute("data-theme", resolve(pref)); }
+  setTheme(localStorage.getItem(KEY) || "system");
+  sysDark.addEventListener("change", function () {
+    if ((localStorage.getItem(KEY) || "system") === "system") setTheme("system");
+  });
+})();
+</script>
+<link rel="stylesheet" href="scylladb-ds.css" />
+<style>
+  /* ---------- bridge: simulator-local var names -> ScyllaDB DS tokens ----------
+     Same trick as the HA simulator: local aliases so the rest of this stylesheet and the
+     SVG stage inherit whichever DS token is active for the current data-theme. */
+  :root {
+    --bg: var(--bg-page);
+    --surface: var(--bg-surface);
+    --surface-2: var(--bg-surface-alt);
+    --border: var(--border-color);
+    --text: var(--text-color);
+    --text-dim: var(--text-muted);
+    --text-faint: var(--text-disabled);
+
+    --accent: var(--btn-primary-bg);
+    --ok: var(--status-success);
+    --warn: var(--status-warning);
+    --bad: var(--status-error);
+
+    /* tablet-specific roles */
+    --tablet-own: var(--color-gray-400);
+    --mig-migration: var(--color-primary-500);
+    --mig-intranode: var(--color-purple-400);
+    --mig-rebuild: var(--color-magenta-400);
+    --tablet-clean: var(--color-warning-400);
+
+    --font-ui: var(--font-family);
+  }
+  [data-theme="dark"] { --tablet-own: var(--color-gray-500); }
+
+  * { box-sizing: border-box; }
+
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--font-ui);
+    font-size: 14px;
+    line-height: 1.5;
+  }
+
+  .wrap {
+    /* Everything — type and stage graphics alike — is drawn at 1.55x, ~40% larger again than
+       the 1.105 it was at, and ~1.8x the 0.85 the HA simulator uses. `zoom` reflows at the
+       scaled size instead of leaving the original layout box behind. The max-width is a cap
+       for very large monitors only; on a laptop the viewport is the binding constraint. */
+    zoom: 1.55;
+    max-width: 1560px;
+    margin: 0 auto;
+    padding: 14px 18px 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  /* ---------- header ---------- */
+  header.top {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 16px;
+    flex-wrap: wrap;
+    border-bottom: var(--border-w) solid var(--border);
+    padding-bottom: 8px;
+  }
+  header.top h1 {
+    font-size: 19px;
+    font-weight: 700;
+    margin: 0;
+    letter-spacing: -0.01em;
+    text-wrap: balance;
+  }
+  header.top h1 span.accent { color: var(--accent); }
+  header.top .sub {
+    font-size: 11.5px;
+    color: var(--text-faint);
+    font-family: var(--font-mono);
+    letter-spacing: .02em;
+  }
+
+  /* ---------- controls ---------- */
+  .controls {
+    background: var(--surface);
+    border: var(--border-w) solid var(--border);
+    border-radius: var(--radius-xl);
+    box-shadow: var(--shadow-1);
+    padding: 10px 14px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px 22px;
+    align-items: flex-end;
+  }
+  .ctrl { display: flex; flex-direction: column; gap: 5px; min-width: 132px; }
+  .ctrl.narrow { min-width: auto; }
+  .ctrl > label {
+    font-size: 10.5px;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--text-faint);
+    font-weight: 600;
+    display: flex;
+    justify-content: space-between;
+    gap: 8px;
+    white-space: nowrap;
+  }
+  .ctrl > label .val {
+    font-family: var(--font-mono);
+    font-variant-numeric: tabular-nums;
+    color: var(--accent);
+    font-weight: 700;
+    letter-spacing: 0;
+    text-transform: none;
+  }
+  .ctrl input[type="range"] { width: 100%; accent-color: var(--accent); margin: 0; height: 18px; }
+  .btn-row { display: flex; gap: 6px; flex-wrap: wrap; }
+  .divider { width: 1px; align-self: stretch; background: var(--border); }
+
+  /* ---------- stage ---------- */
+  .stage-card {
+    position: relative;
+    background: var(--surface);
+    border: var(--border-w) solid var(--border);
+    border-radius: var(--radius-xl);
+    box-shadow: var(--shadow-1);
+    padding: 8px 8px 22px;
+    /* Fixed so the page never jumps as nodes and tablets come and go — the viewBox grows
+       with the cluster and the SVG scales itself to fit this frame. */
+    height: 470px;
+    display: flex;
+    flex-direction: column;
+  }
+  #stage { flex: 1 1 auto; width: 100%; min-height: 0; display: block; overflow: visible; }
+  .planner {
+    margin-top: 6px; font-family: var(--font-mono); font-size: 11px; color: var(--text-dim);
+    display: flex; gap: 8px; align-items: baseline; min-height: 15px;
+  }
+  .planner .rule { color: var(--accent); font-weight: 700; }
+  .stage-hint {
+    position: absolute;
+    bottom: 8px; left: 0; right: 0;
+    text-align: center;
+    font-family: var(--font-mono);
+    font-size: 10px;
+    color: var(--text-faint);
+    pointer-events: none;
+  }
+
+  /* ---------- svg elements ---------- */
+  .caption {
+    fill: var(--text-faint);
+    font-family: var(--font-mono);
+    font-size: 9px;
+    letter-spacing: .09em;
+    text-transform: uppercase;
+    pointer-events: none;
+  }
+
+  .node-box {
+    fill: var(--surface-2);
+    stroke: var(--border-strong);
+    stroke-width: 1.5;
+    transition: stroke .18s;
+    pointer-events: none;
+  }
+  .node-box.up { stroke: var(--ok); }
+  .node-box.joining { stroke: var(--accent); stroke-dasharray: 6 4; }
+  .node-box.leaving { stroke: var(--warn); stroke-dasharray: 6 4; }
+  .node-box.dead { stroke: var(--bad); stroke-dasharray: 2 3; }
+
+  .node-label { fill: var(--text); font-family: var(--font-mono); font-size: 10.5px; font-weight: 700; text-anchor: middle; pointer-events: none; }
+  .node-sub { font-family: var(--font-mono); font-size: 9px; font-weight: 700; text-anchor: middle; pointer-events: none; fill: var(--text-faint); }
+  .node-sub.up { fill: var(--ok); }
+  .node-sub.joining { fill: var(--accent); }
+  .node-sub.leaving { fill: var(--warn); }
+  .node-sub.dead { fill: var(--bad); }
+  .node-count { font-family: var(--font-mono); font-size: 9.5px; font-weight: 700; text-anchor: middle; pointer-events: none; fill: var(--text-dim); font-variant-numeric: tabular-nums; }
+  .ideal-line { stroke: var(--accent); stroke-width: 1; stroke-dasharray: 3 3; opacity: .55; pointer-events: none; }
+  .shard-tick { stroke: var(--border); stroke-width: 1; opacity: .5; pointer-events: none; }
+  .shard-label { fill: var(--text-faint); font-family: var(--font-mono); font-size: 7px; text-anchor: middle; pointer-events: none; }
+
+  /* tablet replica pills */
+  .pill {
+    fill: var(--tablet-own);
+    stroke: none;
+    cursor: pointer;
+    transition: x .28s ease, y .28s ease, fill .18s, opacity .18s;
+  }
+  /* A change of pill pitch or box height moves every pill at once; sliding them all would
+     read as the whole stage sloshing about (and briefly spill them outside their box), so
+     that one frame is applied instantly and only genuine stack movement animates. */
+  #pillsLayer.reflow .pill { transition: none; }
+  @media (prefers-reduced-motion: reduce) { .pill { transition: none; } }
+  .pill.pending {
+    fill: color-mix(in srgb, var(--mig-migration) 38%, transparent);
+    stroke: var(--mig-migration);
+    stroke-width: 1;
+    stroke-dasharray: 2.5 2;
+  }
+  .pill.pending.rebuild { fill: color-mix(in srgb, var(--mig-rebuild) 38%, transparent); stroke: var(--mig-rebuild); }
+  .pill.pending.intranode_migration { fill: color-mix(in srgb, var(--mig-intranode) 38%, transparent); stroke: var(--mig-intranode); }
+  .pill.streaming { animation: pulse 1.1s ease-in-out infinite; }
+  .pill.cleaning { fill: color-mix(in srgb, var(--tablet-clean) 40%, transparent); stroke: var(--tablet-clean); stroke-width: 1; }
+  .pill.hl { stroke: var(--text-emphasis); stroke-width: 1.4; stroke-dasharray: none; }
+  @keyframes pulse { 0%,100% { opacity: .62; } 50% { opacity: 1; } }
+
+  #arcsLayer { pointer-events: none; }
+  .arc { fill: none; stroke-width: 1.6; opacity: .5; }
+  .arc.migration { stroke: var(--mig-migration); }
+  .arc.intranode_migration { stroke: var(--mig-intranode); }
+  .arc.rebuild { stroke: var(--mig-rebuild); }
+  .arc.dim { opacity: .16; }
+  .arc.hl { opacity: .95; stroke-width: 2.6; }
+  .packet { stroke: none; }
+  .packet.migration { fill: var(--mig-migration); }
+  .packet.intranode_migration { fill: var(--mig-intranode); }
+  .packet.rebuild { fill: var(--mig-rebuild); }
+  .stage-lbl {
+    font-family: var(--font-mono);
+    font-size: 8px;
+    font-weight: 700;
+    text-anchor: middle;
+    paint-order: stroke;
+    stroke: var(--surface);
+    stroke-width: 3px;
+    stroke-linejoin: round;
+    pointer-events: none;
+  }
+  .stage-lbl.migration { fill: var(--mig-migration); }
+  .stage-lbl.intranode_migration { fill: var(--mig-intranode); }
+  .stage-lbl.rebuild { fill: var(--mig-rebuild); }
+
+  /* tablet tooltip */
+  .tip {
+    position: absolute;
+    z-index: 40;
+    pointer-events: none;
+    background: var(--bg-surface);
+    border: var(--border-w) solid var(--border);
+    border-radius: var(--radius-md);
+    box-shadow: var(--shadow-3);
+    padding: 7px 9px;
+    font-family: var(--font-mono);
+    font-size: 10.5px;
+    line-height: 1.5;
+    color: var(--text-dim);
+    max-width: 300px;
+    opacity: 0;
+    transition: opacity .12s;
+  }
+  .tip.on { opacity: 1; }
+  .tip b { color: var(--text-emphasis); }
+  .tip .dim { color: var(--text-faint); }
+
+  @media (max-width: 900px) {
+    .controls { gap: 12px 16px; }
+    .divider { display: none; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header class="top">
+    <div>
+      <h1>ScyllaDB <span class="accent">Tablet</span> Simulator</h1>
+      <div class="sub">single zone / rack &middot; add, kill and remove nodes &middot; the load balancer is a port of ScyllaDB's real planner, and names the rule behind every decision</div>
+    </div>
+    <button type="button" class="btn btn--xs" id="btnReset">Reset</button>
+  </header>
+
+  <div class="controls">
+    <div class="ctrl narrow">
+      <label>Cluster</label>
+      <div class="btn-row">
+        <button type="button" class="btn btn--xs btn--primary" id="btnAdd">+ Add node</button>
+        <button type="button" class="btn btn--xs" id="btnDecom">Decommission</button>
+        <button type="button" class="btn btn--xs" id="btnKill">Kill</button>
+      </div>
+    </div>
+
+    <div class="divider"></div>
+
+    <div class="ctrl">
+      <label>Shards / node <span class="val" id="shardsVal">4</span></label>
+      <input type="range" id="shardsRange" min="1" max="8" value="4" step="1" />
+    </div>
+    <div class="ctrl">
+      <label>Replication factor <span class="val" id="rfVal">3</span></label>
+      <input type="range" id="rfRange" min="1" max="3" value="3" step="1" />
+    </div>
+
+    <div class="divider"></div>
+
+    <div class="ctrl">
+      <label>Speed <span class="val" id="speedVal">1.0&times;</span></label>
+      <input type="range" id="speedRange" min="1" max="16" value="4" step="1" />
+    </div>
+    <div class="ctrl narrow">
+      <label>Load balancer</label>
+      <div class="btn-row">
+        <button type="button" class="btn btn--xs" id="btnPause">Pause</button>
+        <button type="button" class="btn btn--xs" id="btnStep" disabled>Step</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="stage-card" id="stageCard">
+    <svg id="stage" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid meet">
+      <text id="caption" class="caption" x="16" y="11"></text>
+      <g id="nodesLayer"></g>
+      <g id="pillsLayer"></g>
+      <g id="arcsLayer"></g>
+    </svg>
+    <div class="planner" id="planner"></div>
+    <div class="stage-hint">one replica of a tablet per node &middot; hover a replica to trace its token range and every node holding a copy of it</div>
+    <div class="tip" id="tip"></div>
+  </div>
+</div>
+
+<script>
+"use strict";
+/* =====================================================================================
+   ScyllaDB tablet simulator — single zone.
+
+   v2: the load balancer is no longer a heuristic. planRfRestore / planInternode /
+   planIntranode below are a port of the real planner's rules, catalogued in
+   tablet_balancing_rules.md in this repo (rule IDs LB-x.y are cited inline throughout).
+
+   Real-ScyllaDB constants this models (defaults, from db/config.cc and the tablets docs):
+     target_tablet_size_in_bytes                  5 GiB  -> split above 10 GiB, merge below 2.5 GiB
+     tablet_streaming_read_concurrency_per_shard   2     (outbound streams per shard)
+     tablet_streaming_write_concurrency_per_shard  2     (inbound streams per shard)
+   Migration stage names come from locator/tablets.hh (tablet_transition_stage) and the
+   transition kinds from tablet_transition_kind.
+   ===================================================================================== */
+
+/* ---------- constants ---------- */
+const TABLE_GB         = 320;                    // fixed table size behind the tablet count
+const TARGET_TABLET_GB = 5;
+const SPLIT_AT_GB      = TARGET_TABLET_GB * 2;   // avg > 2x target -> double the tablet count
+const MERGE_AT_GB      = TARGET_TABLET_GB / 2;   // avg < target/2  -> halve it
+const READ_CONC  = 2;   // concurrent outbound streams per shard
+const WRITE_CONC = 2;   // concurrent inbound streams per shard
+const MIN_TABLETS = 8;
+const MAX_TABLETS = 128;      // rendering cap, not a ScyllaDB limit
+const MAX_NODES   = 10;
+const BALANCE_PERIOD = 220;   // ms of sim time between load-balancer passes
+
+// tablet_transition_stage, with the sim durations (ms of sim time) each stage takes.
+// Streaming dominates, as it does in reality — it is the only stage that moves bytes.
+const STAGES = [
+  ["allow_write_both_read_old", 130],
+  ["write_both_read_old",       200],
+  ["streaming",                1500],
+  ["write_both_read_new",       200],
+  ["use_new",                   140],
+  ["cleanup",                   280],
+];
+const STREAM_STAGE = STAGES.findIndex(s => s[0] === "streaming");
+const USE_NEW_STAGE = STAGES.findIndex(s => s[0] === "use_new");
+
+/* ---------- state ---------- */
+const S = {
+  nodes: [],            // {id, name, state: up|joining|leaving|dead}
+  nextNodeId: 1,
+  tablets: [],          // {i, r: [{n, s}]}   r = committed replicas (node id, shard)
+  T: 64,
+  rf: 3,
+  shards: 4,
+  migs: [],             // active tablet transitions
+  nextMigId: 1,
+  time: 0,
+  lastBalance: 0,
+  paused: false,
+  speed: 1,
+  hoverTablet: null,
+};
+
+/* ---------- small helpers ---------- */
+const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
+const nextPow2 = n => { let p = 1; while (p < n) p *= 2; return p; };
+const key = (n, s) => n + ":" + s;
+const nodeById = id => S.nodes.find(n => n.id === id);
+const liveNodes = () => S.nodes.filter(n => n.state === "up" || n.state === "joining");
+/** A dead node is excluded: it can neither receive tablets nor stream its own away, so its
+    replicas have to be rebuilt from surviving ones (LB-3.4, LB-7.16). */
+const isDead = n => !!n && n.state === "dead";
+const avgTabletGB = () => TABLE_GB / S.T;
+const totalSlots = () => liveNodes().length * S.shards;
+
+/* =====================================================================================
+   token ring
+   Tablet i of T owns a contiguous slice of the int64 token ring. Split is a pure
+   metadata operation on this map: each tablet's range is halved, replicas stay put.
+   ===================================================================================== */
+const TWO63 = 1n << 63n;
+function tokenRange(i, T) {
+  const span = (1n << 64n) / BigInt(T);
+  const lo = -TWO63 + BigInt(i) * span;
+  const hi = (i === T - 1) ? TWO63 - 1n : lo + span - 1n;
+  return [lo, hi];
+}
+
+/* =====================================================================================
+   topology mutations
+   ===================================================================================== */
+function addNode() {
+  if (S.nodes.length >= MAX_NODES) return null;
+  const n = { id: S.nextNodeId, name: "10.0.0." + S.nextNodeId, state: "joining" };
+  S.nextNodeId++;
+  S.nodes.push(n);
+  refreshRfMax();   // a bigger cluster can support a bigger RF — raise the ceiling
+  return n;
+}
+
+function decommission(n) {
+  if (n.state === "leaving") return;
+  if (liveNodes().length - 1 < S.rf) return;   // RF needs at least RF live nodes in the zone
+  n.state = "leaving";
+}
+
+/** Node failure. Unlike a decommission the node cannot participate, so every replica it
+    held is re-created elsewhere by a `rebuild` streamed from a surviving replica. */
+function killNode(n) {
+  if (n.state === "dead") return;
+  if (liveNodes().length - 1 < S.rf) return;   // no room left to rebuild onto
+  n.state = "dead";
+}
+
+/** A zone can hold at most one replica of a tablet per node, so RF <= node count.
+    Lowering the slider's max would make the browser clamp its value, so the value is
+    always rewritten from S.rf afterwards. */
+function refreshRfMax() {
+  const max = Math.max(1, Math.min(3, S.nodes.length));
+  rfRange.max = String(max);
+  rfRange.value = String(Math.min(S.rf, max));
+}
+function clampRf() {
+  S.rf = Math.min(S.rf, Math.max(1, Math.min(3, S.nodes.length)));
+  refreshRfMax();
+}
+
+/* =====================================================================================
+   tablet map: split / merge
+   ===================================================================================== */
+function minTabletCount() {
+  // A floor comparable to min_per_shard_tablet_count / tablets_initial_scale_factor:
+  // never fewer tablets than shards, so every shard can own something.
+  return clamp(nextPow2(Math.max(1, totalSlots())), MIN_TABLETS, MAX_TABLETS);
+}
+
+function splitTablets() {
+  const nt = [];
+  for (const t of S.tablets) {
+    nt.push({ i: nt.length, r: t.r.map(r => ({ n: r.n, s: r.s })) });
+    nt.push({ i: nt.length, r: t.r.map(r => ({ n: r.n, s: r.s })) });
+  }
+  S.tablets = nt; S.T = nt.length;
+}
+
+function mergeTablets() {
+  const nt = [];
+  for (let i = 0; i < S.tablets.length; i += 2) {
+    // Siblings must be co-located to merge; the merged tablet keeps the left sibling's
+    // replica set, which leaves the cluster unbalanced — the balancer then evens it out.
+    nt.push({ i: nt.length, r: S.tablets[i].r.map(r => ({ n: r.n, s: r.s })) });
+  }
+  S.tablets = nt; S.T = nt.length;
+}
+
+function reconcileTabletCount() {
+  if (S.migs.length) return;                 // split/merge is deferred while transitions are in flight
+  const minT = minTabletCount();
+  if (S.T < minT) { splitTablets(); return; }
+  const avg = avgTabletGB();
+  if (avg > SPLIT_AT_GB && S.T * 2 <= MAX_TABLETS) { splitTablets(); return; }
+  if (avg < MERGE_AT_GB && S.T / 2 >= minT) { mergeTablets(); return; }
+}
+
+/* =====================================================================================
+   load accounting
+   ===================================================================================== */
+function computeLoads() {
+  const L = new Map();
+  for (const n of S.nodes) for (let s = 0; s < S.shards; s++) L.set(key(n.id, s), { own: 0, inc: 0, out: 0, tin: 0, tout: 0 });
+  for (const t of S.tablets) for (const r of t.r) { const e = L.get(key(r.n, r.s)); if (e) e.own++; }
+  for (const m of S.migs) {
+    const to = L.get(key(m.to.n, m.to.s));
+    // `inc` is what the balancer reserves against (a flipped target already counts in `own`);
+    // `tin`/`tout` are the display counts of transitions currently touching this shard.
+    if (to) { if (!m.flipped) to.inc++; to.tin++; }
+    const src = L.get(key(m.src.n, m.src.s));
+    if (src) src.tout++;
+    if (src && !m.flipped) src.out++;
+  }
+  return L;
+}
+const loadOf = (L, k) => { const e = L.get(k); return e ? e.own + e.inc : 0; };
+
+const tabletBusy = i => S.migs.some(m => m.tablet === i);
+
+/* =====================================================================================
+   v2 load model — tablet_balancing_rules.md §2
+
+   The real balancer equalises *storage utilisation*, used/capacity, at both node and shard
+   level (LB-2.4). Every tablet in this sim is the same size, which is precisely the
+   capacity-based mode the real planner runs in when force_capacity_based_balancing is set
+   (LB-2.5): all tablets are assumed to be target_tablet_size and gross capacity is used.
+   So the metric below is the real one, not a stand-in for it.
+   ===================================================================================== */
+const GiB = 1024 ** 3;
+const TABLET_BYTES = TARGET_TABLET_GB * GiB;           // LB-2.5: every tablet counts as target size
+const SHARD_CAP_TABLETS = 24;                          // shard capacity, expressed in tablets
+const SHARD_CAP_BYTES = SHARD_CAP_TABLETS * TABLET_BYTES;
+
+/** LB-1.2: a tablet in transition is accounted at its destination, as if the move had
+    already succeeded — that is what makes an incremental plan safe to re-derive. */
+function effectiveReplicas(t) {
+  const ms = S.migs.filter(x => x.tablet === t.i && !x.flipped);
+  if (!ms.length) return t.r;
+  let out = t.r.slice();
+  for (const m of ms) {
+    if (m.leaving) out = out.filter(r => !(r.n === m.leaving.n && r.s === m.leaving.s));
+    if (!out.some(r => r.n === m.to.n && r.s === m.to.s)) out.push({ n: m.to.n, s: m.to.s });
+  }
+  return out;
+}
+
+/** LB-11.6: only the pre-use_new stages actually move bytes. */
+const isStreaming = m => m.st <= STREAM_STAGE;
+
+/** LB-11.4: which shards a transition reads from and writes to. A rebuild streams from
+    every surviving replica; the arc drawn on stage is just its primary source. */
+function readSources(kind, tabletIdx, src) {
+  const t = S.tablets[tabletIdx];
+  if (kind === "rebuild" && t) return t.r.filter(r => nodeById(r.n) && !isDead(nodeById(r.n)));
+  return [src];
+}
+
+/* =====================================================================================
+   node-load map — §3 scope selection, §4 candidate sets
+   ===================================================================================== */
+function buildLoadCtx() {
+  const N = new Map();
+  const drain = new Set();
+
+  for (const n of S.nodes) {
+    // LB-3.3: leaving and dead nodes are drain sources; LB-3.4: only healthy nodes take load.
+    const draining = n.state === "leaving" || isDead(n);
+    if (!draining && n.state !== "up" && n.state !== "joining") continue;
+    if (draining) drain.add(n.id);
+    N.set(n.id, {
+      id: n.id, node: n, drained: draining,
+      shardCount: S.shards,
+      capacity: S.shards * SHARD_CAP_BYTES,
+      used: 0, avgLoad: 0, count: 0,
+      shards: Array.from({ length: S.shards }, () => ({ used: 0, capacity: SHARD_CAP_BYTES, cand: [], sr: 0, sw: 0 })),
+      skipped: [],
+    });
+  }
+
+  for (const t of S.tablets) {
+    for (const r of effectiveReplicas(t)) {
+      const nl = N.get(r.n);
+      if (!nl || r.s >= nl.shardCount) continue;
+      nl.used += TABLET_BYTES; nl.count++;
+      nl.shards[r.s].used += TABLET_BYTES;
+      if (!tabletBusy(t.i)) nl.shards[r.s].cand.push(t.i);        // LB-4.1
+    }
+  }
+  for (const m of S.migs) {                                       // LB-11.6
+    if (!isStreaming(m)) continue;
+    for (const r of readSources(m.kind, m.tablet, m.src)) {
+      const nl = N.get(r.n); if (nl && r.s < nl.shardCount) nl.shards[r.s].sr++;
+    }
+    const nl = N.get(m.to.n); if (nl && m.to.s < nl.shardCount) nl.shards[m.to.s].sw++;
+  }
+  for (const nl of N.values()) nl.avgLoad = nl.used / nl.capacity;
+
+  // LB-3.7: a drain source with nothing left on it is no longer part of the problem.
+  for (const id of [...drain]) if (N.get(id).count === 0) { N.delete(id); drain.delete(id); }
+
+  let totalCap = 0;
+  for (const nl of N.values()) if (!nl.drained) totalCap += nl.capacity;
+  const replicasInScope = S.tablets.reduce(
+    (a, t) => a + effectiveReplicas(t).filter(r => N.has(r.n)).length, 0);
+  // `planned` holds the moves decided in this round but not yet emitted. Constraint checks
+  // must see them, or a second replica of the same tablet can be routed to the same node.
+  return { N, drain, totalCap, tableSize: replicasInScope * TABLET_BYTES, planned: new Map() };
+}
+
+/* =====================================================================================
+   badness — §6.  One table here, so the per-table normalisation is uniform and what
+   survives is the useful part: would this destination end up above the table's fair share
+   of a shard / of a node? Node imbalance outranks shard imbalance (LB-6.8), because shard
+   imbalance is fixable locally with no network.
+   ===================================================================================== */
+const mkBad = (ss, sn, ds, dn) => ({ ss, sn, ds, dn, bad: ss > 0 || sn > 0 || ds > 0 || dn > 0 });
+const nodeBad = b => Math.max(b.sn, b.dn);
+const shardBad = b => Math.max(b.ss, b.ds);
+function badLess(a, b) {                                          // LB-6.8
+  if (nodeBad(a) === nodeBad(b)) return shardBad(a) < shardBad(b);
+  if (nodeBad(a) > 0 || nodeBad(b) > 0) return nodeBad(a) < nodeBad(b);
+  return shardBad(a) < shardBad(b);
+}
+function dstBadness(ctx, nl, shard) {                             // LB-6.2
+  if (nl.drained) return mkBad(0, 0, ctx.tableSize, ctx.tableSize);   // LB-6.5
+  const ideal = ctx.tableSize / ctx.totalCap;                     // LB-6.1
+  const sh = nl.shards[shard];
+  return mkBad(0, 0,
+    ((sh.used + TABLET_BYTES) / sh.capacity - ideal) / ctx.tableSize,
+    ((nl.used + TABLET_BYTES) / nl.capacity - ideal) / ctx.tableSize);
+}
+function srcBadness(ctx, nl, shard) {                             // LB-6.3
+  if (nl.drained) return mkBad(-1, -1, 0, 0);                     // LB-6.5
+  const ideal = ctx.tableSize / ctx.totalCap;
+  const sh = nl.shards[shard];
+  return mkBad(
+    (ideal - (sh.used - TABLET_BYTES) / sh.capacity) / ctx.tableSize,
+    (ideal - (nl.used - TABLET_BYTES) / nl.capacity) / ctx.tableSize, 0, 0);
+}
+function evalMove(ctx, srcNl, srcShard, dstNl, dstShard) {
+  const s = srcBadness(ctx, srcNl, srcShard), d = dstBadness(ctx, dstNl, dstShard);
+  const same = srcNl.id === dstNl.id;                             // LB-6.6
+  return mkBad(s.ss, same ? 0 : s.sn, d.ds, same ? 0 : d.dn);
+}
+
+/* =====================================================================================
+   convergence — §10
+   ===================================================================================== */
+/** LB-10.1. In capacity-based mode the test is exact equality, so a cluster whose replica
+    count does not divide evenly is never "balanced" by this gate — it stops on LB-10.3
+    instead, which is what stops an integer number of tablets from oscillating. */
+function isBalanced(min, max) { return min === max; }
+
+function checkConvergence(src, dst) {                             // LB-10.3
+  if (src.drained) return true;
+  if (dst.drained) return false;
+  if (src.avgLoad <= dst.avgLoad) return false;
+  return src.avgLoad > (dst.used + TABLET_BYTES) / dst.capacity;  // no post-move inversion
+}
+function checkIntranodeConvergence(nl, s, d) {                    // LB-10.4
+  return nl.shards[s].used / nl.shards[s].capacity >
+         (nl.shards[d].used + TABLET_BYTES) / nl.shards[d].capacity;
+}
+function leastLoadedShard(nl) {                                   // LB-7.13, ties on shard id
+  let best = 0, bl = Infinity;
+  for (let s = 0; s < nl.shardCount; s++) {
+    const l = nl.shards[s].used / nl.shards[s].capacity;
+    if (l < bl - 1e-15) { bl = l; best = s; }
+  }
+  return best;
+}
+function mostLoadedShard(nl, pool) {
+  let best = -1, bl = -Infinity;
+  for (const s of pool) {
+    const l = nl.shards[s].used / nl.shards[s].capacity;
+    if (l > bl + 1e-15) { bl = l; best = s; }
+  }
+  return best;
+}
+
+/** The replica set as of this round: in-flight transitions (LB-1.2) plus moves already
+    planned in this same round (LB-4.1's "not already scheduled"). */
+function roundReplicas(ctx, t) {
+  const p = ctx.planned.get(t.i);
+  if (!p) return effectiveReplicas(t);
+  const out = effectiveReplicas(t).filter(r => !(r.n === p.leaving.n && r.s === p.leaving.s));
+  if (!out.some(r => r.n === p.to.n && r.s === p.to.s)) out.push({ n: p.to.n, s: p.to.s });
+  return out;
+}
+
+/** LB-7.18: once a tablet is chosen, drop it from the candidate list of *every* replica, not
+    just the source. Otherwise the same tablet can be picked again from another of its
+    replicas later in the same round, and both moves may target the same node — which would
+    put two replicas of one tablet on one node, violating LB-1.1. */
+function scheduleTablet(ctx, t, leaving, to) {
+  ctx.planned.set(t.i, { leaving, to });
+  for (const r of effectiveReplicas(t)) {
+    const nl = ctx.N.get(r.n);
+    if (!nl || r.s >= nl.shardCount) continue;
+    const cand = nl.shards[r.s].cand;
+    const i = cand.indexOf(t.i);
+    if (i >= 0) cand.splice(i, 1);
+  }
+}
+
+/* =====================================================================================
+   constraints — §9.  One zone / one rack, so the rack rules LB-9.2 and LB-9.3 are vacuous
+   here and LB-9.1 is the whole story: never two replicas of a tablet on one node.
+   ===================================================================================== */
+function viableTargets(ctx, t) {                                  // LB-9.4
+  const out = new Set();
+  for (const nl of ctx.N.values()) if (!nl.drained) out.add(nl.id);
+  for (const r of roundReplicas(ctx, t)) out.delete(r.n);         // LB-9.1
+  return out;
+}
+function checkConstraints(ctx, t, dstNl) {
+  if (roundReplicas(ctx, t).some(r => r.n === dstNl.id))
+    return { viable: viableTargets(ctx, t), rule: "LB-9.1", why: "target already holds a replica" };
+  return null;
+}
+
+/* =====================================================================================
+   streaming admission — §11
+   ===================================================================================== */
+/** LB-11.3. Note the `>0` guard: an idle shard always admits one stream, so a heavy unit
+    can never be starved out entirely. */
+function canAdmit(ctx, kind, tabletIdx, src, to) {
+  for (const r of readSources(kind, tabletIdx, src)) {
+    const nl = ctx.N.get(r.n); if (!nl || r.s >= nl.shardCount) continue;
+    if (nl.shards[r.s].sr > 0 && nl.shards[r.s].sr + 1 > READ_CONC)
+      return { ok: false, why: "read limit on " + nl.node.name + "/s" + r.s };
+  }
+  const nl = ctx.N.get(to.n);
+  if (nl && to.s < nl.shardCount && nl.shards[to.s].sw > 0 && nl.shards[to.s].sw + 1 > WRITE_CONC)
+    return { ok: false, why: "write limit on " + nl.node.name + "/s" + to.s };
+  return { ok: true };
+}
+function chargeStream(ctx, kind, tabletIdx, src, to) {
+  for (const r of readSources(kind, tabletIdx, src)) {
+    const nl = ctx.N.get(r.n); if (nl && r.s < nl.shardCount) nl.shards[r.s].sr++;
+  }
+  const nl = ctx.N.get(to.n); if (nl && to.s < nl.shardCount) nl.shards[to.s].sw++;
+}
+
+/** Book a planned move against the in-round load, so the rest of the batch sees it
+    (LB-7.19). The committed replica set is only touched at use_new, by flipOwnership. */
+function applyPlanned(ctx, srcNl, srcShard, dstNl, dstShard) {
+  srcNl.shards[srcShard].used -= TABLET_BYTES;
+  dstNl.shards[dstShard].used += TABLET_BYTES;
+  if (srcNl.id !== dstNl.id) {
+    srcNl.used -= TABLET_BYTES; srcNl.count--;
+    dstNl.used += TABLET_BYTES; dstNl.count++;
+    srcNl.avgLoad = srcNl.used / srcNl.capacity;
+    dstNl.avgLoad = dstNl.used / dstNl.capacity;
+  }
+}
+
+/* =====================================================================================
+   transitions
+   ===================================================================================== */
+function emitMig(t, kind, src, leaving, to) {
+  S.migs.push({
+    id: S.nextMigId++,
+    tablet: t.i,
+    kind,                                   // migration | intranode_migration | rebuild
+    src: { n: src.n, s: src.s },            // where the bytes stream from
+    leaving: leaving ? { n: leaving.n, s: leaving.s } : null,   // replica being dropped
+    to: { n: to.n, s: to.s },
+    st: 0, el: 0, flipped: false,
+  });
+}
+
+function abortMig(m) {
+  const i = S.migs.indexOf(m);
+  if (i >= 0) S.migs.splice(i, 1);
+}
+
+function flipOwnership(m) {
+  const t = S.tablets[m.tablet];
+  if (!t) return;
+  if (m.leaving) {
+    const i = t.r.findIndex(r => r.n === m.leaving.n && r.s === m.leaving.s);
+    if (i >= 0) t.r.splice(i, 1);
+  }
+  if (!t.r.some(r => r.n === m.to.n && r.s === m.to.s)) t.r.push({ n: m.to.n, s: m.to.s });
+  m.flipped = true;
+}
+
+function stepMigrations(dt) {
+  for (const m of S.migs.slice()) {
+    // A transition needs both ends to still exist.
+    if (!nodeById(m.src.n) || !nodeById(m.to.n)) { abortMig(m); continue; }
+    m.el += dt;
+    let guard = 0;
+    while (m.st < STAGES.length && m.el >= STAGES[m.st][1] && guard++ < 10) {
+      m.el -= STAGES[m.st][1];
+      m.st++;
+      if (m.st === USE_NEW_STAGE) flipOwnership(m);
+      if (m.st >= STAGES.length) { abortMig(m); break; }
+    }
+  }
+}
+
+/* =====================================================================================
+   the load balancer — tablet_balancing_rules.md §§5, 7, 12
+
+   v2 replaces v1's "move a replica from the fullest slot to the emptiest if they differ
+   by 2" heuristic with a port of the real planner. It is a stateless incremental planner:
+   one call returns a small batch, the driver executes it, and it is called again. Balance
+   is reached when a call returns nothing (LB-0.1).
+
+   Round order (§5): restore RF -> inter-node -> intra-node.
+   ===================================================================================== */
+
+// What stopped the last round, for the readout under the stage.
+let lastStop = { rule: "", msg: "" };
+const stop = (rule, msg) => { lastStop = { rule, msg }; };
+
+/** Restoring RF is the RF-change path, not the balancing path (§5 step 1c, listed as out of
+    scope in the rules doc), but a sim that can lose a node or raise RF needs it. Kept from
+    v1, now respecting the §11 streaming limits and picking targets by badness. */
+function planRfRestore(ctx) {
+  const out = [];
+  const live = [...ctx.N.values()].filter(nl => !nl.drained);
+  if (live.length < S.rf) return out;
+  for (const t of S.tablets) {
+    if (effectiveReplicas(t).length >= S.rf || tabletBusy(t.i)) continue;
+    const src = t.r.find(r => nodeById(r.n) && !isDead(nodeById(r.n)));
+    if (!src) continue;
+    const viable = viableTargets(ctx, t);
+    let best = null, bestBad = null;
+    for (const id of viable) {
+      const nl = ctx.N.get(id);
+      for (let s = 0; s < nl.shardCount; s++) {
+        const b = dstBadness(ctx, nl, s);
+        if (!bestBad || badLess(b, bestBad)) { bestBad = b; best = { nl, s }; }
+      }
+    }
+    if (!best) continue;
+    const to = { n: best.nl.id, s: best.s };
+    if (!canAdmit(ctx, "rebuild", t.i, src, to).ok) continue;
+    chargeStream(ctx, "rebuild", t.i, src, to);
+    best.nl.shards[best.s].used += TABLET_BYTES;
+    best.nl.used += TABLET_BYTES; best.nl.count++;
+    best.nl.avgLoad = best.nl.used / best.nl.capacity;
+    scheduleTablet(ctx, t, src, to);        // claim it: one transition per tablet per round
+    ctx.planned.set(t.i, { leaving: { n: -1, s: -1 }, to });   // a rebuild adds, drops nothing
+    out.push({ t, kind: "rebuild", src, leaving: null, to });
+  }
+  if (out.length) stop("LB-7.16", out.length + " replica(s) below RF — rebuilding");
+  return out;
+}
+
+/** §7. Sources are every node but the target, most-loaded first; the target is the single
+    least-loaded node. While draining, the fan reverses: the drain nodes are the only
+    sources and every healthy node is a destination (§13). */
+function planInternode(ctx) {
+  const out = [];
+  const { N, drain } = ctx;
+  const active = [...N.values()].filter(nl => !nl.drained);
+  if (!active.length) {
+    if (drain.size) stop("LB-3.8", "no candidate nodes to drain into");
+    return out;
+  }
+
+  let target = active[0];
+  for (const nl of active) if (nl.avgLoad < target.avgLoad) target = nl;
+
+  const min = target.avgLoad;
+  let max = min;
+  for (const nl of active) if (nl.avgLoad > max) max = nl.avgLoad;
+
+  // LB-10.2
+  if (!drain.size && isBalanced(min, max)) { stop("LB-10.2", "cluster level — nothing to move"); return out; }
+
+  // LB-7.2
+  const sources = [], dests = [];
+  for (const nl of N.values()) {
+    if (nl.id !== target.id && (drain.size === 0 || nl.drained)) sources.push(nl.id);
+    else dests.push(nl.id);
+  }
+  const shardPool = new Map();
+  for (const id of sources) {
+    const nl = N.get(id);
+    shardPool.set(id, [...Array(nl.shardCount).keys()].filter(s => nl.shards[s].used > 0));
+  }
+
+  const batch = target.shardCount;              // LB-7.3
+  const maxSkipped = 2 * batch;                 // LB-7.4
+  let skipped = 0, maxOff = 0;
+  const canConverge = drain.size === 0;         // LB-10.5
+
+  while (out.length < batch) {
+    if (!sources.length) { stop("LB-7.7", "no candidate source nodes left"); break; }
+
+    sources.sort((a, b) => N.get(b).avgLoad - N.get(a).avgLoad || a - b);   // LB-7.5
+    const srcNl = N.get(sources[0]);
+    const pool = shardPool.get(srcNl.id);
+    const drainSkipped = !pool.length && srcNl.drained && srcNl.skipped.length > 0;   // LB-7.6
+
+    if (!pool.length && !drainSkipped) {         // LB-7.7
+      maxOff = Math.max(maxOff, srcNl.avgLoad);
+      sources.shift();
+      continue;
+    }
+
+    let srcShard, tabletIdx = -1, activeDests = dests;
+    if (drainSkipped) {                          // LB-7.8
+      const e = srcNl.skipped[srcNl.skipped.length - 1];
+      srcShard = e.shard; tabletIdx = e.tablet;
+      activeDests = [...e.viable].filter(id => N.has(id));
+    } else {                                     // LB-7.9
+      srcShard = mostLoadedShard(srcNl, pool);
+      const cands = srcNl.shards[srcShard].cand;
+      if (!cands.length) {                       // LB-7.10
+        pool.splice(pool.indexOf(srcShard), 1);
+        continue;
+      }
+    }
+
+    if (!activeDests.length) { stop("LB-7.11", "no destination nodes"); break; }
+    activeDests.sort((a, b) => N.get(a).avgLoad - N.get(b).avgLoad || a - b);   // LB-7.11
+    const tgtNl = N.get(activeDests[0]);
+
+    if (canConverge) {                           // LB-7.12
+      if (isBalanced(tgtNl.avgLoad, Math.max(maxOff, srcNl.avgLoad))) {
+        stop("LB-7.12", "balance achieved");
+        break;
+      }
+    }
+
+    // §8: pick the tablet and the destination shard. With one table the candidate set is
+    // uniform, so the choice that matters is the destination shard, by badness (LB-6.8).
+    let dstNl = tgtNl, dstShard = leastLoadedShard(tgtNl);
+    if (tabletIdx < 0) tabletIdx = srcNl.shards[srcShard].cand[0];
+    let badness = evalMove(ctx, srcNl, srcShard, dstNl, dstShard);
+
+    if (badness.bad) {                           // LB-8.2: widen the search
+      let bestNl = null, bestShard = -1, bestBad = badness;
+      for (const id of activeDests) {
+        const nl = N.get(id);
+        if (!checkConvergence(srcNl, nl)) continue;                   // LB-8.3.2
+        for (let s = 0; s < nl.shardCount; s++) {
+          const b = evalMove(ctx, srcNl, srcShard, nl, s);            // LB-8.3.3
+          if (badLess(b, bestBad)) { bestBad = b; bestNl = nl; bestShard = s; }
+        }
+      }
+      if (bestNl) { dstNl = bestNl; dstShard = bestShard; badness = bestBad; }
+    }
+
+    const t = S.tablets[tabletIdx];
+    const cands = srcNl.shards[srcShard].cand;
+    const ci = cands.indexOf(tabletIdx);
+
+    if (canConverge && !checkConvergence(srcNl, dstNl)) {             // LB-7.14
+      stop("LB-10.3", "would invert load between " + srcNl.node.name + " and " + dstNl.node.name);
+      break;
+    }
+
+    if (!drainSkipped) {                                             // LB-7.15
+      const skip = checkConstraints(ctx, t, dstNl);
+      if (skip) {
+        if (ci >= 0) cands.splice(ci, 1);                            // LB-8.5 (source only)
+        if (srcNl.drained && skip.viable.size === 0) {                // LB-9.6
+          stop("LB-9.6", "cannot drain " + srcNl.node.name + ": no viable target — add a node or lower RF");
+          break;
+        }
+        srcNl.skipped.push({ shard: srcShard, tablet: tabletIdx, viable: skip.viable });
+        continue;
+      }
+    }
+
+    const src = { n: srcNl.id, s: srcShard };
+    const to = { n: dstNl.id, s: dstShard };
+    // LB-7.16: a node being removed cannot stream, so its replicas are rebuilt from peers.
+    const kind = isDead(srcNl.node) ? "rebuild"
+               : srcNl.id === dstNl.id ? "intranode_migration" : "migration";
+
+    // For a rebuild the bytes come from a surviving replica; `src` is the stream source and
+    // `leaving` is the replica being dropped, which is the one on the dead node.
+    let streamSrc = src;
+    if (kind === "rebuild") {
+      const alive = t.r.find(r => nodeById(r.n) && !isDead(nodeById(r.n)));
+      if (!alive) { if (ci >= 0) cands.splice(ci, 1); continue; }
+      streamSrc = alive;
+    }
+
+    const adm = canAdmit(ctx, kind, tabletIdx, streamSrc, to);
+    if (adm.ok) {
+      chargeStream(ctx, kind, tabletIdx, streamSrc, to);
+      out.push({ t, kind, src: streamSrc, leaving: src, to });
+    } else {
+      skipped++;                                                     // LB-7.17
+      if (skipped >= maxSkipped) { stop("LB-7.17", "streaming saturated — " + adm.why); break; }
+    }
+
+    if (drainSkipped) srcNl.skipped.pop();
+    scheduleTablet(ctx, t, src, to);                                 // LB-7.18 + LB-4.1
+    applyPlanned(ctx, srcNl, srcShard, dstNl, dstShard);             // LB-7.19
+    if (srcNl.count === 0) sources.shift();
+  }
+
+  if (out.length === batch) stop("LB-7.3", "batch full (" + batch + " = target shard count)");
+
+  // LB-7.20. In capacity-based mode "balanced" means exactly equal (LB-10.1), which an
+  // integer number of tablets usually cannot be — so distinguish "as level as it gets" from
+  // a genuine structural block before reporting anything.
+  if (!out.length && !S.migs.length && !drain.size && !isBalanced(min, max)) {
+    const oneTablet = TABLET_BYTES / (S.shards * SHARD_CAP_BYTES);
+    if (max - min <= oneTablet + 1e-12) {
+      stop("LB-7.20", "level to within one tablet per node — the best an integer tablet count allows");
+    } else {
+      // LB-9.1 caps any node at one replica per tablet, hence at 1/RF of the data: a node
+      // that already holds every tablet cannot take another byte, however empty it looks.
+      const full = [...N.values()].filter(nl => !nl.drained && nl.count >= S.tablets.length);
+      stop("LB-7.20", full.length
+        ? full.map(nl => nl.node.name).join(", ") + " already " + (full.length > 1 ? "hold" : "holds") +
+          " a replica of every tablet — LB-9.1 caps " + (full.length > 1 ? "them" : "it") +
+          " at 1/RF of the data"
+        : "blocked by replication constraints or tablet granularity, not by the planner");
+    }
+  }
+  return out;
+}
+
+/** §12. Per node, level the shards. No batch cap — intra-node moves are local, so they are
+    cheap; the only brakes are candidates and the streaming limits. */
+function planIntranode(ctx) {
+  const out = [];
+  for (const nl of ctx.N.values()) {
+    if (ctx.drain.has(nl.id)) continue;          // drain sources are skipped
+    if (nl.shardCount <= 1) continue;
+    const pool = [...Array(nl.shardCount).keys()];
+    while (true) {
+      if (!pool.length) break;
+      const s = mostLoadedShard(nl, pool);
+      const d = leastLoadedShard(nl);
+      if (s === d) break;                                            // LB-12.1
+      if (isBalanced(nl.shards[d].used / nl.shards[d].capacity,
+                     nl.shards[s].used / nl.shards[s].capacity)) break;
+      const cands = nl.shards[s].cand;
+      if (!cands.length) { pool.splice(pool.indexOf(s), 1); continue; }   // LB-12.2
+      if (!checkIntranodeConvergence(nl, s, d)) break;                // LB-12.3
+      const tabletIdx = cands[0];
+      const src = { n: nl.id, s }, to = { n: nl.id, s: d };
+      const adm = canAdmit(ctx, "intranode_migration", tabletIdx, src, to);
+      if (!adm.ok) break;                                            // LB-12.4
+      chargeStream(ctx, "intranode_migration", tabletIdx, src, to);
+      out.push({ t: S.tablets[tabletIdx], kind: "intranode_migration", src, leaving: src, to });
+      scheduleTablet(ctx, S.tablets[tabletIdx], src, to);             // LB-7.18 + LB-4.1
+      applyPlanned(ctx, nl, s, nl, d);
+    }
+  }
+  return out;
+}
+
+/** One planner round (§5). Returns the migrations to execute; empty means converged. */
+function makePlan() {
+  const ctx = buildLoadCtx();
+  lastStop = { rule: "", msg: "" };
+  const rf = planRfRestore(ctx);
+  if (rf.length) return rf;                      // restoring RF outranks levelling
+  return planInternode(ctx).concat(planIntranode(ctx));
+}
+
+/* Housekeeping that is not a migration: promote joining nodes, retire drained ones,
+   trim replicas when RF is lowered. */
+function reconcileTopology() {
+  for (const n of S.nodes.slice()) {
+    if (n.state === "joining") {
+      // A tablets node starts serving as soon as it owns its first tablet, long before the
+      // cluster has finished rebalancing.
+      if (S.tablets.some(t => t.r.some(r => r.n === n.id))) n.state = "up";
+    } else if (n.state === "leaving" || n.state === "dead") {
+      const owns = S.tablets.some(t => t.r.some(r => r.n === n.id));
+      const busy = S.migs.some(m => m.src.n === n.id || m.to.n === n.id || (m.leaving && m.leaving.n === n.id));
+      if (!owns && !busy) {
+        S.nodes = S.nodes.filter(x => x.id !== n.id);
+        clampRf();
+      }
+    }
+  }
+
+  // RF lowered: drop surplus replicas (a local cleanup, no streaming involved).
+  for (const t of S.tablets) {
+    while (t.r.length > S.rf && !tabletBusy(t.i)) {
+      const L = computeLoads();
+      let worst = -1, worstLoad = -1;
+      t.r.forEach((r, i) => { const l = loadOf(L, key(r.n, r.s)); if (l > worstLoad) { worstLoad = l; worst = i; } });
+      t.r.splice(worst, 1);
+    }
+  }
+}
+
+/** One driver iteration: housekeeping, then execute one planner batch (LB-0.1).
+    The frame loop calls this every BALANCE_PERIOD, which is what re-plans as transitions
+    complete — exactly how the topology coordinator drives the real planner. */
+function balanceTick() {
+  reconcileTopology();
+  reconcileTabletCount();
+  for (const m of makePlan()) emitMig(m.t, m.kind, m.src, m.leaving, m.to);
+}
+
+/* =====================================================================================
+   layout + rendering
+   ===================================================================================== */
+const svg = document.getElementById("stage");
+const caption = document.getElementById("caption");
+const nodesLayer = document.getElementById("nodesLayer");
+const pillsLayer = document.getElementById("pillsLayer");
+const arcsLayer = document.getElementById("arcsLayer");
+const tip = document.getElementById("tip");
+const SVGNS = "http://www.w3.org/2000/svg";
+
+const PAD = 16, NODE_GAP = 12, TOP = 50;
+const PILL_PITCH_MIN = 3, PILL_PITCH_MAX = 16;
+const SHARD_W_MIN = 16, SHARD_W_MAX = 30;
+const MAX_ZOOM = 1.5;   // how far the stage may be scaled up to fill the card
+
+function mk(tag, cls) { const e = document.createElementNS(SVGNS, tag); if (cls) e.setAttribute("class", cls); return e; }
+function setAttrs(el, a) {
+  for (const k in a) {
+    const v = String(a[k]);
+    if (el["_" + k] !== v) { el.setAttribute(k, v); el["_" + k] = v; }
+  }
+}
+
+/** Which pills belong in which slot, bottom-up, ordered by tablet index. */
+function buildPills() {
+  const bySlot = new Map();
+  const push = (n, s, p) => { const k = key(n, s); let a = bySlot.get(k); if (!a) bySlot.set(k, a = []); a.push(p); };
+
+  for (const t of S.tablets) {
+    for (const r of t.r) push(r.n, r.s, { k: t.i + ":" + key(r.n, r.s), t: t.i, kind: "own", mig: null });
+  }
+  for (const m of S.migs) {
+    if (m.flipped) {
+      // ownership has moved; the old replica lingers until cleanup finishes
+      if (m.leaving) push(m.leaving.n, m.leaving.s, { k: m.tablet + ":" + key(m.leaving.n, m.leaving.s), t: m.tablet, kind: "cleaning", mig: m });
+    } else {
+      push(m.to.n, m.to.s, { k: m.tablet + ":" + key(m.to.n, m.to.s), t: m.tablet, kind: "pending", mig: m });
+    }
+  }
+  for (const a of bySlot.values()) a.sort((x, y) => x.t - y.t);
+  return bySlot;
+}
+
+let lastPitch = 0, lastBoxH = 0, reflowFrame = false;
+const nodeEls = new Map();
+const pillEls = new Map();
+const arcEls = new Map();
+const pillPos = new Map();     // pill key -> {cx, cy}
+
+function render() {
+  renderPlanner();
+  const bySlot = buildPills();
+  const ns = S.nodes;
+
+  // Written before the geometry is worked out, because the content box has to be at least as
+  // wide as this line — otherwise a small cluster leaves it spilling past the card and clipped.
+  const cap = "zone: eu-west-1a · rack: rack1 · " + S.T + " tablets × RF" + S.rf +
+              " · " + S.migs.length + " in flight";
+  if (caption.textContent !== cap) caption.textContent = cap;
+  const capW = caption.getComputedTextLength();
+
+  // Shard columns widen to use the card when the cluster is small, instead of leaving the
+  // stage as a narrow strip of tiny boxes in the middle of a wide panel. Widening the columns
+  // (rather than scaling the whole stage) keeps every label at a readable, constant size.
+  const viewW = svg.clientWidth || 900, viewH = svg.clientHeight || 520;
+  const availW = Math.max(320, viewW) - PAD * 2 - Math.max(0, ns.length - 1) * NODE_GAP;
+  const shardW = clamp(Math.floor(availW / Math.max(1, ns.length) / S.shards), SHARD_W_MIN, SHARD_W_MAX);
+  const boxW = S.shards * shardW + 12;
+  const width = PAD * 2 + Math.max(1, ns.length) * boxW + Math.max(0, ns.length - 1) * NODE_GAP;
+
+  // Box height and pill pitch are derived from the *ideal* replicas-per-shard plus headroom,
+  // not from the current tallest stack. Deriving them from the live maximum would resize every
+  // pill in the cluster whenever one stack grew by one, so nothing would ever sit still. This
+  // reference only moves on a split/merge or a topology change, and leaves each stack sitting
+  // well below the top of its box so imbalance is what the eye picks up.
+  let maxStack = 1;
+  for (const a of bySlot.values()) maxStack = Math.max(maxStack, a.length);
+  const ideal = totalSlots() ? (S.T * S.rf) / totalSlots() : 1;
+  const layoutStack = Math.max(4, maxStack, Math.ceil(ideal * 1.2) + 2);
+
+  // Pills grow to use the card's height the same way the columns grow to use its width. A wide
+  // cluster is scaled down to fit the card's width, so the height to aim for is measured in
+  // pre-scale units — otherwise a ten-node stage would be drawn as a thin band with the bottom
+  // half of the card empty.
+  const contentW = Math.max(240, width, capW + PAD * 2);
+  const scaleW = Math.min(MAX_ZOOM, Math.max(0.2, viewW / contentW));
+  const roomH = Math.max(160, viewH / scaleW) - TOP - 44;
+  const pitch = clamp(roomH / layoutStack, PILL_PITCH_MIN, PILL_PITCH_MAX);
+  const boxH = layoutStack * pitch + 16;
+
+  const contentH = TOP + boxH + 44;
+  // Pad the viewBox out so a three-node cluster is not magnified until its labels dwarf the
+  // boxes: the stage may scale up to MAX_ZOOM to fill the card, never further.
+  const vbW = Math.max(contentW, viewW / MAX_ZOOM), vbH = Math.max(contentH, viewH / MAX_ZOOM);
+  setAttrs(svg, {
+    viewBox: (-(vbW - contentW) / 2).toFixed(1) + " " + (-(vbH - contentH) / 2).toFixed(1) +
+             " " + vbW.toFixed(1) + " " + vbH.toFixed(1),
+  });
+
+  const pillH = Math.max(2.5, pitch - 2);
+  const pillW = shardW - 5;
+  const bottom = TOP + boxH - 6;
+
+  if (pitch !== lastPitch || boxH !== lastBoxH) {
+    lastPitch = pitch; lastBoxH = boxH;
+    pillsLayer.classList.add("reflow");
+    reflowFrame = true;
+  } else if (reflowFrame) {
+    pillsLayer.classList.remove("reflow");
+    reflowFrame = false;
+  }
+
+  const L = computeLoads();
+  const idealPerSlot = totalSlots() ? (S.T * S.rf) / totalSlots() : 0;
+
+  /* ---- node boxes ---- */
+  const seenNodes = new Set();
+  ns.forEach((n, idx) => {
+    seenNodes.add(n.id);
+    const x = PAD + idx * (boxW + NODE_GAP);
+    let g = nodeEls.get(n.id);
+    if (!g) {
+      g = mk("g");
+      g.appendChild(mk("rect", "node-box"));
+      for (let i = 0; i < 8; i++) g.appendChild(mk("line", "shard-tick"));
+      g.appendChild(mk("line", "ideal-line"));
+      for (let i = 0; i < 8; i++) g.appendChild(mk("text", "shard-label"));
+      g.appendChild(mk("text", "node-label"));
+      g.appendChild(mk("text", "node-sub"));
+      g.appendChild(mk("text", "node-count"));
+      g._parts = {
+        box: g.children[0],
+        ticks: Array.from(g.children).slice(1, 9),
+        ideal: g.children[9],
+        slabels: Array.from(g.children).slice(10, 18),
+        label: g.children[18],
+        sub: g.children[19],
+        count: g.children[20],
+      };
+      nodesLayer.appendChild(g);
+      nodeEls.set(n.id, g);
+    }
+    const p = g._parts;
+    setAttrs(p.box, { x, y: TOP, width: boxW, height: boxH, rx: 10 });
+    p.box.setAttribute("class", "node-box " + n.state);
+
+    p.ticks.forEach((t, i) => {
+      if (i >= S.shards - 1) { t.setAttribute("visibility", "hidden"); return; }
+      t.removeAttribute("visibility");
+      const tx = x + 6 + (i + 1) * shardW;
+      setAttrs(t, { x1: tx, y1: TOP + 4, x2: tx, y2: TOP + boxH - 4 });
+    });
+    p.slabels.forEach((t, i) => {
+      if (i >= S.shards || S.shards > 6) { t.setAttribute("visibility", "hidden"); return; }
+      t.removeAttribute("visibility");
+      setAttrs(t, { x: x + 6 + i * shardW + shardW / 2, y: TOP + boxH + 8 });
+      t.textContent = "s" + i;
+    });
+
+    if (n.state !== "leaving" && idealPerSlot > 0.5) {
+      p.ideal.removeAttribute("visibility");
+      const y = bottom - idealPerSlot * pitch;
+      setAttrs(p.ideal, { x1: x + 4, y1: y, x2: x + boxW - 4, y2: y });
+    } else p.ideal.setAttribute("visibility", "hidden");
+
+    setAttrs(p.label, { x: x + boxW / 2, y: 27 });
+    p.label.textContent = n.name;
+
+    let own = 0, inc = 0, out = 0;
+    for (let s = 0; s < S.shards; s++) { const e = L.get(key(n.id, s)); if (e) { own += e.own; inc += e.tin; out += e.tout; } }
+    setAttrs(p.sub, { x: x + boxW / 2, y: 39 });
+    p.sub.setAttribute("class", "node-sub " + n.state);
+    p.sub.textContent = n.state.toUpperCase() + " · " + S.shards + (S.shards > 1 ? " shards" : " shard");
+
+    setAttrs(p.count, { x: x + boxW / 2, y: TOP + boxH + (S.shards > 6 ? 13 : 21) });
+    p.count.textContent = own + " repl" + (inc ? "  ↓" + inc : "") + (out ? "  ↑" + out : "");
+  });
+  for (const [id, g] of nodeEls) if (!seenNodes.has(id)) { g.remove(); nodeEls.delete(id); }
+
+  /* ---- tablet replica pills ---- */
+  const seen = new Set();
+  pillPos.clear();
+  ns.forEach((n, idx) => {
+    const x0 = PAD + idx * (boxW + NODE_GAP) + 6;
+    for (let s = 0; s < S.shards; s++) {
+      const arr = bySlot.get(key(n.id, s)) || [];
+      arr.forEach((p, i) => {
+        seen.add(p.k);
+        let el = pillEls.get(p.k);
+        if (!el) {
+          el = mk("rect", "pill");
+          el.addEventListener("pointerenter", ev => { S.hoverTablet = p.t; showTip(ev, p.t); });
+          el.addEventListener("pointerleave", () => { S.hoverTablet = null; tip.classList.remove("on"); });
+          pillsLayer.appendChild(el);
+          pillEls.set(p.k, el);
+        }
+        const px = x0 + s * shardW + 2.5;
+        const py = bottom - (i + 1) * pitch;
+        setAttrs(el, { x: px, y: py, width: pillW, height: pillH, rx: Math.min(3, pillH / 2) });
+        pillPos.set(p.k, { cx: px + pillW / 2, cy: py + pillH / 2 });
+
+        let cls = "pill";
+        if (p.kind === "pending") {
+          cls += " pending " + p.mig.kind;
+          if (p.mig.st === STREAM_STAGE) cls += " streaming";
+        } else if (p.kind === "cleaning") cls += " cleaning";
+        if (S.hoverTablet === p.t) cls += " hl";
+        if (el._cls !== cls) { el.setAttribute("class", cls); el._cls = cls; }
+      });
+    }
+  });
+  for (const [k, el] of pillEls) if (!seen.has(k)) { el.remove(); pillEls.delete(k); }
+
+  /* ---- migration arcs ---- */
+  const seenArcs = new Set();
+  // Stage labels are only legible when a handful of transitions are in flight — a dozen arcs
+  // landing on one joining node would stack their labels into mush. Hovering a tablet always
+  // labels its own arc, whatever else is going on.
+  const showLabels = S.migs.length <= 3;
+  for (const m of S.migs) {
+    const a = pillPos.get(m.tablet + ":" + key(m.src.n, m.src.s));
+    const b = pillPos.get(m.tablet + ":" + key(m.to.n, m.to.s));
+    if (!a || !b) continue;
+    seenArcs.add(m.id);
+    let g = arcEls.get(m.id);
+    if (!g) {
+      g = mk("g");
+      g.appendChild(mk("path", "arc"));
+      g.appendChild(mk("circle", "packet"));
+      g.appendChild(mk("text", "stage-lbl"));
+      arcsLayer.appendChild(g);
+      arcEls.set(m.id, g);
+    }
+    const [path, dot, lbl] = g.children;
+    const dist = Math.hypot(b.cx - a.cx, b.cy - a.cy);
+    const lift = Math.min(130, 24 + dist * 0.32);
+    const mx = (a.cx + b.cx) / 2;
+    const my = Math.max(4, Math.min(a.cy, b.cy) - lift);
+    const d = "M" + a.cx + "," + a.cy + " Q" + mx + "," + my + " " + b.cx + "," + b.cy;
+    if (path._d !== d) { path.setAttribute("d", d); path._d = d; }
+    const hot = S.hoverTablet === m.tablet;
+    const acls = "arc " + m.kind + (hot ? " hl" : (S.hoverTablet !== null ? " dim" : ""));
+    if (path._cls !== acls) { path.setAttribute("class", acls); path._cls = acls; }
+
+    // Packet position: 0 before streaming, sweeps across during streaming, parked at the far end after.
+    const prog = m.st < STREAM_STAGE ? 0 : m.st > STREAM_STAGE ? 1 : clamp(m.el / STAGES[STREAM_STAGE][1], 0, 1);
+    const pt = path.getPointAtLength(path.getTotalLength() * prog);
+    setAttrs(dot, { cx: pt.x.toFixed(1), cy: pt.y.toFixed(1), r: m.st === STREAM_STAGE ? 3.4 : 2.2 });
+    dot.setAttribute("class", "packet " + m.kind);
+
+    if (showLabels || hot) {
+      lbl.removeAttribute("visibility");
+      setAttrs(lbl, { x: pt.x.toFixed(1), y: (pt.y - 7).toFixed(1) });
+      lbl.setAttribute("class", "stage-lbl " + m.kind);
+      const name = STAGES[Math.min(m.st, STAGES.length - 1)][0];
+      if (lbl.textContent !== name) lbl.textContent = name;
+    } else lbl.setAttribute("visibility", "hidden");
+  }
+  for (const [id, g] of arcEls) if (!seenArcs.has(id)) { g.remove(); arcEls.delete(id); }
+}
+
+/** The rule that ended the last planner round — the whole point of v2 is that every stop
+    is a named rule from tablet_balancing_rules.md rather than an opaque heuristic. */
+function renderPlanner() {
+  const txt = lastStop.rule
+    ? '<span class="rule">[' + lastStop.rule + ']</span> ' + lastStop.msg
+    : '<span class="rule">[LB-0.1]</span> converged — planner returns an empty plan';
+  if (plannerEl.innerHTML !== txt) plannerEl.innerHTML = txt;
+}
+
+/* ---------- tablet tooltip ---------- */
+const stageCard = document.getElementById("stageCard");
+function showTip(ev, ti) {
+  const t = S.tablets[ti];
+  if (!t) return;
+  const [lo, hi] = tokenRange(ti, S.T);
+  const where = t.r.map(r => {
+    const n = nodeById(r.n);
+    return (n ? n.name : "?") + ":s" + r.s + (n && n.state !== "up" ? " (" + n.state + ")" : "");
+  }).join(", ") || "— none —";
+  const m = S.migs.find(x => x.tablet === ti);
+  tip.innerHTML =
+    "<b>tablet " + ti + "</b> <span class='dim'>of " + S.T + "</span><br>" +
+    "<span class='dim'>tokens</span> " + lo + "<br>" +
+    "<span class='dim'>&nbsp;&nbsp;..&nbsp;&nbsp;</span> " + hi + "<br>" +
+    "<span class='dim'>replicas</span> " + where +
+    (m ? "<br><span class='dim'>transition</span> " + m.kind + " / " + STAGES[Math.min(m.st, STAGES.length - 1)][0] : "");
+  const cr = stageCard.getBoundingClientRect();
+  const r = ev.target.getBoundingClientRect();
+  tip.classList.add("on");
+  const tw = tip.offsetWidth, th = tip.offsetHeight;
+  let x = r.left - cr.left + r.width + 10;
+  if (x + tw > cr.width - 6) x = r.left - cr.left - tw - 10;
+  tip.style.left = Math.max(4, x) + "px";
+  tip.style.top = clamp(r.top - cr.top - th / 2, 4, cr.height - th - 4) + "px";
+}
+
+/* =====================================================================================
+   controls
+   ===================================================================================== */
+const shardsRange = document.getElementById("shardsRange");
+const rfRange = document.getElementById("rfRange");
+const speedRange = document.getElementById("speedRange");
+const shardsVal = document.getElementById("shardsVal");
+const rfVal = document.getElementById("rfVal");
+const speedVal = document.getElementById("speedVal");
+const btnAdd = document.getElementById("btnAdd");
+const btnDecom = document.getElementById("btnDecom");
+const btnKill = document.getElementById("btnKill");
+const plannerEl = document.getElementById("planner");
+const btnPause = document.getElementById("btnPause");
+const btnStep = document.getElementById("btnStep");
+
+function syncLabels() {
+  shardsVal.textContent = String(S.shards);
+  rfVal.textContent = String(S.rf);
+  speedVal.textContent = S.speed.toFixed(2).replace(/0$/, "") + "×";
+  btnDecom.disabled = liveNodes().length - 1 < S.rf;
+  btnKill.disabled = liveNodes().length - 1 < S.rf;
+  btnAdd.disabled = S.nodes.length >= MAX_NODES;
+}
+
+btnAdd.addEventListener("click", () => { addNode(); syncLabels(); });
+
+btnDecom.addEventListener("click", () => {
+  // Decommission the node holding the fewest replicas — the cheapest one to drain.
+  const cands = S.nodes.filter(n => n.state === "up");
+  if (!cands.length) return;
+  const L = computeLoads();
+  const load = n => { let a = 0; for (let s = 0; s < S.shards; s++) a += loadOf(L, key(n.id, s)); return a; };
+  cands.sort((a, b) => load(a) - load(b));
+  decommission(cands[0]);
+  syncLabels();
+});
+
+btnKill.addEventListener("click", () => {
+  // Kill the most-loaded node: the interesting case, since its replicas are the ones the
+  // rest of the cluster has to rebuild.
+  const cands = S.nodes.filter(n => n.state === "up");
+  if (!cands.length) return;
+  const L = computeLoads();
+  const load = n => { let a = 0; for (let s = 0; s < S.shards; s++) a += loadOf(L, key(n.id, s)); return a; };
+  cands.sort((a, b) => load(b) - load(a));
+  killNode(cands[0]);
+  syncLabels();
+});
+
+shardsRange.addEventListener("input", () => {
+  const v = +shardsRange.value;
+  if (v === S.shards) return;
+  S.shards = v;
+  // Replicas on shards that no longer exist fold onto the surviving ones (ScyllaDB does not
+  // reshard tablet data on restart — this is the sim taking a shortcut).
+  for (const t of S.tablets) for (const r of t.r) if (r.s >= v) r.s = r.s % v;
+  for (const m of S.migs.slice()) if (m.src.s >= v || m.to.s >= v) abortMig(m);
+  syncLabels();
+});
+
+rfRange.addEventListener("input", () => { S.rf = +rfRange.value; syncLabels(); });
+speedRange.addEventListener("input", () => { S.speed = +speedRange.value / 4; syncLabels(); });
+
+btnPause.addEventListener("click", () => {
+  S.paused = !S.paused;
+  btnPause.textContent = S.paused ? "Resume" : "Pause";
+  btnPause.classList.toggle("btn--primary", S.paused);
+  btnStep.disabled = !S.paused;
+});
+btnStep.addEventListener("click", () => {
+  // One balancer pass plus a slice of transition progress.
+  balanceTick();
+  stepMigrations(160);
+  render(); syncLabels();
+});
+document.getElementById("btnReset").addEventListener("click", () => reset());
+
+/* =====================================================================================
+   boot
+   ===================================================================================== */
+function reset() {
+  S.nodes = []; S.nextNodeId = 1; S.migs = []; S.tablets = [];
+  S.time = 0; S.lastBalance = 0; S.hoverTablet = null;
+  S.rf = 3; S.shards = 4;
+  shardsRange.value = "4";
+  rfRange.max = "3"; rfRange.value = "3";   // set max first, or the browser clamps the value
+  for (const el of pillEls.values()) el.remove(); pillEls.clear();
+  for (const el of nodeEls.values()) el.remove(); nodeEls.clear();
+  for (const el of arcEls.values()) el.remove(); arcEls.clear();
+
+  for (let i = 0; i < 3; i++) addNode().state = "up";
+  refreshRfMax();
+
+  // Seed the tablet map already balanced, the way a freshly loaded cluster would look.
+  S.T = clamp(Math.max(minTabletCount(), nextPow2(Math.round(TABLE_GB / TARGET_TABLET_GB))), MIN_TABLETS, MAX_TABLETS);
+  S.tablets = [];
+  const ids = S.nodes.map(n => n.id);
+  for (let i = 0; i < S.T; i++) {
+    const t = { i, r: [] };
+    // Replica j of tablet i lands on consecutive nodes (distinct, since RF <= node count)
+    // and on a rotating shard, so a fresh cluster starts level.
+    for (let j = 0; j < S.rf; j++) t.r.push({ n: ids[(i * S.rf + j) % ids.length], s: (i + j) % S.shards });
+    S.tablets.push(t);
+  }
+  syncLabels();
+}
+
+let last = performance.now();
+function frame(now) {
+  const real = Math.min(120, now - last);
+  last = now;
+  if (!S.paused) {
+    const dt = real * S.speed;
+    S.time += dt;
+    stepMigrations(dt);
+    if (S.time - S.lastBalance >= BALANCE_PERIOD) { S.lastBalance = S.time; balanceTick(); }
+  }
+  render();
+  requestAnimationFrame(frame);
+}
+
+reset();
+requestAnimationFrame(frame);
+</script>
+</body>
+</html>

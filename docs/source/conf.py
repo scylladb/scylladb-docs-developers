@@ -35,6 +35,7 @@ extensions = [
     "sphinx_scylladb_theme",
     "sphinx_multiversion",
     'ext.card_box',
+    'ext.simulations',
     'sphinx_reredirects',
 ]
 
@@ -51,7 +52,7 @@ author = u"ScyllaDB Project Contributors"
 
 # List of patterns, relative to source directory, that match files and
 # directories to ignore when looking for source files.
-exclude_patterns = ["_build", "Thumbs.db", ".DS_Store", ".venv"]
+exclude_patterns = ["_build", "Thumbs.db", ".DS_Store", ".venv", "_extra"]
 
 # The name of the Pygments (syntax highlighting) style to use.
 pygments_style = "sphinx"
@@ -99,6 +100,9 @@ html_theme_path = ["../.."]
 # A list of paths that contain custom static files. 
 # They are copied to the output’s _static directory.
 html_static_path = ["_static"]
+
+# Files copied as-is to the root of the output (for example, the simulations).
+html_extra_path = ["_extra"]
 
 html_css_files = [
     'css/custom.css',
