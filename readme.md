@@ -5,18 +5,9 @@ It is built using Sphinx and hosted on GitHub Pages.
 
 ## Prerequisites
 
-To build the site, you need to have Python 3.10 installed. 
-Recommended way to install Python is using [Homebrew](https://brew.sh/) with venv.
+To build the site, you need Python 3.12 or later and uv.
 
-    brew install python@3.10
-    python3.10 -m pip install --user --upgrade pip
-    python3.10 -m pip install --user virtualenv
-    python3.10 -m venv .venv
-    source .venv/bin/activate
-
-Install the required packages:
-
-    pip install poetry
+    python3.12 -m pip install --user uv
 
 ## Building the site
 
