@@ -11,6 +11,7 @@ Getting Started with ScyllaDB
 
     what
     differentiators
+    compaction
 
 .. title:: Getting Started with ScyllaDB
 
